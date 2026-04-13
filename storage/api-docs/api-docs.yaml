@@ -1,0 +1,2369 @@
+openapi: 3.1.0
+info:
+    title: SIMRS API
+    version: 1.0.0
+servers:
+    - url: http://localhost:8000
+paths:
+    /api/auth/login:
+        post:
+            tags:
+                - Authentikasi
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - username
+                                - password
+                            properties:
+                                username:
+                                    type: string
+                                    example: "user1"
+                                password:
+                                    type: string
+                                    example: "password"
+                                force_logout:
+                                    type: boolean
+                                    example: false
+            responses:
+                200:
+                    description: Login sukses
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    status:
+                                        type: integer
+                                        example: 200
+                                    message:
+                                        type: string
+                                        example: "Login berhasil"
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                user:
+                                                    type: object
+                                                    properties:
+                                                        username:
+                                                            type: string
+                                                            example: "user1"
+                                                        nama:
+                                                            type: string
+                                                            example: "User 1"
+                                                        jabatan:
+                                                            type: string
+                                                            example: "pengadministrasi pendaftaran"
+                                                        role:
+                                                            type: string
+                                                            example: "pengadministrasi"
+                                                token:
+                                                    type: string
+                                                    example: "Bearer 018d451c000077a088002f3b7c7d9a10"
+                                                permissions:
+                                                    type: array
+                                                    items:
+                                                        type: string
+                                                        example: "create-pasien"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 400
+                                    message:
+                                        type: string
+                                        example: "Validasi gagal"
+                                    errors:
+                                        type: object
+                                        properties:
+                                            username:
+                                                type: array
+                                                items:
+                                                    type: string
+                                                    example: "Username tidak boleh kosong"
+                                            password:
+                                                type: array
+                                                items:
+                                                    type: string
+                                                    example: "Password tidak boleh kosong"
+                401:
+                    description: Tidak terautentikasi
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 401
+                                    message:
+                                        type: string
+                                        example: "Username dan password tidak valid"
+                409:
+                    description: Terjadi konflik
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 409
+                                    message:
+                                        type: string
+                                        example: "Akun sedang aktif di perangkat lain. Lanjutkan login dan keluarkan perangkat lain?"
+                422:
+                    description: Tidak dapat diproses
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 422
+                                    message:
+                                        type: string
+                                        example: "Login dibatalkan"
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 429
+                                    message:
+                                        type: string
+                                        example: "Terlalu banyak upaya login, silakan coba lagi dalam 30 detik"
+    /api/auth/logout:
+        delete:
+            tags:
+                - Authentikasi
+            security:
+                - XTokenAuth: []
+            responses:
+                200:
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    status:
+                                        type: integer
+                                        example: 200
+                                    message:
+                                        type: string
+                                        example: "Logout berhasil"
+                401:
+                    description: Tidak terautentikasi
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    status:
+                                        type: integer
+                                        example: 401
+                                    message:
+                                        type: string
+                                        example: "Token tidak valid atau kadaluwarsa"
+
+
+    /api/penjamin:
+        get:
+            tags:
+                - Master Data Penjamin
+            responses:
+                200:
+                    description: Data penjamin
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data penjamin berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Umum",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "BPJS Kesehatan",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "BPJS Ketenagakerjaan",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "Asuransi Swasta",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a14",
+                                                    nama: "Lainnya",
+                                                },
+                                            ]
+                401:
+                    description: Tidak terautentikasi
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                401:
+                                    value:
+                                        success: false
+                                        status: 401
+                                        message: "Token tidak valid atau kadaluwarsa"
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+                500:
+                    description: Terjadi kesalahan pada server
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                500:
+                                    value:
+                                        success: false
+                                        status: 500
+                                        message: "Terjadi kesalahan pada server"
+        post:
+            tags:
+                - Master Data Penjamin
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+                        examples:
+                            default:
+                                value:
+                                    nama: "Umum"
+            responses:
+                201:
+                    description: Penjamin berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Penjamin berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Umum"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Penjamin sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Penjamin sudah ada"
+    /api/penjamin/{uuid}:
+        get:
+            tags:
+                - Master Data Penjamin
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID penjamin
+            responses:
+                200:
+                    description: Data penjamin
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Penjamin berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Umum"
+                404:
+                    description: Penjamin tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Penjamin tidak ditemukan"
+        put:
+            tags:
+                - Master Data Penjamin
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID penjamin
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+                        examples:
+                            default:
+                                value:
+                                    nama: "Umum Updated"
+            responses:
+                200:
+                    description: Penjamin berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Penjamin berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Umum Updated"
+        delete:
+            tags:
+                - Master Data Penjamin
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID penjamin
+            responses:
+                200:
+                    description: Penjamin berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Penjamin berhasil dihapus"
+    /api/bahasa:
+        get:
+            tags:
+                - Master Data Bahasa
+            responses:
+                200:
+                    description: Data bahasa
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data bahasa berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "INDONESIA",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "INGGRIS",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Bahasa
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+                        examples:
+                            default:
+                                value:
+                                    nama: "Indonesia"
+            responses:
+                201:
+                    description: Bahasa berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Bahasa berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Indonesia"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Bahasa sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Bahasa sudah ada"
+    /api/bahasa/{uuid}:
+        get:
+            tags:
+                - Master Data Bahasa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID bahasa
+            responses:
+                200:
+                    description: Data bahasa
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Bahasa berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Indonesia"
+                404:
+                    description: Bahasa tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Bahasa tidak ditemukan"
+        put:
+            tags:
+                - Master Data Bahasa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID bahasa
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+                        examples:
+                            default:
+                                value:
+                                    nama: "Indonesia Updated"
+            responses:
+                200:
+                    description: Bahasa berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Bahasa berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Indonesia Updated"
+
+        delete:
+            tags:
+                - Master Data Bahasa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID bahasa
+            responses:
+                200:
+                    description: Bahasa berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Bahasa berhasil dihapus"
+    /api/suku-bangsa:
+        get:
+            tags:
+                - Master Data Suku Bangsa
+            responses:
+                200:
+                    description: Data suku bangsa
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data suku bangsa berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Jawa",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Madura",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Suku Bangsa
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Suku bangsa berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Suku bangsa berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Jawa"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Suku bangsa sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Suku bangsa sudah ada"
+    /api/suku-bangsa/{uuid}:
+        get:
+            tags:
+                - Master Data Suku Bangsa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID suku bangsa
+            responses:
+                200:
+                    description: Data suku bangsa
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Suku bangsa berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Jawa"
+                404:
+                    description: Suku bangsa tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Suku bangsa tidak ditemukan"
+        put:
+            tags:
+                - Master Data Suku Bangsa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID suku bangsa
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Suku bangsa berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Suku bangsa berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Jawa Updated"
+
+        delete:
+            tags:
+                - Master Data Suku Bangsa
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID suku bangsa
+            responses:
+                200:
+                    description: Suku bangsa berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Suku bangsa berhasil dihapus"
+    /api/agama:
+        get:
+            tags:
+                - Master Data Agama
+            responses:
+                200:
+                    description: Data agama
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data agama berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Islam",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Kristen",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Agama
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Agama berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Agama berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Islam"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Agama sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Agama sudah ada"
+    /api/agama/{uuid}:
+        get:
+            tags:
+                - Master Data Agama
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID agama
+            responses:
+                200:
+                    description: Data agama
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Agama berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Islam"
+                404:
+                    description: Agama tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Agama tidak ditemukan"
+        put:
+            tags:
+                - Master Data Agama
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID agama
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Agama berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Agama berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Islam Updated"
+
+        delete:
+            tags:
+                - Master Data Agama
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID agama
+            responses:
+                200:
+                    description: Agama berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Agama berhasil dihapus"
+    /api/cacat-fisik:
+        get:
+            tags:
+                - Master Data Cacat Fisik
+            responses:
+                200:
+                    description: Data cacat fisik
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data cacat fisik berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Bisu",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Tuli",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "Tidak Cacat Fisik",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Cacat Fisik
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Cacat fisik berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Cacat fisik berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Bisu"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Cacat fisik sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Cacat fisik sudah ada"
+    /api/cacat-fisik/{uuid}:
+        get:
+            tags:
+                - Master Data Cacat Fisik
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID cacat fisik
+            responses:
+                200:
+                    description: Data cacat fisik
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Cacat fisik berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Bisu"
+                404:
+                    description: Cacat fisik tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Cacat fisik tidak ditemukan"
+        put:
+            tags:
+                - Master Data Cacat Fisik
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID cacat fisik
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Cacat fisik berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Cacat fisik berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Bisu Updated"
+
+        delete:
+            tags:
+                - Master Data Cacat Fisik
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID cacat fisik
+            responses:
+                200:
+                    description: Cacat fisik berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Cacat fisik berhasil dihapus"
+    /api/status-menikah:
+        get:
+            tags:
+                - Master Data Status Menikah
+            responses:
+                200:
+                    description: Data status menikah
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data status menikah berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Belum Kawin",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Kawin",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "Tidak Diketahui",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "Cerai Mati",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a14",
+                                                    nama: "Cerai Hidup",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Status Menikah
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Status menikah berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Status menikah berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "Belum Kawin"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Status menikah sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Status menikah sudah ada"
+    /api/status-menikah/{uuid}:
+        get:
+            tags:
+                - Master Data Status Menikah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID status menikah
+            responses:
+                200:
+                    description: Data status menikah
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Status menikah berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Belum Kawin"
+                404:
+                    description: Status menikah tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Status menikah tidak ditemukan"
+        put:
+            tags:
+                - Master Data Status Menikah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID status menikah
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Status menikah berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Status menikah berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Belum Kawin Updated"
+
+        delete:
+            tags:
+                - Master Data Status Menikah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID status menikah
+            responses:
+                200:
+                    description: Status menikah berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Status menikah berhasil dihapus"
+    /api/hubungan-penanggung-jawab-pasien:
+        get:
+            tags:
+                - Master Data Hubungan Penanggung Jawab Pasien
+            responses:
+                200:
+                    description: Data hubungan penanggung jawab pasien
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data hubungan penanggung jawab pasien berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Ayah",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Ibu",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "Suami",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "Istri",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a14",
+                                                    nama: "Diri Sendiri",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "Anak",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a14",
+                                                    nama: "Saudara",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15",
+                                                    nama: "Lainnya",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Hubungan Penanggung Jawab Pasien
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Hubungan penanggung jawab pasien berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Hubungan penanggung jawab pasien berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a16"
+                                            nama: "Ayah"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Hubungan penanggung jawab pasien sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Hubungan penanggung jawab pasien sudah ada"
+    /api/hubungan-penanggung-jawab-pasien/{uuid}:
+        get:
+            tags:
+                - Master Data Hubungan Penanggung Jawab Pasien
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID hubungan penanggung jawab pasien
+            responses:
+                200:
+                    description: Data hubungan penanggung jawab pasien
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Hubungan penanggung jawab pasien berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a16"
+                                            nama: "Ayah"
+                404:
+                    description: Hubungan penanggung jawab pasien tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Hubungan penanggung jawab pasien tidak ditemukan"
+        put:
+            tags:
+                - Master Data Hubungan Penanggung Jawab Pasien
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID hubungan penanggung jawab pasien
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Hubungan penanggung jawab pasien berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Hubungan penanggung jawab pasien berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Ayah Updated"
+
+        delete:
+            tags:
+                - Master Data Hubungan Penanggung Jawab Pasien
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID hubungan penanggung jawab pasien
+            responses:
+                200:
+                    description: Hubungan penanggung jawab pasien berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Hubungan penanggung jawab pasien berhasil dihapus"
+    /api/golongan-darah:
+        get:
+            tags:
+                - Master Data Golongan Darah
+            responses:
+                200:
+                    description: Data golongan darah
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data golongan darah berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "A",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "B",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "AB",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "O",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Golongan Darah
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Golongan darah berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Golongan darah berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15"
+                                            nama: "A"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Golongan darah sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Golongan darah sudah ada"
+    /api/golongan-darah/{uuid}:
+        get:
+            tags:
+                - Master Data Golongan Darah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID golongan darah
+            responses:
+                200:
+                    description: Data golongan darah
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Golongan darah berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "A"
+                404:
+                    description: Golongan darah tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Golongan darah tidak ditemukan"
+        put:
+            tags:
+                - Master Data Golongan Darah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID golongan darah
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Golongan darah berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Golongan darah berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "A Updated"
+
+        delete:
+            tags:
+                - Master Data Golongan Darah
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID golongan darah
+            responses:
+                200:
+                    description: Golongan darah berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Golongan darah berhasil dihapus"
+    /api/pendidikan:
+        get:
+            tags:
+                - Master Data Pendidikan
+            responses:
+                200:
+                    description: Data pendidikan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ListMasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data pendidikan berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10",
+                                                    nama: "Tidak Sekolah",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a11",
+                                                    nama: "Pra Sekolah",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a12",
+                                                    nama: "Taman Kanak-kanak",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a13",
+                                                    nama: "Sekolah Dasar",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a14",
+                                                    nama: "Sekolah Menengah Pertama",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a15",
+                                                    nama: "Sekolah Menengah Atas",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a16",
+                                                    nama: "Diploma",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a17",
+                                                    nama: "Sarjana",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a18",
+                                                    nama: "Pascasarjana",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a19",
+                                                    nama: "Doktor",
+                                                },
+                                                {
+                                                    uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a20",
+                                                    nama: "Lainnya",
+                                                },
+                                            ]
+                429:
+                    description: Terlalu banyak permintaan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                429:
+                                    value:
+                                        success: false
+                                        status: 429
+                                        message: "Terlalu banyak permintaan"
+        post:
+            tags:
+                - Master Data Pendidikan
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                201:
+                    description: Pendidikan berhasil disimpan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                201:
+                                    value:
+                                        success: true
+                                        status: 201
+                                        message: "Pendidikan berhasil disimpan"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a21"
+                                            nama: "Tidak Sekolah"
+                400:
+                    description: Validasi gagal
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                400:
+                                    value:
+                                        success: false
+                                        status: 400
+                                        message: "Validasi gagal"
+                                        errors:
+                                            nama: ["Nama tidak boleh kosong"]
+                409:
+                    description: Pendidikan sudah ada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                409:
+                                    value:
+                                        success: false
+                                        status: 409
+                                        message: "Pendidikan sudah ada"
+    /api/pendidikan/{uuid}:
+        get:
+            tags:
+                - Master Data Pendidikan
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID pendidikan
+            responses:
+                200:
+                    description: Data pendidikan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Pendidikan berhasil diambil"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Tidak Sekolah"
+                404:
+                    description: Pendidikan tidak ditemukan
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ResponseError"
+                            examples:
+                                404:
+                                    value:
+                                        success: false
+                                        status: 404
+                                        message: "Pendidikan tidak ditemukan"
+        put:
+            tags:
+                - Master Data Pendidikan
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID pendidikan
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - nama
+                            properties:
+                                nama:
+                                    type: string
+            responses:
+                200:
+                    description: Pendidikan berhasil diperbarui
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/MasterData"
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Pendidikan berhasil diperbarui"
+                                        data:
+                                            uuid: "018d451c-0000-77a0-8800-2f3b7c7d9a10"
+                                            nama: "Tidak Sekolah Updated"
+
+        delete:
+            tags:
+                - Master Data Pendidikan
+            parameters:
+                - in: path
+                  name: uuid
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                  description: UUID pendidikan
+            responses:
+                200:
+                    description: Pendidikan berhasil dihapus
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Pendidikan berhasil dihapus"
+    /api/wilayah:
+        get:
+            tags:
+                - Master Data Wilayah
+            parameters:
+                - in: query
+                  name: nama
+                  schema:
+                      type: string
+                  description: Filter berdasarkan nama wilayah
+                  required: false
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                  description: Halaman yang ingin ditampilkan
+                  required: false
+                - in: query
+                  name: size
+                  schema:
+                      type: integer
+                      default: 10
+                  description: Jumlah data per halaman
+                  required: false
+            responses:
+                200:
+                    description: Data wilayah
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    status:
+                                        type: integer
+                                    message:
+                                        type: string
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                kelurahan:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: string
+                                                        nama:
+                                                            type: string
+                                                kecamatan:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: string
+                                                        nama:
+                                                            type: string
+                                                kota:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: string
+                                                        nama:
+                                                            type: string
+                                                provinsi:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: string
+                                                        nama:
+                                                            type: string
+
+                            examples:
+                                200:
+                                    value:
+                                        success: true
+                                        status: 200
+                                        message: "Data wilayah berhasil diambil"
+                                        data:
+                                            [
+                                                {
+                                                    kelurahan:
+                                                        {
+                                                            id: "35.79.01.1004",
+                                                            nama: "Sisir",
+                                                        },
+                                                    kecamatan:
+                                                        {
+                                                            id: "35.79.01",
+                                                            nama: "Kec. Batu",
+                                                        },
+                                                    kota:
+                                                        {
+                                                            id: "35.79",
+                                                            nama: "Kota Batu",
+                                                        },
+                                                    provinsi:
+                                                        {
+                                                            id: "35",
+                                                            nama: "Provinsi Jawa Timur",
+                                                        },
+                                                },
+                                            ]
+                                        meta:
+                                            page: 1
+                                            size: 10
+                                            total_items: 38
+                                            total_pages: 4
+                                        links:
+                                            self: "/api/kecamatan?page=1&size=10"
+                                            first: "/api/kecamatan?page=1&size=10"
+                                            last: "/api/kecamatan?page=4&size=10"
+                                            prev: null
+                                            next: "/api/kecamatan?page=2&size=10"
+components:
+    securitySchemes:
+        XTokenAuth:
+            type: http
+            scheme: bearer
+    schemas:
+        ListMasterData:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                status:
+                    type: integer
+                message:
+                    type: string
+                data:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            uuid:
+                                type: string
+                                format: uuid
+                            nama:
+                                type: string
+        MasterData:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                status:
+                    type: integer
+                message:
+                    type: string
+                data:
+                    type: object
+                    properties:
+                        uuid:
+                            type: string
+                            format: uuid
+                        nama:
+                            type: string
+        ResponseError:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                status:
+                    type: integer
+                message:
+                    type: string
+                errors:
+                    type: object
+                    additionalProperties:
+                        type: array
+                        items:
+                            type: string
