@@ -58,13 +58,17 @@ class PdfService
         }
         File::put($extPath2 . DIRECTORY_SEPARATOR . $filename, $pdfOutput);
 
-        // 4. Save to External Path 3: D:\xampp\htdocs\webapps-ori\persetujuanumum\pages\upload
-        $extPath3 = "D:\\xampp\\htdocs\\webapps-ori\\persetujuanumum\\pages\\upload";
-        if (!File::isDirectory($extPath3)) {
-            File::makeDirectory($extPath3, 0755, true);
+        // 4. Send to Remote Server 192.168.30.24 using cURL
+        try {
+            \Illuminate\Support\Facades\Http::attach(
+                'pdf', $pdfOutput, $filenameOri
+            )->post('http://192.168.30.24/webapps/persetujuanumum/pages/upload_pdf.php', [
+                'no_surat' => $consent->no_surat,
+            ]);
+        } catch (\Exception $e) {
+            // Log error if needed, but continue to return internal path
+            \Illuminate\Support\Facades\Log::error("Gagal mengirim PDF ke server .24: " . $e->getMessage());
         }
-        $filenameOri = str_replace('/', '_', $consent->no_surat) . ".pdf";
-        File::put($extPath3 . DIRECTORY_SEPARATOR . $filenameOri, $pdfOutput);
 
         return $internalPath;
     }
