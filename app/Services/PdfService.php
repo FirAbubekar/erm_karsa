@@ -58,6 +58,14 @@ class PdfService
         }
         File::put($extPath2 . DIRECTORY_SEPARATOR . $filename, $pdfOutput);
 
+        // 4. Save to External Path 3: D:\xampp\htdocs\webapps-ori\persetujuanumum\pages\upload
+        $extPath3 = "D:\\xampp\\htdocs\\webapps-ori\\persetujuanumum\\pages\\upload";
+        if (!File::isDirectory($extPath3)) {
+            File::makeDirectory($extPath3, 0755, true);
+        }
+        $filenameOri = str_replace('/', '_', $consent->no_surat) . ".pdf";
+        File::put($extPath3 . DIRECTORY_SEPARATOR . $filenameOri, $pdfOutput);
+
         return $internalPath;
     }
 

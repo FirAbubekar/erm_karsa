@@ -128,9 +128,10 @@ class GeneralConsentController extends Controller
                 }
 
                 // 4. Save to surat_persetujuan_umum_pembuat_pernyataan
+                $safeNoSurat = str_replace('/', '_', $request->no_surat);
                 DB::table('surat_persetujuan_umum_pembuat_pernyataan')->updateOrInsert(
                     ['no_surat' => $request->no_surat],
-                    ['photo' => 'pages/upload/' . $request->no_surat . '.pdf']
+                    ['photo' => 'pages/upload/' . $safeNoSurat . '.pdf']
                 );
 
                 // 5. Generate PDF and Save to Private Storage
