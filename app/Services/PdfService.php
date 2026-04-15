@@ -59,14 +59,19 @@ class PdfService
         File::put($extPath2 . DIRECTORY_SEPARATOR . $filename, $pdfOutput);
 
         // 4. Send to Remote Server 192.168.30.24 using cURL
+        $filenameOri = str_replace('/', '_', $consent->no_surat) . ".pdf";
         try {
-            \Illuminate\Support\Facades\Http::attach(
+            $response = \Illuminate\Support\Facades\Http::attach(
                 'pdf', $pdfOutput, $filenameOri
-            )->post('http://192.168.30.24/webapps/persetujuanumum/pages/upload_pdf.php', [
+            )->post('http://192.168.30.24/webapps/berkasrawat/pages/upload_pdf.php', [
                 'no_surat' => $consent->no_surat,
             ]);
+
+            // Catat balasan dari server .24 ke log untuk debug
+            \Illuminate\Support\Facades\Log::info("Respon dari server .24: " . $response->body());
+            
         } catch (\Exception $e) {
-            // Log error if needed, but continue to return internal path
+            // Log error jika koneksi gagal
             \Illuminate\Support\Facades\Log::error("Gagal mengirim PDF ke server .24: " . $e->getMessage());
         }
 
