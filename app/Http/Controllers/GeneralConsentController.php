@@ -134,18 +134,11 @@ class GeneralConsentController extends Controller
                     ['lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf']
                 );
 
-                // 5. Generate PDF and Save to Private Storage
-                $path = $this->pdfService->generateAndSave($consent);
-
-                // 5. Generate Signed URL for WhatsApp
-                $signedUrl = URL::temporarySignedRoute(
-                    'pdf.download.signed',
-                    now()->addHour(),
-                    ['no_surat' => $consent->no_surat]
-                );
-
-                // 6. Send WhatsApp Notification
-                $this->whatsappService->sendLink($consent->no_telp, $signedUrl);
+                // 5. Generate PDF and Save to Storage
+                $pdfPath = $this->pdfService->generateAndSave($consent);
+                
+                // 6. Send WhatsApp Notification (File directly)
+                $this->whatsappService->sendFile($consent->no_telp, $pdfPath);
 
                 return response()->json([
                     'success' => true,
@@ -260,12 +253,6 @@ class GeneralConsentController extends Controller
 
     public function sendWhatsappManual(Request $request, $no_surat, WhatsappService $whatsappService)
     {
-        // Handle accidental direct access (GET) by redirecting back to the list
-        // if ($request->isMethod('get')) {
-        //     return redirect()->route('general-consent.index')
-        //         ->with('error', 'Gunakan tombol "WA" pada tabel riwayat untuk mengirim pesan.');
-        // }
-
         $consent = GeneralConsent::where('no_surat', $no_surat)->first();
         
         if (!$consent) {
@@ -284,8 +271,11 @@ class GeneralConsentController extends Controller
             ], 400);
         }        
 
-        // // Use the service to send the message
-        $success = $whatsappService->sendLink($consent->no_telp, '', $message);
+        // Get the storage path for the PDF
+        $pdfPath = PdfService::getInternalPath($consent);
+
+        // Send the file via WhatsApp
+        $success = $whatsappService->sendFile($consent->no_telp, $pdfPath, $message);
         if ($success) {
             return response()->json([
                 'success' => true,
