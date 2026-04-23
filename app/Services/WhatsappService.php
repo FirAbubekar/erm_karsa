@@ -76,7 +76,7 @@ class WhatsappService
     public function sendFile(string $noTelp, string $relativeStoragePath, string $customMessage = null): bool
     {
         $target = $this->formatNumber($noTelp);
-        $message = $customMessage ?: "Berikut kami lampirkan dokumen General Consent Anda.";
+        $message = $customMessage ?: $this->getDefaultFileMessage();
 
         // Check if custom WA gateway is configured
         $waUrl = env('WA_URL');
@@ -104,6 +104,7 @@ class WhatsappService
                     ->post($waUrl . '/send/file', [
                         'phone'   => $target,
                         'message' => $message,
+                        'caption' => $message, // Added caption for broader gateway compatibility
                     ]);
             } else {
                 // Fallback to Fonnte
@@ -115,6 +116,7 @@ class WhatsappService
                 ->post('https://api.fonnte.com/send', [
                     'target' => $target,
                     'message' => $message,
+                    'caption' => $message, // Added for Fonnte compatibility if needed
                     'countryCode' => '62',
                 ]);
             }
@@ -135,9 +137,18 @@ class WhatsappService
         }
     }
 
+    public function getDefaultFileMessage(): string
+    {
+        return "Yth. Bapak/Ibu,\n\n" .
+               "Terima kasih telah mempercayakan pelayanan kesehatan Anda kepada kami di *RSUD Karsa Husada Batu*.\n\n" .
+               "Bersama pesan ini, kami lampirkan dokumen digital *General Consent (Persetujuan Umum)* Anda sebagai bukti administrasi yang sah.\n\n" .
+               "Mohon simpan dokumen ini dengan baik. Atas perhatian dan kerja samanya, kami ucapkan terima kasih.";
+    }
+
     public function getDefaultMessage(string $signedUrl): string
     {
-        return "Berikut kami sampaikan tautan untuk mengunduh dokumen yang General Consent (berlaku selama 1 jam):\n\n" .
+        return "Yth. Bapak/Ibu Pasien,\n\n" .
+               "Berikut kami sampaikan tautan untuk mengunduh dokumen General Consent (berlaku selama 1 jam):\n\n" .
                $signedUrl . "\n\n" .
                "Mohon untuk segera mengunduh dokumen tersebut sebelum masa berlaku tautan berakhir.\n\n" .
                "Atas perhatian dan kerja samanya, kami ucapkan terima kasih.";

@@ -433,6 +433,173 @@
             color: #94A3B8;
         }
 
+        .filter-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 0;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin-bottom: 28px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .filter-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .filter-header {
+            padding: 16px 24px;
+            background: linear-gradient(to right, #F8FAFC, #FFFFFF);
+            border-bottom: 1px solid #F1F5F9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .filter-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .filter-body {
+            padding: 24px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-left: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-input-wrapper {
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #94A3B8;
+            z-index: 10;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 11px 16px 11px 42px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .filter-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-light);
+            background: white;
+        }
+
+        .filter-input::placeholder {
+            color: #CBD5E1;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            padding: 20px 24px 24px;
+            justify-content: flex-end;
+            background: #FAFBFC;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .btn-filter-submit {
+            padding: 11px 28px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-filter-submit:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-filter-reset {
+            padding: 11px 22px;
+            background: white;
+            color: #64748B;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-filter-reset:hover {
+            background: #F1F5F9;
+            color: #1E293B;
+            border-color: #CBD5E1;
+        }
+
         .btn-create {
             display: inline-flex;
             align-items: center;
@@ -1075,13 +1242,96 @@
                 </div>
             @endif
 
-            <!-- Toolbar -->
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <div class="search-box">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" id="tableSearch" placeholder="Cari nama pasien, no. surat..." oninput="filterTable(this.value)">
+            <!-- Advanced Filter Card (Premium Design) -->
+            <div class="filter-card animate-in">
+                <div class="filter-header">
+                    <div class="filter-title">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                        Pencarian Lanjutan Dokumen
+                        @php $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); @endphp
+                        @if($activeFilters > 0)
+                            <span class="filter-badge">{{ $activeFilters }} Filter Aktif</span>
+                        @endif
                     </div>
+                    <div style="font-size: 11px; color: #94A3B8;">Gunakan filter untuk mempersempit pencarian data lama</div>
+                </div>
+                
+                <form action="{{ route('general-consent.index') }}" method="GET">
+                    <div class="filter-body">
+                        <div class="filter-form">
+                            <div class="filter-group">
+                                <label>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    Identitas Pasien
+                                </label>
+                                <div class="filter-input-wrapper">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    <input type="text" name="search" value="{{ request('search') }}" class="filter-input" placeholder="Nama, No.RM, atau No.Surat">
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    Registrasi (No. Rawat)
+                                </label>
+                                <div class="filter-input-wrapper">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.53 0 1.04.21 1.41.59L17 7l-3.59 3.59A2 2 0 0112 11H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                                    <input type="text" name="no_rawat" value="{{ request('no_rawat') }}" class="filter-input" placeholder="Format: YYYY/MM/DD/xxxxxx">
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    Penanggung Jawab / Staf
+                                </label>
+                                <div class="filter-input-wrapper">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <input type="text" name="person" value="{{ request('person') }}" class="filter-input" placeholder="Cari nama PJ atau Petugas">
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
+                                    Periode Pemeriksaan
+                                </label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <div class="filter-input-wrapper" style="flex: 1;">
+                                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="filter-input" style="padding-left: 14px;">
+                                    </div>
+                                    <span style="color: #94A3B8; font-size: 11px; font-weight: 700;">s/d</span>
+                                    <div class="filter-input-wrapper" style="flex: 1;">
+                                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="filter-input" style="padding-left: 14px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        @if($activeFilters > 0)
+                            <a href="{{ route('general-consent.index') }}" class="btn-filter-reset">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Reset Pencarian
+                            </a>
+                        @endif
+                        <button type="submit" class="btn-filter-submit">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            Terapkan Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Toolbar (Action Only) -->
+            <div class="toolbar" style="margin-bottom: 16px;">
+                <div class="toolbar-left">
+                    <h2 style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Daftar Dokumen Terpilih
+                    </h2>
                 </div>
                 <a href="{{ route('general-consent') }}" class="btn-create">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>

@@ -27,18 +27,25 @@
         </a>
         
         <div class="nav-label" style="margin-top: 24px;">Rekam Medis</div>
-        <a href="{{ route('general-consent') }}" class="nav-item {{ Route::is('general-consent') ? 'active' : '' }}" title="Persetujuan Umum">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            General Consent RM 1
-        </a>
-        <a href="{{ route('general-consent.index') }}" class="nav-item {{ Route::is('general-consent.index') ? 'active' : '' }}">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Riwayat General Consent
-        </a>
-        <a href="#" class="nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            Data Pasien
-        </a>
+        
+        <!-- Dropdown Menu -->
+        <div class="nav-dropdown {{ (Route::is('general-consent') || Route::is('general-consent.index')) ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    RM 01 General Consent
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+            <div class="nav-dropdown-content">
+                <a href="{{ route('general-consent') }}" class="nav-dropdown-item {{ Route::is('general-consent') ? 'active' : '' }}">
+                    Input General Consent
+                </a>
+                <a href="{{ route('general-consent.index') }}" class="nav-dropdown-item {{ Route::is('general-consent.index') ? 'active' : '' }}">
+                    Riwayat General Consent
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="sidebar-footer">
@@ -52,6 +59,94 @@
     </div>
 </div>
 
+<style>
+    /* Dropdown Styles */
+    .nav-dropdown {
+        margin-bottom: 4px;
+    }
+
+    .nav-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-radius: 12px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .nav-dropdown-toggle:hover {
+        background: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    .nav-dropdown.active .nav-dropdown-toggle {
+        color: var(--text-main);
+    }
+
+    .nav-dropdown-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nav-dropdown-label svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .chevron {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.3s ease;
+    }
+
+    .nav-dropdown.active .chevron {
+        transform: rotate(180deg);
+    }
+
+    .nav-dropdown-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        padding-left: 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .nav-dropdown.active .nav-dropdown-content {
+        max-height: 200px;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    .nav-dropdown-item {
+        display: block;
+        padding: 10px 16px;
+        border-radius: 10px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .nav-dropdown-item:hover {
+        background: var(--bg-main);
+        color: var(--text-main);
+    }
+
+    .nav-dropdown-item.active {
+        color: var(--primary);
+        font-weight: 600;
+        background: var(--primary-light);
+    }
+</style>
+
 <script>
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -63,11 +158,20 @@
         document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
     }
 
-    toggle.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', toggleSidebar);
+    if (toggle) toggle.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+    // Dropdown Logic
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    dropdowns.forEach(dropdown => {
+        const toggleBtn = dropdown.querySelector('.nav-dropdown-toggle');
+        toggleBtn.addEventListener('click', () => {
+            dropdown.classList.toggle('active');
+        });
+    });
 
     // Close sidebar when clicking nav items on mobile
-    const navItems = document.querySelectorAll('.nav-item');
+    const navItems = document.querySelectorAll('.nav-item, .nav-dropdown-item');
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             if (window.innerWidth <= 1024) {
@@ -76,3 +180,4 @@
         });
     });
 </script>
+

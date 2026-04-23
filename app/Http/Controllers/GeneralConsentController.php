@@ -29,11 +29,53 @@ class GeneralConsentController extends Controller
         $this->whatsappService = $whatsappService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $consents = GeneralConsent::with('regPeriksa.pasien')
-            ->orderBy('tanggal', 'desc')
-            ->paginate(20);
+        $query = GeneralConsent::with('regPeriksa.pasien')
+            ->leftJoin(DB::raw('(SELECT no_surat, MAX(created_date) as latest_created FROM pelepasan_informasi GROUP BY no_surat) as pi'), 
+                       'surat_persetujuan_umum.no_surat', '=', 'pi.no_surat')
+            ->select('surat_persetujuan_umum.*');
+
+        // Filter Search (Nama Pasien / No. RM / No. Surat)
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('surat_persetujuan_umum.no_surat', 'like', "%$search%")
+                  ->orWhereHas('regPeriksa.pasien', function($qp) use ($search) {
+                      $qp->where('nm_pasien', 'like', "%$search%")
+                         ->orWhere('no_rkm_medis', 'like', "%$search%");
+                  });
+            });
+        }
+
+        // Filter No. Rawat
+        if ($request->filled('no_rawat')) {
+            $query->where('surat_persetujuan_umum.no_rawat', 'like', "%" . $request->no_rawat . "%");
+        }
+
+        // Filter Nama PJ or Petugas
+        if ($request->filled('person')) {
+            $person = $request->person;
+            $query->where(function($q) use ($person) {
+                $q->where('surat_persetujuan_umum.nama_pj', 'like', "%$person%")
+                  ->orWhereHas('pegawai', function($qp) use ($person) {
+                      $qp->where('nama', 'like', "%$person%")
+                         ->orWhere('nik', 'like', "%$person%");
+                  });
+            });
+        }
+
+        // Filter Date Range
+        if ($request->filled('start_date')) {
+            $query->where('surat_persetujuan_umum.tanggal', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->where('surat_persetujuan_umum.tanggal', '<=', $request->end_date);
+        }
+
+        $consents = $query->orderBy('latest_created', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
         return view('general_consent.index', compact('consents'));
     }
@@ -240,14 +282,8 @@ class GeneralConsentController extends Controller
         $consent = GeneralConsent::where('no_surat', $no_surat)->first();
         if (!$consent) return response()->json(['error' => 'Data tidak ditemukan'], 404);
 
-        $signedUrl = URL::temporarySignedRoute(
-            'pdf.download.signed',
-            now()->addHour(),
-            ['no_surat' => $consent->no_surat]
-        );
-
         return response()->json([
-            'template' => $whatsappService->getDefaultMessage($signedUrl)
+            'template' => $whatsappService->getDefaultFileMessage()
         ]);
     }
 

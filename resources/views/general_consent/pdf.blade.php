@@ -128,7 +128,7 @@
                     <tr>
                         <td class="label">Tgl. Lahir</td>
                         <td class="colon">:</td>
-                        <td>{{ date('d m Y', strtotime($consent->regPeriksa->pasien->tgl_lahir)) ?? '-' }}</td>
+                        <td>{{ date('d-m-Y', strtotime($consent->regPeriksa->pasien->tgl_lahir)) ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td class="label">NIK</td>
@@ -192,10 +192,16 @@
     <table class="signature-table">
         <tr>
             <td>Mengetahui :<br>Petugas Rumah Sakit</td>
-            <td>Batu, {{ date('d m Y', strtotime($consent->tanggal)) }}<br>Pasien/Wali</td>
+            <td>Batu, {{ date('d-m-Y', strtotime($consent->tanggal)) }}<br>Pasien/Wali</td>
         </tr>
         <tr>
-            <td><div class="sig-space"></div></td>
+                        <td>
+                @if($consent->pegawai && $consent->pegawai->signature_base64)
+                    <img src="{{ $consent->pegawai->signature_base64 }}" class="signature-image">
+                @else
+                    <div class="sig-space"></div>
+                @endif
+            </td>
             <td>
                 @if($consent->regPeriksa->signaturePasien && $consent->regPeriksa->signaturePasien->signature_path)
                     <img src="{{ public_path('storage/' . $consent->regPeriksa->signaturePasien->signature_path) }}" class="signature-image">
