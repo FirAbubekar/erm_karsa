@@ -1333,10 +1333,6 @@
                         Daftar Dokumen Terpilih
                     </h2>
                 </div>
-                <a href="{{ route('general-consent') }}" class="btn-create">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Buat Baru
-                </a>
             </div>
 
             <!-- Table -->

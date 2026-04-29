@@ -461,14 +461,14 @@
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="space-y-3">
                             <div class="form-group">
-                                <label>Pihak Berwenang 1 (Nama)</label>
-                                <input type="text" id="field-auth-name-1" class="form-control" placeholder="Nama Lengkap">
+                                <label>Pihak Berwenang 1 (Nama / Hubungan)</label>
+                                <input type="text" id="field-auth-name-1" class="form-control" placeholder="Otomatis dari Penanggung Jawab" readonly>
                             </div>
                             <div class="form-group">
                                 <label>No. HP / Telp 1</label>
                                 <div class="telp-input-group">
                                     <div class="telp-prefix">+62</div>
-                                    <input type="text" id="field-auth-telp-1" class="form-control telp-input" placeholder="8xxxxxxxxxx">
+                                    <input type="text" id="field-auth-telp-1" class="form-control telp-input" placeholder="Otomatis dari PJ" readonly>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -485,7 +485,7 @@
                         </div>
                         <div class="space-y-3">
                             <div class="form-group">
-                                <label>Pihak Berwenang 3 (Nama)</label>
+                                <label>Pihak Berwenang 3 (Nama)s</label>
                                 <input type="text" id="field-auth-name-3" class="form-control" placeholder="Nama Lengkap">
                             </div>
                             <div class="form-group">
@@ -1208,6 +1208,30 @@
                 }, 0);
             });
         });
+
+        // Sync Penanggung Jawab to Pihak Berwenang 1
+        const fieldPjNama = document.getElementById('field-pj-nama');
+        const fieldPjHubungan = document.getElementById('field-pj-hubungan');
+        const fieldPjTelp = document.getElementById('field-pj-telp');
+        const fieldAuthName1 = document.getElementById('field-auth-name-1');
+        const fieldAuthTelp1 = document.getElementById('field-auth-telp-1');
+
+        function syncAuth1() {
+            const nama = fieldPjNama.value.trim();
+            const hubungan = fieldPjHubungan.value;
+            const telp = fieldPjTelp.value.trim();
+            
+            if (nama && hubungan) {
+                fieldAuthName1.value = `${nama} / ${hubungan}`;
+            } else {
+                fieldAuthName1.value = nama;
+            }
+            fieldAuthTelp1.value = telp;
+        }
+
+        fieldPjNama.addEventListener('input', syncAuth1);
+        fieldPjHubungan.addEventListener('change', syncAuth1);
+        fieldPjTelp.addEventListener('input', syncAuth1);
     </script>
 </body>
 </html>

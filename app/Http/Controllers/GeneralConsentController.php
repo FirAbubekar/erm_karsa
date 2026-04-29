@@ -73,7 +73,8 @@ class GeneralConsentController extends Controller
             $query->where('surat_persetujuan_umum.tanggal', '<=', $request->end_date);
         }
 
-        $consents = $query->orderBy('latest_created', 'desc')
+        $consents = $query->orderBy('surat_persetujuan_umum.tanggal', 'desc')
+            ->orderBy('surat_persetujuan_umum.no_surat', 'desc')
             ->paginate(20)
             ->withQueryString();
 
@@ -108,6 +109,14 @@ class GeneralConsentController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
+                // Ensure auth_name_1 is synced with Penanggung Jawab data as requested
+                // Format: Nama / Hubungan
+                $pjNameWithHubungan = $request->nama_pj . ' / ' . $request->bertindak_atas;
+                $request->merge([
+                    'auth_name_1' => $pjNameWithHubungan,
+                    'auth_telp_1' => $request->no_telp
+                ]);
+
                 // Process Signature
                 $imageData = $request->signature;
                 $imageData = str_replace('data:image/png;base64,', '', $imageData);
@@ -321,7 +330,7 @@ class GeneralConsentController extends Controller
 
         return response()->json([
             'success' => false,
-            'error' => 'Gagal mengirim WhatsApp melalui gateway'
+            'error' => 'Gagal mengirim WhatsApp melalui gateway'.$pdfPath
         ], 500);
     }
 }
