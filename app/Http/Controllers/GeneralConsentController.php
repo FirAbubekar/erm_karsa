@@ -36,6 +36,16 @@ class GeneralConsentController extends Controller
                        'surat_persetujuan_umum.no_surat', '=', 'pi.no_surat')
             ->select('surat_persetujuan_umum.*');
 
+        // Default to today if no filters are provided
+        $hasFilters = $request->filled('search') || $request->filled('no_rawat') || 
+                      $request->filled('person') || $request->filled('start_date') || 
+                      $request->filled('end_date');
+        
+        if (!$hasFilters) {
+            $today = now()->toDateString();
+            $request->merge(['start_date' => $today, 'end_date' => $today]);
+        }
+
         // Filter Search (Nama Pasien / No. RM / No. Surat)
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -78,7 +88,14 @@ class GeneralConsentController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('general_consent.index', compact('consents'));
+        // Calculate Stats
+        $stats = [
+            'total' => GeneralConsent::count(),
+            'today' => GeneralConsent::where('tanggal', now()->toDateString())->count(),
+            'month' => GeneralConsent::where('tanggal', '>=', now()->startOfMonth()->toDateString())->count(),
+        ];
+
+        return view('general_consent.index', compact('consents', 'stats'));
     }
 
     public function store(Request $request)

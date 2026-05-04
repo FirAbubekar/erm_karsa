@@ -330,9 +330,9 @@
         }
 
         .stat-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -340,8 +340,8 @@
         }
 
         .stat-icon svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
         }
 
         .stat-icon.green {
@@ -434,49 +434,74 @@
         }
 
         .filter-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: white;
             padding: 0;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            margin-bottom: 28px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.2s ease;
         }
 
         .filter-card:hover {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
         }
 
         .filter-header {
-            padding: 16px 24px;
-            background: linear-gradient(to right, #F8FAFC, #FFFFFF);
-            border-bottom: 1px solid #F1F5F9;
+            padding: 18px 24px;
+            background: linear-gradient(to right, #F8FAFC, #FAFBFC);
+            border-bottom: 1px solid var(--border);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 14px;
+        }
+
+        .filter-header-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .filter-header-text {
+            flex-grow: 1;
         }
 
         .filter-title {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-size: 14px;
             font-weight: 700;
             color: var(--text-main);
+            margin-bottom: 2px;
         }
 
         .filter-badge {
-            background: var(--accent-light);
-            color: var(--accent);
             font-size: 10px;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .filter-badge.today {
+            background: #ECFDF5;
+            color: #10B981;
+            border: 1px solid #D1FAE5;
+        }
+
+        .filter-badge.active {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
         .filter-body {
@@ -637,7 +662,39 @@
             border-radius: 20px;
             border: 1px solid var(--border);
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .table-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            background: linear-gradient(to right, #FAFBFC, white);
+        }
+
+        .table-top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-top-bar-left h2 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+        }
+
+        .result-count-badge {
+            background: var(--bg-main);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
         }
 
         .table-wrapper {
@@ -852,14 +909,14 @@
 
         /* Empty State */
         .empty-state {
-            padding: 60px 20px;
+            padding: 72px 40px;
             text-align: center;
         }
 
         .empty-state .empty-icon {
-            width: 64px;
-            height: 64px;
-            background: var(--accent-light);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
             border-radius: 20px;
             display: flex;
             align-items: center;
@@ -871,19 +928,44 @@
         .empty-state .empty-icon svg {
             width: 28px;
             height: 28px;
-            opacity: 0.6;
         }
 
         .empty-state h3 {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
         }
 
         .empty-state p {
             font-size: 13px;
             color: var(--text-muted);
+            max-width: 340px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .empty-state .empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .empty-state .empty-action:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
         /* ─── Pagination ─── */
@@ -934,6 +1016,11 @@
             background: var(--accent-light);
             border-color: var(--accent);
             color: var(--accent);
+        }
+
+        .pagination-wrapper nav svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* ─── Modal ─── */
@@ -1209,26 +1296,26 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ $consents->total() }}</span>
+                    <span class="stat-value">{{ number_format($stats['total']) }}</span>
                     <span class="stat-label">Total Persetujuan</span>
                 </div>
             </div>
             <div class="stat-card animate-in animate-delay-2">
                 <div class="stat-icon blue">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ $consents->where('tanggal', '>=', now()->startOfMonth()->toDateString())->count() }}</span>
-                    <span class="stat-label">Bulan Ini</span>
+                    <span class="stat-value">{{ number_format($stats['today']) }}</span>
+                    <span class="stat-label">Hari Ini</span>
                 </div>
             </div>
             <div class="stat-card animate-in animate-delay-3">
                 <div class="stat-icon purple">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.53 0 1.04.21 1.41.59L17 7l-3.59 3.59A2 2 0 0112 11H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ $consents->count() }}</span>
-                    <span class="stat-label">Halaman Ini</span>
+                    <span class="stat-value">{{ number_format($stats['month']) }}</span>
+                    <span class="stat-label">Bulan Ini</span>
                 </div>
             </div>
         </div>
@@ -1242,18 +1329,35 @@
                 </div>
             @endif
 
-            <!-- Advanced Filter Card (Premium Design) -->
+            <!-- Pencarian Lanjutan -->
             <div class="filter-card animate-in">
                 <div class="filter-header">
-                    <div class="filter-title">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                        Pencarian Lanjutan Dokumen
-                        @php $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); @endphp
-                        @if($activeFilters > 0)
-                            <span class="filter-badge">{{ $activeFilters }} Filter Aktif</span>
-                        @endif
+                    <div class="filter-header-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
-                    <div style="font-size: 11px; color: #94A3B8;">Gunakan filter untuk mempersempit pencarian data lama</div>
+                    <div class="filter-header-text">
+                        <div class="filter-title">
+                            Pencarian Lanjutan
+                            @php 
+                                $isDefaultToday = !request('search') && !request('no_rawat') && !request('person') && 
+                                                 request('start_date') === now()->toDateString() && 
+                                                 request('end_date') === now()->toDateString();
+                                $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); 
+                            @endphp
+                            @if($isDefaultToday)
+                                <span class="filter-badge today">Default: Hari Ini</span>
+                            @elseif($activeFilters > 0)
+                                <span class="filter-badge active">{{ $activeFilters }} Filter Aktif</span>
+                            @endif
+                        </div>
+                        <div style="font-size: 12px; color: #94A3B8; margin-top: 1px;">
+                            @if($isDefaultToday)
+                                Menampilkan data hari ini. Isi form di bawah untuk mencari data lainnya.
+                            @else
+                                Menampilkan hasil pencarian dengan filter yang diterapkan.
+                            @endif
+                        </div>
+                    </div>
                 </div>
                 
                 <form action="{{ route('general-consent.index') }}" method="GET">
@@ -1325,42 +1429,49 @@
                 </form>
             </div>
 
-            <!-- Toolbar (Action Only) -->
-            <div class="toolbar" style="margin-bottom: 16px;">
-                <div class="toolbar-left">
-                    <h2 style="font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                        Daftar Dokumen Terpilih
-                    </h2>
-                </div>
-            </div>
 
-            <!-- Table -->
+            <!-- Tabel Data -->
             <div class="table-card animate-in">
+                <!-- Table Header Bar -->
+                <div class="table-top-bar">
+                    <div class="table-top-bar-left">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <h2>Daftar Dokumen @if($isDefaultToday)(Hari Ini, {{ now()->format('d M Y') }})@endif</h2>
+                        <span class="result-count-badge">{{ $consents->total() }} dokumen</span>
+                    </div>
+                </div>
                 <div class="table-wrapper">
                     <table class="data-table" id="consentTable">
                         <thead>
                             <tr>
                                 <th>No. Surat</th>
-                                <th>Pasien</th>
+                                <th>Informasi Pasien</th>
                                 <th>Tgl. Periksa</th>
                                 <th>Penanggung Jawab</th>
                                 <th>Hubungan</th>
-                                <th>Aksi</th>
+                                <th style="text-align: center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($consents as $consent)
                             <tr class="table-row">
                                 <td>
-                                    <span class="surat-badge" title="{{ $consent->no_surat }}">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <div class="surat-badge" title="{{ $consent->no_surat }}">
+                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            {{ $consent->no_surat }}
+                                        </div>
                                         @if($consent->regPeriksa->signaturePasien)
-                                            <span class="badge badge-success">Ada TTD</span>
+                                            <span class="badge badge-success" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
+                                                <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                                Tanda Tangan Lengkap
+                                            </span>
                                         @else
-                                            <span class="badge badge-secondary">Tidak Ada TTD</span>
+                                            <span class="badge badge-secondary" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
+                                                Belum TTD
+                                            </span>
                                         @endif
-                                        {{ $consent->no_surat }}
-                                    </span>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="patient-info">
@@ -1433,10 +1544,23 @@
                                 <td colspan="6">
                                     <div class="empty-state">
                                         <div class="empty-icon">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </div>
-                                        <h3>Belum Ada Riwayat</h3>
-                                        <p>Data general consent yang tersimpan akan muncul di sini.</p>
+                                        @if($isDefaultToday)
+                                            <h3>Belum Ada Dokumen Hari Ini</h3>
+                                            <p>Tidak ada general consent yang dibuat pada {{ now()->format('d M Y') }}. Gunakan Pencarian Lanjutan di atas untuk mencari data dari tanggal lain.</p>
+                                            <a href="{{ route('general-consent.index') }}?start_date=&end_date=" class="empty-action">
+                                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                                Lihat Semua Riwayat
+                                            </a>
+                                        @else
+                                            <h3>Tidak Ada Hasil Ditemukan</h3>
+                                            <p>Tidak ada dokumen yang cocok dengan filter pencarian Anda. Coba ubah atau reset filter di atas.</p>
+                                            <a href="{{ route('general-consent.index') }}" class="empty-action">
+                                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                Reset Pencarian
+                                            </a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
