@@ -413,6 +413,13 @@
                                 <option value="Ayah">Ayah</option>
                                 <option value="Ibu">Ibu</option>
                                 <option value="Saudara">Saudara</option>
+                                <option value="Diri Sendiri">Diri Sendiri</option>
+                                <option value="Keponakan">Keponakan</option>
+                                <option value="Cucu">Cucu</option>
+                                <option value="Kakek">Kakek</option>
+                                <option value="Nenek">Nenek</option>
+                                <option value="Kakak">Kakak</option>
+                                <option value="Adik">Adik</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -690,8 +697,121 @@
             </div>
         </div>
     </div>
+    <!-- Premium Error Modal -->
+    <div class="modal-overlay" id="error-modal" style="z-index: 1050; padding: 20px;">
+        <div class="modal-content" style="max-width: 380px; text-align: center; padding: 40px 32px 32px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid rgba(239, 68, 68, 0.1); position: relative; animation: modalBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white; margin: auto;">
+            
+            <!-- Close Button Top Right -->
+            <button id="close-error-modal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: #94A3B8; cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; outline: none;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Animated Icon -->
+            <div style="width: 72px; height: 72px; background: #FEF2F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #EF4444; position: relative;">
+                <div style="position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #FCA5A5; opacity: 0.5; animation: pulseRing 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;"></div>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 36px; height: 36px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+
+            <h3 style="font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 12px; letter-spacing: -0.02em;">Aksi Diperlukan</h3>
+            <p id="error-modal-message" style="font-size: 14px; font-weight: 500; color: #64748B; margin: 0 0 28px; line-height: 1.6;"></p>
+
+            <button id="btn-close-error" style="width: 100%; padding: 14px 24px; background: #EF4444; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2), 0 2px 4px -1px rgba(239, 68, 68, 0.1); outline: none;">
+                Saya Mengerti
+            </button>
+            
+        </div>
+    </div>
+
+    <style>
+        @keyframes modalBounce {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            80%, 100% { transform: scale(1.3); opacity: 0; }
+        }
+        #close-error-modal:hover {
+            background: #F1F5F9 !important;
+            color: #64748B !important;
+        }
+        #btn-close-error:hover {
+            background: #DC2626 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.3), 0 4px 6px -1px rgba(239, 68, 68, 0.2) !important;
+        }
+        #btn-close-error:active {
+            transform: translateY(1px);
+        }
+
+        /* Success Modal Styles */
+        @keyframes pulseRingSuccess {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            80%, 100% { transform: scale(1.3); opacity: 0; }
+        }
+        #close-success-modal:hover {
+            background: #F1F5F9 !important;
+            color: #64748B !important;
+        }
+        #btn-close-success:hover {
+            background: #059669 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3), 0 4px 6px -1px rgba(16, 185, 129, 0.2) !important;
+        }
+        #btn-close-success:active {
+            transform: translateY(1px);
+        }
+    </style>
+
+    <!-- Premium Success Modal -->
+    <div class="modal-overlay" id="success-modal" style="z-index: 1050; padding: 20px;">
+        <div class="modal-content" style="max-width: 380px; text-align: center; padding: 40px 32px 32px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border: 1px solid rgba(16, 185, 129, 0.1); position: relative; animation: modalBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white; margin: auto;">
+            
+            <button id="close-success-modal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: #94A3B8; cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; outline: none;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Animated Success Icon -->
+            <div style="width: 72px; height: 72px; background: #ECFDF5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #10B981; position: relative;">
+                <div style="position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #6EE7B7; opacity: 0.5; animation: pulseRingSuccess 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;"></div>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 36px; height: 36px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+
+            <h3 style="font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 12px; letter-spacing: -0.02em;">Berhasil!</h3>
+            <p id="success-modal-message" style="font-size: 14px; font-weight: 500; color: #64748B; margin: 0 0 28px; line-height: 1.6;"></p>
+
+            <button id="btn-close-success" style="width: 100%; padding: 14px 24px; background: #10B981; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1); outline: none;">
+                Selesai
+            </button>
+            
+        </div>
+    </div>
 
     <script>
+        function showError(message) {
+            document.getElementById('error-modal-message').textContent = message;
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        function hideError() {
+            document.getElementById('error-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-error-modal').addEventListener('click', hideError);
+        document.getElementById('btn-close-error').addEventListener('click', hideError);
+
+        function showSuccess(message) {
+            document.getElementById('success-modal-message').textContent = message;
+            document.getElementById('success-modal').style.display = 'flex';
+        }
+
+        function hideSuccess() {
+            document.getElementById('success-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-success-modal').addEventListener('click', hideSuccess);
+        document.getElementById('btn-close-success').addEventListener('click', hideSuccess);
+
         // Patient Search Logic
         const btnSearch = document.getElementById('btn-search');
         const inputNoRm = document.getElementById('search-no-rm');
@@ -706,7 +826,7 @@
  
         async function searchPatient() {
             const noRm = inputNoRm.value;
-            if (!noRm) return alert('Silakan masukkan No. RM');
+            if (!noRm) return showError('Silakan masukkan No. RM');
 
             btnSearch.disabled = true;
             btnSearch.innerHTML = 'Mencari...';
@@ -796,11 +916,11 @@
                         document.getElementById('field-tgl-periksa').value = '';
                     }
                 } else {
-                    alert(result.error || 'Terjadi kesalahan');
+                    showError(result.error || 'Terjadi kesalahan');
                 }
             } catch (error) {
                 console.error('Search error:', error);
-                alert('Gagal menghubungi server');
+                showError('Gagal menghubungi server');
             } finally {
                 btnSearch.disabled = false;
                 btnSearch.innerHTML = 'Cari';
@@ -864,7 +984,7 @@
 
         btnSaveSignatureModal.addEventListener('click', () => {
             if (signaturePad.isEmpty()) {
-                return alert('Silakan tanda tangan terlebih dahulu.');
+                return showError('Silakan tanda tangan terlebih dahulu.');
             }
             
             const dataURL = signaturePad.toDataURL('image/png');
@@ -966,11 +1086,11 @@
         btnSave.addEventListener('click', async () => {
             const signatureData = signaturePreview.src;
             if (!signatureData || signaturePreview.style.display === 'none') {
-                return alert('Silakan tanda tangan terlebih dahulu.');
+                return showError('Silakan tanda tangan terlebih dahulu.');
             }
 
             if (!checkAgree.checked) {
-                return alert('Anda harus menyetujui ketentuan untuk menyimpan.');
+                return showError('Anda harus menyetujui ketentuan untuk menyimpan.');
             }
 
             const formData = {
@@ -1005,7 +1125,7 @@
 
             // Basic Validation
             if (!formData.no_rawat || !formData.nama_pj) {
-                return alert('Mohon lengkapi data pasien dan penanggung jawab.');
+                return showError('Mohon lengkapi data pasien dan penanggung jawab.');
             }
 
             btnSave.disabled = true;
@@ -1025,51 +1145,8 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Success Notification
-                    const toast = document.createElement('div');
-                    toast.style.cssText = `
-                        position: fixed;
-                        top: 24px;
-                        right: 24px;
-                        background: #10B981;
-                        color: white;
-                        padding: 16px 24px;
-                        border-radius: 12px;
-                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                        z-index: 1000;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        font-weight: 600;
-                        animation: toastSlideIn 0.3s ease-out;
-                    `;
-                    toast.innerHTML = `
-                        <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        ${result.message}
-                    `;
-                    document.body.appendChild(toast);
-
-                    // Add keyframe animation if not exists
-                    if (!document.getElementById('toast-animation-style')) {
-                        const style = document.createElement('style');
-                        style.id = 'toast-animation-style';
-                        style.innerHTML = `
-                            @keyframes toastSlideIn {
-                                from { transform: translateX(100%); opacity: 0; }
-                                to { transform: translateX(0); opacity: 1; }
-                            }
-                            @keyframes toastSlideOut {
-                                from { transform: translateX(0); opacity: 1; }
-                                to { transform: translateX(100%); opacity: 0; }
-                            }
-                        `;
-                        document.head.appendChild(style);
-                    }
-
-                    setTimeout(() => {
-                        toast.style.animation = 'toastSlideOut 0.3s ease-in forwards';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
+                    // Success Notification Modal
+                    showSuccess(result.message);
 
                     // Reset signature preview
                     signaturePreview.src = '';
@@ -1077,11 +1154,11 @@
                     signaturePlaceholder.style.display = 'flex';
                     signaturePad.clear();
                 } else {
-                    alert(result.message || 'Gagal menyimpan data.');
+                    showError(result.message || 'Gagal menyimpan data.');
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                alert('Terjadi kesalahan saat menghubungi server.');
+                showError('Terjadi kesalahan saat menghubungi server.');
             } finally {
                 btnSave.disabled = false;
                 btnSave.innerHTML = 'Simpan Pernyataan';
