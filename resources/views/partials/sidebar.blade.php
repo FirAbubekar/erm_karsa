@@ -46,6 +46,41 @@
                 </a>
             </div>
         </div>
+
+        <div class="nav-dropdown {{ Route::is('surat-persetujuan-rawat-inap.*') ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    RM 02 Surat Persetujuan Rawat Inap
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+            <div class="nav-dropdown-content">
+                <a href="{{ route('surat-persetujuan-rawat-inap.index') }}" class="nav-dropdown-item {{ Route::is('surat-persetujuan-rawat-inap.index') ? 'active' : '' }}">
+                    Surat Persetujuan Rawat Inap
+                </a>
+                <a href="{{ route('surat-persetujuan-rawat-inap.history') }}" class="nav-dropdown-item {{ Route::is('surat-persetujuan-rawat-inap.history') ? 'active' : '' }}">
+                    Riwayat Surat Persetujuan Rawat Inap
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-label" style="margin-top: 24px;">Laboratorium</div>
+        
+        <div class="nav-dropdown {{ Route::is('hasil-lab.*') ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Laboratorium
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+            <div class="nav-dropdown-content">
+                <a href="{{ route('hasil-lab.index') }}" class="nav-dropdown-item {{ Route::is('hasil-lab.*') ? 'active' : '' }}">
+                    Hasil Lab
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="sidebar-footer">
@@ -144,6 +179,43 @@
         color: var(--primary);
         font-weight: 600;
         background: var(--primary-light);
+    }
+
+    /* Logout Button */
+    .sidebar-footer {
+        padding: 16px;
+        border-top: 1px solid var(--border);
+        margin-top: auto;
+    }
+
+    .btn-logout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        width: 100%;
+        background: #FEF2F2;
+        color: #EF4444;
+        border: 1px solid #FEE2E2;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .btn-logout:hover {
+        background: #FEE2E2;
+        border-color: #FECACA;
+        transform: translateY(-1px);
+    }
+
+    .btn-logout svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
     }
 </style>
 
