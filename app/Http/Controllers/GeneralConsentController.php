@@ -205,12 +205,37 @@ class GeneralConsentController extends Controller
                 // 5. Generate PDF and Save to Storage
                 $pdfPath = $this->pdfService->generateAndSave($consent);
                 
-                // 6. Send WhatsApp Notification (File directly)
-                $this->whatsappService->sendFile($consent->no_telp, $pdfPath);
+                // 6. Save to WhatsApp Queue (Outbox) with remote URL
+                try {
+                    $consent->load('regPeriksa.pasien');
+                    $namaPj = $consent->nama_pj;
+                    $nmPasien = $consent->regPeriksa->pasien->nm_pasien ?? '-';
+                    $noRm = $consent->regPeriksa->pasien->no_rkm_medis ?? '-';
+
+                    $remoteFileName = str_replace('/', '_', $consent->no_surat) . ".pdf";
+                    $remoteUrl = "http://192.168.30.24/webapps/berkasrawat/pages/upload/" . $remoteFileName;
+
+                    $waMessage = "Yth. Bapak/Ibu *" . $namaPj . "*,\n\n" .
+                                 "Terima kasih telah mempercayakan pelayanan kesehatan Anda kepada kami di *RSUD Karsa Husada Batu*.\n\n" .
+                                 "Bersama pesan ini, kami lampirkan dokumen digital *General Consent (Persetujuan Umum)* untuk Pasien *" . $nmPasien . "* (No. RM: *" . $noRm . "*).\n\n" .
+                                 "Mohon simpan dokumen digital ini dengan baik sebagai bukti administrasi yang sah. Atas perhatian dan kerja samanya, kami ucapkan terima kasih.";
+
+                    DB::table('t_antrean_wa')->insert([
+                        'no_surat' => $consent->no_surat,
+                        'no_telp' => $consent->no_telp,
+                        'pesan' => $waMessage,
+                        'file_path' => $remoteUrl,
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } catch (\Exception $waEx) {
+                    \Illuminate\Support\Facades\Log::error("Gagal memasukkan antrean WA otomatis saat simpan General Consent: " . $waEx->getMessage());
+                }
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Pernyataan General Consent berhasil disimpan dan PDF telah dikirim ke WhatsApp.',
+                    'message' => 'Pernyataan General Consent berhasil disimpan dan dokumen telah masuk antrean pengiriman WhatsApp.',
                     'data' => $consent
                 ]);
 
@@ -246,28 +271,11 @@ class GeneralConsentController extends Controller
 
     public function downloadPDF(Request $request, $no_surat)
     {
-        $consent = GeneralConsent::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai'])
-            ->where('no_surat', $no_surat)
-            ->firstOrFail();
+        $consent = GeneralConsent::where('no_surat', $no_surat)->firstOrFail();
+        $safeNoSurat = str_replace('/', '_', $consent->no_surat);
+        $namaFile = $safeNoSurat . '.pdf';
 
-        // Fetch pelepasan_informasi by no_rekamedis
-        $pelepasanInformasi = PelepasanInformasi::where('no_rekamedis', $consent->regPeriksa->pasien->no_rkm_medis)
-            ->where('status', 'aktif')
-            ->get();
-
-        // Device info for footer
-        $deviceInfo = [
-            'ip' => $request->ip(),
-            'lat' => $request->query('lat', '-'),
-            'lng' => $request->query('lng', '-'),
-            'downloaded_at' => now()->format('d/m/Y H:i:s'),
-        ];
-
-        $pdf = Pdf::loadView('general_consent.pdf', compact('consent', 'pelepasanInformasi', 'deviceInfo'));
-        
-        $pdf->setPaper('a4', 'portrait');
-
-        return $pdf->download('General_Consent_' . str_replace('/', '_', $consent->no_surat) . '.pdf');
+        return redirect('http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile);
     }
 
     public function getPelepasanInformasi($no_surat)
@@ -336,18 +344,20 @@ class GeneralConsentController extends Controller
         // Get the storage path for the PDF
         $pdfPath = PdfService::getInternalPath($consent);
 
-        // Send the file via WhatsApp
-        $success = $whatsappService->sendFile($consent->no_telp, $pdfPath, $message);
-        if ($success) {
-            return response()->json([
-                'success' => true,
-                'message' => 'WhatsApp berhasil dikirim ke ' . $consent->no_telp
-            ]);
-        }       
+        // Queue the file via t_antrean_wa
+        DB::table('t_antrean_wa')->insert([
+            'no_surat' => $consent->no_surat,
+            'no_telp' => $consent->no_telp,
+            'pesan' => $message,
+            'file_path' => $pdfPath,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         return response()->json([
-            'success' => false,
-            'error' => 'Gagal mengirim WhatsApp melalui gateway'.$pdfPath
-        ], 500);
+            'success' => true,
+            'message' => 'Pesan WhatsApp berhasil dimasukkan ke antrean pengiriman.'
+        ]);
     }
 }

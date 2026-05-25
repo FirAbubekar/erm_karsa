@@ -1082,6 +1082,36 @@
             }
         });
 
+        // Geolocation coordinate fetcher for form submission
+        const getCoordinates = () => {
+            return new Promise((resolve) => {
+                if (navigator.geolocation && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            resolve({
+                                lat: position.coords.latitude.toFixed(6),
+                                lng: position.coords.longitude.toFixed(6)
+                            });
+                        },
+                        function(error) {
+                            // Fallback to IP API
+                            fetch('http://ip-api.com/json/')
+                                .then(res => res.json())
+                                .then(data => resolve({ lat: data.lat, lng: data.lon }))
+                                .catch(() => resolve({ lat: '-', lng: '-' }));
+                        },
+                        { timeout: 3000 } // 3 seconds timeout
+                    );
+                } else {
+                    // Fallback to IP API
+                    fetch('http://ip-api.com/json/')
+                        .then(res => res.json())
+                        .then(data => resolve({ lat: data.lat, lng: data.lon }))
+                        .catch(() => resolve({ lat: '-', lng: '-' }));
+                }
+            });
+        };
+
         // Save Consent Logic
         btnSave.addEventListener('click', async () => {
             const signatureData = signaturePreview.src;
@@ -1092,6 +1122,12 @@
             if (!checkAgree.checked) {
                 return showError('Anda harus menyetujui ketentuan untuk menyimpan.');
             }
+
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<svg class="animate-spin" style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
+
+            // 1. Fetch Geolocation coordinates first
+            const coords = await getCoordinates();
 
             const formData = {
                 no_surat: document.getElementById('field-no-rawat').value + '_GC', // Temporary logic if no_pernyataan is not provided or just use field
@@ -1115,6 +1151,8 @@
                 auth_telp_3: document.getElementById('field-auth-telp-3').value,
                 auth_name_4: document.getElementById('field-auth-name-4').value,
                 auth_telp_4: document.getElementById('field-auth-telp-4').value,
+                lat: coords.lat,
+                lng: coords.lng,
             };
 
             // Override no_surat with actual No. Pernyataan from field if exists
@@ -1125,11 +1163,11 @@
 
             // Basic Validation
             if (!formData.no_rawat || !formData.nama_pj) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Simpan Pernyataan';
+                validateConsent();
                 return showError('Mohon lengkapi data pasien dan penanggung jawab.');
             }
-
-            btnSave.disabled = true;
-            btnSave.innerHTML = '<svg class="animate-spin" style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
 
             try {
                 const response = await fetch('{{ route("general-consent.store") }}', {
