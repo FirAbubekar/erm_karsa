@@ -80,6 +80,13 @@ class ProcessWaQueue extends Command
                             'updated_at' => now()
                         ]);
                     $this->info("Berhasil mengirim ke {$antrean->no_telp}");
+
+                    // Delete temporary lab PDF files after successful transmission to save space
+                    if (!empty($antrean->file_path) && !str_starts_with($antrean->file_path, 'http') && str_contains($antrean->file_path, 'temp_lab')) {
+                        if (\Illuminate\Support\Facades\Storage::exists($antrean->file_path)) {
+                            \Illuminate\Support\Facades\Storage::delete($antrean->file_path);
+                        }
+                    }
                 } else {
                     // Cari tahu alasan gagal
                     $errorMsg = 'Gagal dikirim (API merespon gagal)';

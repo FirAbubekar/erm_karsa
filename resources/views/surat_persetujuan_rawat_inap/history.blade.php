@@ -847,6 +847,19 @@
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
         }
 
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.08);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-edit:hover {
+            background: var(--info);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
         .btn-pdf {
             background: rgba(16, 185, 129, 0.08);
             color: var(--primary);
@@ -1389,7 +1402,13 @@
                                 </td>
                                 <td>
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                                        <span style="font-weight: 700; color: var(--text-secondary);">{{ $consent->nama_pj }}</span>
+                                        @php
+                                            $pjNamaDisplay = $consent->nama_pj;
+                                            if (preg_match('/^([^\(]+)\((\d+)\)\(([LP])\)$/i', $pjNamaDisplay, $matches)) {
+                                                $pjNamaDisplay = trim($matches[1]);
+                                            }
+                                        @endphp
+                                        <span style="font-weight: 700; color: var(--text-secondary);">{{ $pjNamaDisplay }}</span>
                                         @php
                                             $hub = strtolower($consent->hubungan);
                                             $hubClass = 'default';
@@ -1402,8 +1421,8 @@
                                 </td>
                                 <td>
                                     <div style="display: flex; flex-direction: column; gap: 2px;">
-                                        <span style="font-weight: 600; color: var(--text-main); font-size: 13px;">{{ $consent->ruang ?? '-' }}</span>
-                                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">{{ $consent->kelas ?? '-' }}</span>
+                                        <span style="font-weight: 600; color: var(--text-main); font-size: 13px;">{{ $consent->nm_bangsal ?? $consent->ruang ?? '-' }}</span>
+                                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">{{ $consent->kelas_kamar ?? $consent->kelas ?? '-' }}</span>
                                     </div>
                                 </td>
                                 <td>
@@ -1416,15 +1435,15 @@
                                                 'nm_pasien' => $consent->regPeriksa->pasien->nm_pasien ?? 'Unknown',
                                                 'no_rm' => $consent->regPeriksa->no_rkm_medis ?? '-',
                                                 'tgl_periksa' => $consent->tanggal,
-                                                'nama_pj' => $consent->nama_pj,
+                                                'nama_pj' => $pjNamaDisplay,
                                                 'hubungan' => $consent->hubungan,
                                                 'ktp_pj' => $consent->no_ktppj,
                                                 'telp_pj' => $consent->no_telppj,
                                                 'alamat_pj' => $consent->alamatpj,
                                                 'pendidikan_pj' => $consent->pendidikan_pj,
                                                 'hak_kelas' => $consent->hak_kelas,
-                                                'ruang_diinginkan' => $consent->ruang,
-                                                'kelas' => $consent->kelas,
+                                                'ruang_diinginkan' => $consent->nm_bangsal ?? $consent->ruang,
+                                                'kelas' => $consent->kelas_kamar ?? $consent->kelas,
                                                 'bayar_secara' => $consent->bayar_secara,
                                                 'nama_alamat_keluarga_terdekat' => $consent->nama_alamat_keluarga_terdekat,
                                                 'petugas' => ($consent->pegawai->nama ?? '-') . ' (' . ($consent->nip ?? '-') . ')',
@@ -1434,6 +1453,14 @@
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             Detail
                                         </button>
+                                        <a
+                                            class="btn-action btn-edit"
+                                            href="{{ route('surat-persetujuan-rawat-inap.index') }}?no_rm={{ $consent->regPeriksa->no_rkm_medis }}&no_rawat={{ urlencode($consent->no_rawat) }}&edit=true"
+                                            title="Edit Surat Persetujuan"
+                                        >
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            Edit
+                                        </a>
                                         <button
                                             class="btn-action btn-pdf"
                                             onclick="downloadPDF('{{ route('surat-persetujuan-rawat-inap.download', $consent->no_surat) }}')"

@@ -201,6 +201,40 @@
         $patientKota = $consent->regPeriksa->pasien->nm_kab ?? $consent->regPeriksa->pasien->kabupaten->nm_kab ?? '-';
         $patientJalan = $consent->regPeriksa->pasien->alamat ?? '-';
 
+        // Construct Patient Full Address in one clean line
+        $alamatPasien = '';
+        $pasien = $consent->regPeriksa->pasien ?? null;
+        if ($pasien) {
+            $alamatPasien = $pasien->alamat ?? '';
+            if (!empty($patientRt) && $patientRt !== '-') {
+                $alamatPasien .= ' RT ' . $patientRt;
+            }
+            if (!empty($patientRw) && $patientRw !== '-') {
+                $alamatPasien .= ' RW ' . $patientRw;
+            }
+            if (!empty($patientKel) && $patientKel !== '-') {
+                $alamatPasien .= ', Kel. ' . $patientKel;
+            }
+            if (!empty($patientKec) && $patientKec !== '-') {
+                $alamatPasien .= ', Kec. ' . $patientKec;
+            }
+            if (!empty($patientKota) && $patientKota !== '-') {
+                $alamatPasien .= ', ' . $patientKota;
+            }
+        }
+        $alamatPasien = trim($alamatPasien) ?: '-';
+
+        // Clean & Parse Penanggung Jawab Name, Age, and Gender if stored in Name(Age)(Gender) format
+        $pjNamaJelas = $consent->nama_pj;
+        $pjUmurParsed = '';
+        $pjJkParsed = '';
+        
+        if (preg_match('/^([^\(]+)\((\d+)\)\(([LP])\)$/i', $consent->nama_pj, $matches)) {
+            $pjNamaJelas = trim($matches[1]);
+            $pjUmurParsed = $matches[2];
+            $pjJkParsed = $matches[3];
+        }
+
         // Parse Penanggung Jawab Hubungan
         $isDiri = false; $isIstri = false; $isAnak = false; $isWali = false; $isSuami = false; $isOrangTua = false;
         $waliValue = '';
@@ -326,13 +360,13 @@
                 <tr>
                     <td class="label">Nama</td>
                     <td class="colon">:</td>
-                    <td><span class="solid-underline" style="display: inline-block; width: 98%;">{{ $consent->nama_pj }}</span></td>
+                    <td><span class="solid-underline" style="display: inline-block; width: 98%;">{{ $pjNamaJelas }}</span></td>
                 </tr>
                 <tr>
                     <td class="label">Umur</td>
                     <td class="colon">:</td>
                     <td>
-                        <span class="solid-underline" style="display: inline-block; width: 80px; text-align: left; padding-left: 5px;">{{ $consent->pj_umur ?? '-' }}</span> tahun
+                        <span class="solid-underline" style="display: inline-block; width: 80px; text-align: left; padding-left: 5px;">{{ $pjUmurParsed ?: ($consent->pj_umur ?? '-') }}</span> tahun
                     </td>
                 </tr>
                 <tr>
@@ -340,7 +374,7 @@
                     <td class="colon">:</td>
                     <td>
                         <span class="solid-underline" style="display: inline-block; width: 98%;">
-                            {{ $pj_jk === 'L' ? 'Laki – Laki' : ($pj_jk === 'P' ? 'Perempuan' : '-') }}
+                            {{ $pjJkParsed === 'L' ? 'Laki – Laki' : ($pjJkParsed === 'P' ? 'Perempuan' : ($pj_jk === 'L' ? 'Laki – Laki' : ($pj_jk === 'P' ? 'Perempuan' : '-'))) }}
                         </span>
                     </td>
                 </tr>
@@ -348,18 +382,7 @@
                     <td class="label">Alamat</td>
                     <td class="colon">:</td>
                     <td>
-                        <span class="solid-underline" style="display: inline-block; width: 62%;">{{ $jalan }}</span>
-                        &nbsp;&nbsp;RT.&nbsp;<span class="solid-underline" style="display: inline-block; width: 45px; text-align: center;">{{ $rt }}</span>
-                        &nbsp;&nbsp;RW.&nbsp;<span class="solid-underline" style="display: inline-block; width: 45px; text-align: center;">{{ $rw }}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label"></td>
-                    <td class="colon"></td>
-                    <td>
-                        Kelurahan&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $kel }}</span>
-                        &nbsp;&nbsp;Kecamatan&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $kec }}</span>
-                        &nbsp;&nbsp;Kota/ Kab.&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $kota }}</span>
+                        <span class="solid-underline" style="display: inline-block; width: 98%;">{{ $consent->alamatpj }}</span>
                     </td>
                 </tr>
                 <tr>
@@ -442,18 +465,7 @@
                     <td class="label">Alamat</td>
                     <td class="colon">:</td>
                     <td>
-                        <span class="solid-underline" style="display: inline-block; width: 62%;">{{ $patientJalan }}</span>
-                        &nbsp;&nbsp;RT.&nbsp;<span class="solid-underline" style="display: inline-block; width: 45px; text-align: center;">{{ $patientRt }}</span>
-                        &nbsp;&nbsp;RW.&nbsp;<span class="solid-underline" style="display: inline-block; width: 45px; text-align: center;">{{ $patientRw }}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label"></td>
-                    <td class="colon"></td>
-                    <td>
-                        Kel.&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $patientKel }}</span>
-                        &nbsp;&nbsp;Kec.&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $patientKec }}</span>
-                        &nbsp;&nbsp;Kota/ Kab.&nbsp;<span class="solid-underline" style="display: inline-block; width: 140px; text-align: center;">{{ $patientKota }}</span>
+                        <span class="solid-underline" style="display: inline-block; width: 98%;">{{ $alamatPasien }}</span>
                     </td>
                 </tr>
                 <tr>
@@ -519,7 +531,7 @@
                                 <div style="height: 48px;"></div>
                             @endif
                         </div>
-                        <strong><u>( {{ $consent->nama_pj }} )</u></strong>
+                        <strong><u>( {{ $pjNamaJelas }} )</u></strong>
                     </td>
                 </tr>
             </table>

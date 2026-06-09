@@ -17,7 +17,16 @@ class SuratPersetujuanRawatInapController extends Controller
         if (!Session::get('is_logged_in')) {
             return redirect('/');
         }
-        return view('surat_persetujuan_rawat_inap.index');
+        
+        $kamarList = DB::table('kamar')
+            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+            ->where('kamar.statusdata', '1')
+            ->select('kamar.kd_kamar', 'bangsal.nm_bangsal', 'kamar.kelas')
+            ->orderBy('bangsal.nm_bangsal')
+            ->orderBy('kamar.kelas')
+            ->get();
+
+        return view('surat_persetujuan_rawat_inap.index', compact('kamarList'));
     }
 
     public function store(Request $request)
@@ -35,8 +44,7 @@ class SuratPersetujuanRawatInapController extends Controller
             'no_rm' => 'required|string',
             'tanggal' => 'required|date',
             'hak_kelas' => 'required|in:Kelas I,Kelas II,Kelas III',
-            'ruang_diinginkan' => 'required|string',
-            'kelas' => 'required|in:Utama,Kelas I,Kelas II,Kelas III,VIP,VVIP',
+            'kd_kamar' => 'required|string',
             'pj_biaya' => 'required|string',
             'nama_asuransi' => 'nullable|string',
             'pj_nama' => 'required|string',
@@ -45,48 +53,58 @@ class SuratPersetujuanRawatInapController extends Controller
             'pendidikan_pj' => 'required|string',
             'pj_jk' => 'required|in:Laki-Laki,Perempuan',
             'pj_hubungan' => 'required|in:Diri Sendiri,Suami,Istri,Anak,Orang Tua,Wali / Kurator',
+            'pj_telp_prefix' => 'required|string',
             'pj_telp' => 'required|string',
             'pj_alamat' => 'required|string',
-            'pj_rt' => 'required|string',
-            'pj_rw' => 'required|string',
-            'pj_kelurahan' => 'required|string',
-            'pj_kecamatan' => 'required|string',
-            'pj_kota' => 'required|string',
             'nama_alamat_keluarga_terdekat' => 'required|string',
             'tanda_tangan' => 'required|string', // Base64 signature string
         ]);
 
         return DB::transaction(function () use ($request) {
             try {
-                // 1. Process and Save Signature
-                $imageData = $request->tanda_tangan;
-                $imageData = str_replace('data:image/png;base64,', '', $imageData);
-                $imageData = str_replace(' ', '+', $imageData);
-                $imageBinary = base64_decode($imageData);
+                // Fetch room/kamar from database
+                $kamar = DB::table('kamar')->where('kd_kamar', $request->kd_kamar)->first();
+                if (!$kamar) {
+                    throw new \Exception('Kamar tidak valid atau tidak ditemukan.');
+                }
 
-                // Folder structure: signatures/YYYY/MM/DD/
-                $year = date('Y');
-                $month = date('m');
-                $day = date('d');
-                $directory = "signatures/{$year}/{$month}/{$day}";
-                
-                $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
-                $path = "{$directory}/{$filename}";
+                // 1. Process and Save Signature conditionally (if new)
+                $isNewSignature = str_starts_with($request->tanda_tangan, 'data:image/');
+                $path = null;
 
-                // Save to storage (public disk)
-                Storage::disk('public')->put($path, $imageBinary);
+                if ($isNewSignature) {
+                    $imageData = $request->tanda_tangan;
+                    $imageData = str_replace('data:image/png;base64,', '', $imageData);
+                    $imageData = str_replace(' ', '+', $imageData);
+                    $imageBinary = base64_decode($imageData);
 
-                // 2. Save Signature to signature_pasien table
-                SignaturePasien::create([
-                    'id_uuid' => (string) Str::uuid(),
-                    'no_rekamedis' => $request->no_rm,
-                    'no_rawat' => $request->no_rawat,
-                    'signature_path' => $path,
-                ]);
+                    // Folder structure: signatures/YYYY/MM/DD/
+                    $year = date('Y');
+                    $month = date('m');
+                    $day = date('d');
+                    $directory = "signatures/{$year}/{$month}/{$day}";
+                    
+                    $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
+                    $path = "{$directory}/{$filename}";
 
-                // 3. Concatenate and format Penanggung Jawab Address
-                $alamatpj = $request->pj_alamat . " RT " . $request->pj_rt . " RW " . $request->pj_rw . ", Kel. " . $request->pj_kelurahan . ", Kec. " . $request->pj_kecamatan . ", " . $request->pj_kota;
-                $alamatpj = substr($alamatpj, 0, 100); // DB limit is varchar(100)
+                    // Save to storage (public disk)
+                    Storage::disk('public')->put($path, $imageBinary);
+                }
+
+                // 2. Save or update Signature to signature_pasien table
+                if ($isNewSignature) {
+                    SignaturePasien::updateOrCreate(
+                        ['no_rawat' => $request->no_rawat],
+                        [
+                            'id_uuid' => (string) Str::uuid(),
+                            'no_rekamedis' => $request->no_rm,
+                            'signature_path' => $path,
+                        ]
+                    );
+                }
+
+                // 3. Save Penanggung Jawab Address directly (already complete string from form)
+                $alamatpj = substr($request->pj_alamat, 0, 100); // DB limit is varchar(100)
 
                 // 4. Map Kelas and Hak Kelas
                 $kelasMap = [
@@ -97,7 +115,7 @@ class SuratPersetujuanRawatInapController extends Controller
                     'VIP' => 'Kelas VIP',
                     'VVIP' => 'Kelas VVIP',
                 ];
-                $kelasDb = $kelasMap[$request->kelas] ?? null;
+                $kelasDb = $kamar->kelas;
                 $hakKelasDb = $kelasMap[$request->hak_kelas] ?? '-';
 
                 // 5. Map Hubungan Penanggung Jawab
@@ -127,12 +145,12 @@ class SuratPersetujuanRawatInapController extends Controller
                     [
                         'no_rawat' => $request->no_rawat,
                         'tanggal' => $request->tanggal,
-                        'nama_pj' => substr($request->pj_nama, 0, 50),
+                        'nama_pj' => substr($request->pj_nama . '(' . $request->pj_umur . ')(' . ($request->pj_jk === 'Laki-Laki' ? 'L' : 'P') . ')', 0, 50),
                         'no_ktppj' => substr($request->no_ktp, 0, 20),
                         'pendidikan_pj' => $request->pendidikan_pj,
                         'alamatpj' => $alamatpj,
-                        'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp), 0, 30),
-                        'ruang' => substr($request->ruang_diinginkan, 0, 40),
+                        'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp, $request->pj_telp_prefix), 0, 30),
+                        'ruang' => substr($kamar->kd_kamar, 0, 40),
                         'kelas' => $kelasDb,
                         'hubungan' => $hubunganDb,
                         'hak_kelas' => $hakKelasDb,
@@ -199,12 +217,15 @@ class SuratPersetujuanRawatInapController extends Controller
                 // 10. Queue to t_antrean_wa (WhatsApp Queue)
                 try {
                     $namaPj = $spri->nama_pj;
+                    if (preg_match('/^([^\(]+)\((\d+)\)\(([LP])\)$/i', $namaPj, $matches)) {
+                        $namaPj = trim($matches[1]);
+                    }
                     $nmPasien = $spri->regPeriksa->pasien->nm_pasien ?? '-';
                     $noRm = $spri->regPeriksa->pasien->no_rkm_medis ?? '-';
 
                     $waMessage = "Yth. Bapak/Ibu *" . $namaPj . "*,\n\n" .
                                 "Terima kasih telah mempercayakan pelayanan kesehatan Anda kepada kami di *RSUD Karsa Husada Batu*.\n\n" .
-                                "Bersama pesan ini, kami lampirkan dokumen digital *Surat Persetujuan Rawat Inap (RM 02)* untuk Pasien *" . $nmPasien . "* (No. RM: *" . $noRm . "*).\n\n" .
+                                "Bersama pesan ini, kami lampirkan dokumen digital *Surat Persetujuan Rawat Inap (RM 01)* untuk Pasien *" . $nmPasien . "* (No. RM: *" . $noRm . "*).\n\n" .
                                 "Mohon simpan dokumen digital ini dengan baik sebagai bukti administrasi yang sah. Atas perhatian dan kerja samanya, kami ucapkan terima kasih.";
 
                     $remoteFileName = str_replace('/', '_', $spri->no_surat) . ".pdf";
@@ -225,7 +246,7 @@ class SuratPersetujuanRawatInapController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Surat Persetujuan Rawat Inap (RM 02) berhasil disimpan ke database.',
+                    'message' => 'Surat Persetujuan Rawat Inap (RM 01) berhasil disimpan ke database.',
                     'data' => $spri
                 ]);
 
@@ -244,7 +265,14 @@ class SuratPersetujuanRawatInapController extends Controller
             return redirect('/');
         }
 
-        $query = SuratPersetujuanRawatInap::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
+        $query = SuratPersetujuanRawatInap::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai'])
+            ->leftJoin('kamar', 'surat_persetujuan_rawat_inap.ruang', '=', 'kamar.kd_kamar')
+            ->leftJoin('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+            ->select(
+                'surat_persetujuan_rawat_inap.*',
+                'bangsal.nm_bangsal',
+                'kamar.kelas as kelas_kamar'
+            );
 
         // Default to today if no filters are provided
         $hasFilters = $request->filled('search') || $request->filled('no_rawat') || 
@@ -342,6 +370,16 @@ class SuratPersetujuanRawatInapController extends Controller
         // Fallback: If remote fetch fails or file not found, compile it locally as a backup
         $consent->load(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
 
+        // Fetch human-readable room name to replace kd_kamar for PDF
+        $kamarData = DB::table('kamar')
+            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+            ->where('kamar.kd_kamar', $consent->ruang)
+            ->select('bangsal.nm_bangsal')
+            ->first();
+        if ($kamarData) {
+            $consent->ruang = $kamarData->nm_bangsal;
+        }
+
         $deviceInfo = [
             'ip' => $request->ip(),
             'lat' => $request->input('lat') ?? $request->query('lat') ?? '-',
@@ -362,6 +400,9 @@ class SuratPersetujuanRawatInapController extends Controller
         if (!$consent) return response()->json(['error' => 'Data tidak ditemukan'], 404);
 
         $namaPj = $consent->nama_pj;
+        if (preg_match('/^([^\(]+)\((\d+)\)\(([LP])\)$/i', $namaPj, $matches)) {
+            $namaPj = trim($matches[1]);
+        }
         $nmPasien = $consent->regPeriksa->pasien->nm_pasien ?? '-';
         $noRm = $consent->regPeriksa->pasien->no_rkm_medis ?? '-';
 
@@ -394,6 +435,16 @@ class SuratPersetujuanRawatInapController extends Controller
                 'success' => false,
                 'error' => 'Data tidak ditemukan'
             ], 404);
+        }
+
+        // Fetch human-readable room name to replace kd_kamar for PDF
+        $kamarData = DB::table('kamar')
+            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+            ->where('kamar.kd_kamar', $consent->ruang)
+            ->select('bangsal.nm_bangsal')
+            ->first();
+        if ($kamarData) {
+            $consent->ruang = $kamarData->nm_bangsal;
         }
 
         // Generate PDF and save to storage
@@ -436,11 +487,17 @@ class SuratPersetujuanRawatInapController extends Controller
         ]);
     }
 
-    private function formatPhoneNumber($number)
+    private function formatPhoneNumber($number, $prefix = '+62')
     {
         if (empty($number) || $number === '-') return $number;
         
-        // Remove non-digits
+        // Remove non-digits from prefix to get numeric code (e.g. "+62" -> "62")
+        $prefixDigits = preg_replace('/\D/', '', $prefix);
+        if (empty($prefixDigits)) {
+            $prefixDigits = '62'; // Fallback if no digits found in prefix
+        }
+        
+        // Remove non-digits from number
         $digits = preg_replace('/\D/', '', $number);
         
         // If it starts with 0, remove it
@@ -448,12 +505,12 @@ class SuratPersetujuanRawatInapController extends Controller
             $digits = substr($digits, 1);
         }
         
-        // If it already starts with 62, return it
-        if (str_starts_with($digits, '62')) {
+        // If it already starts with the prefix digits, return it
+        if (str_starts_with($digits, $prefixDigits)) {
             return $digits;
         }
         
-        // Prepend 62
-        return '62' . $digits;
+        // Prepend prefix digits
+        return $prefixDigits . $digits;
     }
 }

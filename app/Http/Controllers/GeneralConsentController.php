@@ -112,6 +112,7 @@ class GeneralConsentController extends Controller
             'no_ktppj' => 'required|string',
             'jkpj' => 'required|in:L,P',
             'bertindak_atas' => 'required|string',
+            'no_telp_prefix' => 'required|string',
             'no_telp' => 'required|string',
             'signature' => 'required|string', // Base64 string
             'auth_name_1' => 'nullable|string',
@@ -134,23 +135,28 @@ class GeneralConsentController extends Controller
                     'auth_telp_1' => $request->no_telp
                 ]);
 
-                // Process Signature
-                $imageData = $request->signature;
-                $imageData = str_replace('data:image/png;base64,', '', $imageData);
-                $imageData = str_replace(' ', '+', $imageData);
-                $imageBinary = base64_decode($imageData);
+                // Process Signature conditionally (if new)
+                $isNewSignature = str_starts_with($request->signature, 'data:image/');
+                $path = null;
 
-                // Folder structure: signatures/YYYY/MM/DD/
-                $year = date('Y');
-                $month = date('m');
-                $day = date('d');
-                $directory = "signatures/{$year}/{$month}/{$day}";
-                
-                $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
-                $path = "{$directory}/{$filename}";
+                if ($isNewSignature) {
+                    $imageData = $request->signature;
+                    $imageData = str_replace('data:image/png;base64,', '', $imageData);
+                    $imageData = str_replace(' ', '+', $imageData);
+                    $imageBinary = base64_decode($imageData);
 
-                // Save to storage (public disk)
-                Storage::disk('public')->put($path, $imageBinary);
+                    // Folder structure: signatures/YYYY/MM/DD/
+                    $year = date('Y');
+                    $month = date('m');
+                    $day = date('d');
+                    $directory = "signatures/{$year}/{$month}/{$day}";
+                    
+                    $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
+                    $path = "{$directory}/{$filename}";
+
+                    // Save to storage (public disk)
+                    Storage::disk('public')->put($path, $imageBinary);
+                }
 
                 // 1. Save to surat_persetujuan_umum
                 $consent = GeneralConsent::updateOrCreate(
@@ -165,20 +171,27 @@ class GeneralConsentController extends Controller
                         'no_ktppj' => $request->no_ktppj,
                         'jkpj' => $request->jkpj,
                         'bertindak_atas' => $request->bertindak_atas,
-                        'no_telp' => $this->formatPhoneNumber($request->no_telp),
+                        'no_telp' => $this->formatPhoneNumber($request->no_telp, $request->no_telp_prefix),
                         'nip' => Session::get('user_id'),
                     ]
                 );
 
-                // 2. Save to signature_pasien
-                SignaturePasien::create([
-                    'id_uuid' => (string) Str::uuid(),
-                    'no_rekamedis' => $request->no_rm,
-                    'no_rawat' => $request->no_rawat,
-                    'signature_path' => $path,
-                ]);
+                // 2. Save or update signature_pasien only if a new signature was uploaded
+                if ($isNewSignature) {
+                    SignaturePasien::updateOrCreate(
+                        ['no_rawat' => $request->no_rawat],
+                        [
+                            'id_uuid' => (string) Str::uuid(),
+                            'no_rekamedis' => $request->no_rm,
+                            'signature_path' => $path,
+                        ]
+                    );
+                }
 
-                // 3. Save to pelepasan_informasi
+                // 3. Delete existing pelepasan_informasi for this no_surat to prevent duplicates on edit/update
+                PelepasanInformasi::where('no_surat', $request->no_surat)->delete();
+
+                // 4. Save to pelepasan_informasi
                 for ($i = 1; $i <= 4; $i++) {
                     $name = $request->{"auth_name_$i"};
                     $telp = $request->{"auth_telp_$i"};
@@ -188,14 +201,14 @@ class GeneralConsentController extends Controller
                             'no_surat' => $request->no_surat,
                             'no_rekamedis' => $request->no_rm,
                             'nama' => $name,
-                            'no_telp' => $this->formatPhoneNumber($telp) ?? '-',
+                            'no_telp' => $this->formatPhoneNumber($telp, $i == 1 ? $request->no_telp_prefix : '+62') ?? '-',
                             'status' => 'aktif',
                             'created_date' => now()
                         ]);
                     }
                 }
 
-                // 4. Save to berkas_digital_perawatan
+                // 5. Save to berkas_digital_perawatan
                 $safeNoSurat = str_replace('/', '_', $request->no_surat);
                 DB::table('berkas_digital_perawatan')->updateOrInsert(
                     ['no_rawat' => $request->no_rawat, 'kode' => '28'],
@@ -248,11 +261,17 @@ class GeneralConsentController extends Controller
         });
     }
 
-    private function formatPhoneNumber($number)
+    private function formatPhoneNumber($number, $prefix = '+62')
     {
         if (empty($number) || $number === '-') return $number;
         
-        // Remove non-digits
+        // Remove non-digits from prefix to get numeric code (e.g. "+62" -> "62")
+        $prefixDigits = preg_replace('/\D/', '', $prefix);
+        if (empty($prefixDigits)) {
+            $prefixDigits = '62'; // Fallback if no digits found in prefix
+        }
+        
+        // Remove non-digits from number
         $digits = preg_replace('/\D/', '', $number);
         
         // If it starts with 0, remove it
@@ -260,13 +279,13 @@ class GeneralConsentController extends Controller
             $digits = substr($digits, 1);
         }
         
-        // If it already starts with 62, return it
-        if (str_starts_with($digits, '62')) {
+        // If it already starts with the prefix digits, return it
+        if (str_starts_with($digits, $prefixDigits)) {
             return $digits;
         }
         
-        // Prepend 62
-        return '62' . $digits;
+        // Prepend prefix digits
+        return $prefixDigits . $digits;
     }
 
     public function downloadPDF(Request $request, $no_surat)
@@ -341,15 +360,16 @@ class GeneralConsentController extends Controller
             ], 400);
         }        
 
-        // Get the storage path for the PDF
-        $pdfPath = PdfService::getInternalPath($consent);
+        // Get the remote URL for the PDF
+        $remoteFileName = str_replace('/', '_', $consent->no_surat) . ".pdf";
+        $remoteUrl = "http://192.168.30.24/webapps/berkasrawat/pages/upload/" . $remoteFileName;
 
         // Queue the file via t_antrean_wa
         DB::table('t_antrean_wa')->insert([
             'no_surat' => $consent->no_surat,
             'no_telp' => $consent->no_telp,
             'pesan' => $message,
-            'file_path' => $pdfPath,
+            'file_path' => $remoteUrl,
             'status' => 'pending',
             'created_at' => now(),
             'updated_at' => now(),

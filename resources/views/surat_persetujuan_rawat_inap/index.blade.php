@@ -171,6 +171,16 @@
             border-right: 1.5px solid var(--border);
             user-select: none;
         }
+        input.telp-prefix {
+            border-top: none;
+            border-left: none;
+            border-bottom: none;
+            outline: none;
+            width: 64px;
+            text-align: center;
+            padding: 11px 0;
+            cursor: text;
+        }
         .telp-input-group .form-control {
             border: none !important;
             background: transparent !important;
@@ -189,7 +199,69 @@
                 grid-column: span 1;
             }
         }
+
+        /* Premium Select2 Styling Overrides */
+        .select2-container--default .select2-selection--single {
+            background-color: #F8FAFC !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: 12px !important;
+            height: auto !important;
+            padding: 10px 14px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            outline: none !important;
+            transition: all 0.2s !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-container--default .select2-selection--single:focus,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            background-color: white !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px var(--accent-light) !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: var(--text-main) !important;
+            padding-left: 0 !important;
+            line-height: normal !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            right: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-dropdown {
+            background-color: white !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+            overflow: hidden !important;
+            z-index: 9999 !important;
+            margin-top: 4px !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1.5px solid var(--border) !important;
+            border-radius: 8px !important;
+            padding: 6px 12px !important;
+            outline: none !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: var(--accent) !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--accent) !important;
+            color: white !important;
+        }
+        .select2-container--default .select2-results__option {
+            padding: 10px 14px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: var(--text-secondary) !important;
+        }
     </style>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- Signature Pad Library -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
@@ -356,19 +428,15 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Kelas Perawatan Yang Diinginkan</label>
-                                    <div class="form-row" style="gap: 8px;">
-                                        <input type="text" class="form-control" name="ruang_diinginkan" placeholder="Nama Ruang" required style="flex: 2;">
-                                        <select class="form-control" name="kelas" required style="flex: 1;">
-                                            <option value="">Pilih Kelas...</option>
-                                            <option value="Utama">Utama</option>
-                                            <option value="Kelas I">Kelas I</option>
-                                            <option value="Kelas II">Kelas II</option>
-                                            <option value="Kelas III">Kelas III</option>
-                                            <option value="VIP">VIP</option>
-                                            <option value="VVIP">VVIP</option>
-                                        </select>
-                                    </div>
+                                    <label for="kd_kamar">Kelas Perawatan Yang Diinginkan</label>
+                                    <select class="form-control" id="kd_kamar" name="kd_kamar" required style="width: 100%;">
+                                        <option value="">Pilih Ruang & Kelas...</option>
+                                        @foreach($kamarList as $k)
+                                            <option value="{{ $k->kd_kamar }}">
+                                                {{ $k->nm_bangsal }} ({{ $k->kelas }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="form-group full-width">
                                     <label>Penanggung Jawab Biaya</label>
@@ -454,24 +522,46 @@
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <label>No. HP / Telepon</label>
                                         <div class="telp-input-group">
-                                            <div class="telp-prefix">+62</div>
+                                            <!-- Select Prefix Container -->
+                                            <div id="telp-prefix-select-container" style="display: flex; align-items: center; background: #F1F5F9; border-right: 1.5px solid var(--border);">
+                                                <select id="field-pj-telp-prefix-select" style="border: none; background: transparent; font-weight: 700; font-size: 14px; padding: 11px 24px 11px 16px; outline: none; cursor: pointer; color: var(--text-secondary); width: 85px; height: 100%; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'%23475569\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
+                                                    <option value="+62" selected>+62</option>
+                                                    <option value="+60">+60</option>
+                                                    <option value="+65">+65</option>
+                                                    <option value="custom">Lainnya...</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Custom Prefix Input Container (Hidden by default) -->
+                                            <div id="telp-prefix-custom-container" style="display: none; align-items: center; background: #F1F5F9; border-right: 1.5px solid var(--border);">
+                                                <input type="text" class="telp-prefix" id="field-pj-telp-prefix" name="pj_telp_prefix" value="+62" placeholder="+62" style="border: none !important; width: 55px; text-align: center; padding: 11px 0; background: transparent;" required>
+                                                <button type="button" id="btn-cancel-custom-prefix" style="border: none; background: transparent; padding: 0 8px 0 4px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; height: 100%;">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+
                                             <input type="text" class="form-control telp-input" name="pj_telp" id="field-pj-telp" placeholder="8xxxxxxxxxx" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group full-width">
-                                    <label>Alamat Lengkap</label>
-                                    <input type="text" class="form-control" name="pj_alamat" id="field-pj-alamat" placeholder="Nama Jalan / Perumahan" required style="margin-bottom: 12px;">
-                                    <div class="form-row">
-                                        <input type="text" class="form-control" name="pj_rt" id="field-pj-rt" placeholder="RT" style="width: 80px;" required>
-                                        <input type="text" class="form-control" name="pj_rw" id="field-pj-rw" placeholder="RW" style="width: 80px;" required>
-                                        <input type="text" class="form-control" name="pj_kelurahan" id="field-pj-kelurahan" placeholder="Kelurahan" required>
-                                        <input type="text" class="form-control" name="pj_kecamatan" id="field-pj-kecamatan" placeholder="Kecamatan" required>
-                                        <input type="text" class="form-control" name="pj_kota" id="field-pj-kota" placeholder="Kota / Kab." required>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <label style="margin-bottom: 0;">Alamat Lengkap</label>
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); font-weight: 500;">
+                                            <input type="checkbox" id="copy-alamat-pasien" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary);">
+                                            <label for="copy-alamat-pasien" style="margin-bottom: 0; cursor: pointer; user-select: none;">Sama dengan alamat pasien</label>
+                                        </div>
                                     </div>
+                                    <input type="text" class="form-control" name="pj_alamat" id="field-pj-alamat" placeholder="Masukkan alamat lengkap penanggung jawab..." required>
                                 </div>
                                 <div class="form-group full-width">
-                                    <label>Nama & Alamat Keluarga Terdekat (Yang Dapat Dihubungi Dalam Keadaan Darurat)</label>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <label style="margin-bottom: 0;">Nama & Alamat Keluarga Terdekat (Yang Dapat Dihubungi Dalam Keadaan Darurat)</label>
+                                        <button type="button" id="copy-alamat-keluarga" style="background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                                            Salin Alamat Pasien
+                                        </button>
+                                    </div>
                                     <input type="text" class="form-control" name="nama_alamat_keluarga_terdekat" id="field-pj-keluarga-terdekat" placeholder="Contoh: Budi (Adik) - Jl. Merdeka No. 12 Batu" required>
                                 </div>
                             </div>
@@ -600,7 +690,29 @@
         </div>
     </div>
 
+    <!-- jQuery and Select2 JS CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
+        $(document).ready(function() {
+            $('#kd_kamar').select2({
+                placeholder: "Pilih Ruang & Kelas...",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Auto focus on search box when opened
+            $('#kd_kamar').on('select2:open', function() {
+                setTimeout(function() {
+                    const searchField = document.querySelector('.select2-container--open .select2-search__field');
+                    if (searchField) {
+                        searchField.focus();
+                    }
+                }, 50);
+            });
+        });
+
         // Modal Control Helper
         function showError(message) {
             document.getElementById('error-modal-message').textContent = message;
@@ -636,10 +748,124 @@
             });
         });
 
-        // Patient Search & History Table
+        // Patient Search, History Table, & Alamat Copy state
         const btnSearch = document.getElementById('btn-search');
         const inputNoRm = document.getElementById('search-no-rm');
         const historyTableBody = document.getElementById('history-table-body');
+        
+        let activePatientData = null;
+        let activePatientFullAddress = '';
+
+        // Auto Fill Pihak Pertama Hubungan "Diri Sendiri" option trigger for convenience
+        document.getElementById('field-pj-hubungan').addEventListener('change', (e) => {
+            if (!activePatientData) return;
+            if (e.target.value === 'Diri Sendiri') {
+                document.getElementById('field-pj-nama').value = activePatientData.nm_pasien || '';
+                document.getElementById('field-pj-ktp').value = activePatientData.no_ktp || '';
+                document.getElementById('field-pj-alamat').value = activePatientFullAddress;
+                document.getElementById('copy-alamat-pasien').checked = true;
+                
+                // Auto Fill & Sanitize Phone Number
+                let phoneVal = activePatientData.no_tlp || '';
+                let prefixVal = '+62';
+                if (phoneVal.startsWith('+')) {
+                    let match = phoneVal.match(/^\+(\d{1,4})/);
+                    if (match) {
+                        prefixVal = '+' + match[1];
+                        phoneVal = phoneVal.substring(prefixVal.length);
+                    }
+                } else if (phoneVal.startsWith('62')) {
+                    prefixVal = '+62';
+                    phoneVal = phoneVal.substring(2);
+                } else if (phoneVal.startsWith('0')) {
+                    prefixVal = '+62';
+                    phoneVal = phoneVal.substring(1);
+                }
+                
+                const prefixSelectEl = document.getElementById('field-pj-telp-prefix-select');
+                const prefixSelectContainerEl = document.getElementById('telp-prefix-select-container');
+                const prefixCustomContainerEl = document.getElementById('telp-prefix-custom-container');
+                
+                document.getElementById('field-pj-telp-prefix').value = prefixVal;
+                document.getElementById('field-pj-telp').value = phoneVal;
+                
+                if (prefixSelectEl) {
+                    const options = Array.from(prefixSelectEl.options).map(opt => opt.value);
+                    if (options.includes(prefixVal)) {
+                        prefixSelectEl.value = prefixVal;
+                        prefixSelectContainerEl.style.display = 'flex';
+                        prefixCustomContainerEl.style.display = 'none';
+                    } else {
+                        prefixSelectEl.value = 'custom';
+                        prefixSelectContainerEl.style.display = 'none';
+                        prefixCustomContainerEl.style.display = 'flex';
+                    }
+                }
+                
+                // Parse Age for PJ
+                if (activePatientData.tgl_lahir) {
+                    const birthDate = new Date(activePatientData.tgl_lahir);
+                    const today = new Date();
+                    let ageYears = today.getFullYear() - birthDate.getFullYear();
+                    if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
+                        ageYears--;
+                    }
+                    document.getElementById('field-pj-umur').value = ageYears;
+                }
+                
+                // Parse Gender for PJ
+                if (activePatientData.jk === 'L') {
+                    document.getElementById('pj_jk_L').checked = true;
+                } else if (activePatientData.jk === 'P') {
+                    document.getElementById('pj_jk_P').checked = true;
+                }
+            } else {
+                document.getElementById('copy-alamat-pasien').checked = false;
+            }
+        });
+
+        // Copy patient address checkbox handler
+        document.getElementById('copy-alamat-pasien').addEventListener('change', (e) => {
+            const pjAlamatInput = document.getElementById('field-pj-alamat');
+            if (e.target.checked) {
+                if (!activePatientFullAddress) {
+                    showError('Silakan cari pasien terlebih dahulu.');
+                    e.target.checked = false;
+                    return;
+                }
+                pjAlamatInput.value = activePatientFullAddress;
+            } else {
+                pjAlamatInput.value = '';
+            }
+        });
+
+        // Copy patient address to emergency contact handler
+        document.getElementById('copy-alamat-keluarga').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!activePatientFullAddress) {
+                showError('Silakan cari pasien terlebih dahulu.');
+                return;
+            }
+            const keluargaInput = document.getElementById('field-pj-keluarga-terdekat');
+            const currentValue = keluargaInput.value.trim();
+            
+            if (currentValue === '') {
+                keluargaInput.value = '[Nama] ([Hubungan]) - ' + activePatientFullAddress;
+                keluargaInput.focus();
+                keluargaInput.setSelectionRange(1, 5); // Selects "Nama" template text
+            } else if (currentValue.endsWith('-')) {
+                keluargaInput.value = currentValue + ' ' + activePatientFullAddress;
+                keluargaInput.focus();
+            } else if (!currentValue.includes('-')) {
+                keluargaInput.value = currentValue + ' - ' + activePatientFullAddress;
+                keluargaInput.focus();
+            } else {
+                const parts = currentValue.split('-');
+                const namePart = parts[0].trim();
+                keluargaInput.value = namePart + ' - ' + activePatientFullAddress;
+                keluargaInput.focus();
+            }
+        });
 
         inputNoRm.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -663,6 +889,8 @@
 
                 if (response.ok) {
                     const { pasien, history } = result;
+                    activePatientData = pasien;
+                    window.historyData = history;
 
                     // Fill Patient Identity
                     document.getElementById('field-no-rm').value = pasien.no_rkm_medis || '';
@@ -678,52 +906,18 @@
                         document.getElementById('jk_P').checked = true;
                     }
 
-                    // Fill Patient Address
-                    document.getElementById('field-alamat').value = pasien.alamat || '-';
-
-                    // Auto Fill Pihak Pertama Hubungan "Diri Sendiri" option trigger for convenience
-                    const pjHubungan = document.getElementById('field-pj-hubungan');
-                    pjHubungan.addEventListener('change', (e) => {
-                        if (e.target.value === 'Diri Sendiri') {
-                            document.getElementById('field-pj-nama').value = pasien.nm_pasien || '';
-                            document.getElementById('field-pj-ktp').value = pasien.no_ktp || '';
-                            document.getElementById('field-pj-alamat').value = pasien.alamat || '';
-                            document.getElementById('field-pj-rt').value = pasien.rt || '';
-                            document.getElementById('field-pj-rw').value = pasien.rw || '';
-                            document.getElementById('field-pj-kelurahan').value = pasien.nm_kel || pasien.kd_kel || '';
-                            document.getElementById('field-pj-kecamatan').value = pasien.nm_kec || pasien.kd_kec || '';
-                            document.getElementById('field-pj-kota').value = pasien.nm_kab || pasien.kd_kab || '';
-                            
-                            // Auto Fill & Sanitize Phone Number
-                            let phoneVal = pasien.no_tlp || '';
-                            if (phoneVal.startsWith('+62')) {
-                                phoneVal = phoneVal.substring(3);
-                            } else if (phoneVal.startsWith('62')) {
-                                phoneVal = phoneVal.substring(2);
-                            } else if (phoneVal.startsWith('0')) {
-                                phoneVal = phoneVal.substring(1);
-                            }
-                            document.getElementById('field-pj-telp').value = phoneVal;
-                            
-                            // Parse Age for PJ
-                            if (pasien.tgl_lahir) {
-                                const birthDate = new Date(pasien.tgl_lahir);
-                                const today = new Date();
-                                let ageYears = today.getFullYear() - birthDate.getFullYear();
-                                if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
-                                    ageYears--;
-                                }
-                                document.getElementById('field-pj-umur').value = ageYears;
-                            }
-                            
-                            // Parse Gender for PJ
-                            if (pasien.jk === 'L') {
-                                document.getElementById('pj_jk_L').checked = true;
-                            } else if (pasien.jk === 'P') {
-                                document.getElementById('pj_jk_P').checked = true;
-                            }
-                        }
-                    });
+                    // Construct full patient address and fill it
+                    activePatientFullAddress = (pasien.alamat || '') + 
+                        (pasien.rt && pasien.rt !== '-' ? ' RT ' + pasien.rt : '') + 
+                        (pasien.rw && pasien.rw !== '-' ? ' RW ' + pasien.rw : '') + 
+                        (pasien.nm_kel && pasien.nm_kel !== '-' ? ', Kel. ' + pasien.nm_kel : '') + 
+                        (pasien.nm_kec && pasien.nm_kec !== '-' ? ', Kec. ' + pasien.nm_kec : '') + 
+                        (pasien.nm_kab && pasien.nm_kab !== '-' ? ', ' + pasien.nm_kab : '');
+                    
+                    document.getElementById('field-alamat').value = activePatientFullAddress || '-';
+                    document.getElementById('copy-alamat-pasien').checked = false;
+                    document.getElementById('field-pj-alamat').value = '';
+                    document.getElementById('field-pj-hubungan').value = '';
 
                     // Parse Age
                     if (pasien.tgl_lahir) {
@@ -988,6 +1182,260 @@
                     this.value = value;
                 }, 0);
             });
+        });
+
+        // Normalize prefix input
+        const prefixInput = document.getElementById('field-pj-telp-prefix');
+        if (prefixInput) {
+            prefixInput.addEventListener('input', function(e) {
+                let val = this.value;
+                if (!val.startsWith('+')) {
+                    val = '+' + val.replace(/\D/g, '');
+                } else {
+                    val = '+' + val.substring(1).replace(/\D/g, '');
+                }
+                this.value = val;
+            });
+        }
+
+        // Phone Prefix Selector & Custom Typing Logic
+        const prefixSelect = document.getElementById('field-pj-telp-prefix-select');
+        const prefixSelectContainer = document.getElementById('telp-prefix-select-container');
+        const prefixCustomContainer = document.getElementById('telp-prefix-custom-container');
+        const btnCancelCustomPrefix = document.getElementById('btn-cancel-custom-prefix');
+
+        if (prefixSelect && prefixInput) {
+            prefixSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    prefixSelectContainer.style.display = 'none';
+                    prefixCustomContainer.style.display = 'flex';
+                    prefixInput.value = '+';
+                    prefixInput.focus();
+                } else {
+                    prefixInput.value = this.value;
+                }
+            });
+
+            btnCancelCustomPrefix.addEventListener('click', function() {
+                prefixCustomContainer.style.display = 'none';
+                prefixSelectContainer.style.display = 'flex';
+                prefixSelect.value = '+62';
+                prefixInput.value = '+62';
+            });
+        }
+
+        // Check for edit query parameters on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const noRm = urlParams.get('no_rm');
+            const noRawat = urlParams.get('no_rawat');
+            const isEdit = urlParams.get('edit') === 'true';
+
+            if (noRm) {
+                const searchInput = document.getElementById('search-no-rm');
+                if (searchInput) {
+                    searchInput.value = noRm;
+                    // Trigger search
+                    await searchPatient();
+                    
+                    if (noRawat) {
+                        // Find and select the corresponding registration row
+                        const rows = Array.from(document.getElementById('history-table-body').children);
+                        const targetRow = rows.find(row => {
+                            const cells = row.getElementsByTagName('td');
+                            return cells.length > 2 && cells[2].textContent.trim() === noRawat;
+                        });
+
+                        if (targetRow) {
+                            // Trigger click event on the target row to select it
+                            targetRow.click();
+
+                            if (isEdit && window.historyData) {
+                                // If edit mode, populate form with existing SPRI details
+                                const reg = window.historyData.find(h => h.no_rawat === noRawat);
+                                if (reg && reg.surat_persetujuan_rawat_inap) {
+                                    const consent = reg.surat_persetujuan_rawat_inap;
+                                    
+                                    // 1. Populate basic identity fields
+                                    if (consent.no_surat) {
+                                        document.getElementById('field-no-surat').value = consent.no_surat;
+                                    }
+                                    
+                                    // 2. Parse and populate pj_nama, pj_umur, pj_jk
+                                    const namePj = consent.nama_pj || '';
+                                    let parsedName = namePj;
+                                    let parsedAge = '';
+                                    let parsedGender = '';
+
+                                    const match = namePj.match(/^(.*)\((\d+)\)\(([LP])\)$/i);
+                                    if (match) {
+                                        parsedName = match[1].trim();
+                                        parsedAge = match[2];
+                                        parsedGender = match[3].toUpperCase();
+                                    }
+
+                                    document.getElementById('field-pj-nama').value = parsedName;
+                                    document.getElementById('field-pj-umur').value = parsedAge;
+                                    
+                                    if (parsedGender === 'L') {
+                                        document.getElementById('pj_jk_L').checked = true;
+                                    } else if (parsedGender === 'P') {
+                                        document.getElementById('pj_jk_P').checked = true;
+                                    }
+
+                                    // 3. Populate other identity fields
+                                    document.getElementById('field-pj-ktp').value = consent.no_ktppj || '';
+                                    document.getElementById('field-pj-pendidikan').value = consent.pendidikan_pj || '';
+                                    
+                                    // 4. Map and populate hubungan
+                                    let mappedHubungan = '';
+                                    if (consent.hubungan === 'Diri Saya') {
+                                        mappedHubungan = 'Diri Sendiri';
+                                    } else if (consent.hubungan === 'Suami') {
+                                        mappedHubungan = 'Suami';
+                                    } else if (consent.hubungan === 'Istri') {
+                                        mappedHubungan = 'Istri';
+                                    } else if (consent.hubungan === 'Anak') {
+                                        mappedHubungan = 'Anak';
+                                    } else if (consent.hubungan === 'Ayah' || consent.hubungan === 'Ibu') {
+                                        mappedHubungan = 'Orang Tua';
+                                    } else {
+                                        mappedHubungan = consent.hubungan || '';
+                                    }
+                                    
+                                    const hubunganSelect = document.getElementById('field-pj-hubungan');
+                                    if (hubunganSelect) {
+                                        const options = Array.from(hubunganSelect.options).map(opt => opt.value);
+                                        if (options.includes(mappedHubungan)) {
+                                            hubunganSelect.value = mappedHubungan;
+                                        } else {
+                                            hubunganSelect.value = 'Wali / Kurator';
+                                        }
+                                    }
+
+                                    // 5. Parse and populate pj_telp & prefix
+                                    let phoneVal = consent.no_telppj || '';
+                                    let prefixVal = '+62';
+                                    if (phoneVal.startsWith('62')) {
+                                        prefixVal = '+62';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('60')) {
+                                        prefixVal = '+60';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('65')) {
+                                        prefixVal = '+65';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('+')) {
+                                        let prefixMatch = phoneVal.match(/^\+(\d{1,4})/);
+                                        if (prefixMatch) {
+                                            prefixVal = '+' + prefixMatch[1];
+                                            phoneVal = phoneVal.substring(prefixVal.length);
+                                        }
+                                    } else if (phoneVal.startsWith('0')) {
+                                        phoneVal = phoneVal.substring(1);
+                                        prefixVal = '+62';
+                                    }
+
+                                    const prefixSelectEl = document.getElementById('field-pj-telp-prefix-select');
+                                    const prefixSelectContainerEl = document.getElementById('telp-prefix-select-container');
+                                    const prefixCustomContainerEl = document.getElementById('telp-prefix-custom-container');
+                                    const prefixInputEl = document.getElementById('field-pj-telp-prefix');
+                                    
+                                    if (prefixInputEl) {
+                                        prefixInputEl.value = prefixVal;
+                                    }
+                                    document.getElementById('field-pj-telp').value = phoneVal;
+
+                                    if (prefixSelectEl) {
+                                        const options = Array.from(prefixSelectEl.options).map(opt => opt.value);
+                                        if (options.includes(prefixVal)) {
+                                            prefixSelectEl.value = prefixVal;
+                                            prefixSelectContainerEl.style.display = 'flex';
+                                            prefixCustomContainerEl.style.display = 'none';
+                                        } else {
+                                            prefixSelectEl.value = 'custom';
+                                            prefixSelectContainerEl.style.display = 'none';
+                                            prefixCustomContainerEl.style.display = 'flex';
+                                        }
+                                    }
+
+                                    // 6. Populate pj_alamat
+                                    document.getElementById('field-pj-alamat').value = consent.alamatpj || '';
+                                    if (activePatientFullAddress && consent.alamatpj === activePatientFullAddress) {
+                                        document.getElementById('copy-alamat-pasien').checked = true;
+                                    }
+
+                                    // 7. Populate keluarga terdekat
+                                    document.getElementById('field-pj-keluarga-terdekat').value = consent.nama_alamat_keluarga_terdekat || '';
+
+                                    // 8. Map and populate hak_kelas
+                                    let mappedHakKelas = '';
+                                    if (consent.hak_kelas === 'Kelas 1') {
+                                        mappedHakKelas = 'Kelas I';
+                                    } else if (consent.hak_kelas === 'Kelas 2') {
+                                        mappedHakKelas = 'Kelas II';
+                                    } else if (consent.hak_kelas === 'Kelas 3') {
+                                        mappedHakKelas = 'Kelas III';
+                                    }
+                                    if (mappedHakKelas) {
+                                        const radioEl = document.querySelector(`input[name="hak_kelas"][value="${mappedHakKelas}"]`);
+                                        if (radioEl) radioEl.checked = true;
+                                    }
+
+                                    // 9. Map and populate kd_kamar select (via Select2)
+                                    const kdKamarSelect = $('#kd_kamar');
+                                    if (kdKamarSelect.length && consent.ruang) {
+                                        kdKamarSelect.val(consent.ruang).trigger('change');
+                                    }
+
+                                    // 10. Map and populate pj_biaya & nama_asuransi
+                                    const bayarSecara = consent.bayar_secara || '';
+                                    const asuransiInput = document.getElementById('nama_asuransi');
+                                    if (bayarSecara === 'Bayar Sendiri') {
+                                        document.getElementById('biaya_mandiri').checked = true;
+                                        if (asuransiInput) {
+                                            asuransiInput.removeAttribute('required');
+                                            asuransiInput.value = '';
+                                        }
+                                    } else if (bayarSecara === 'JKN') {
+                                        document.getElementById('biaya_jkn').checked = true;
+                                        if (asuransiInput) {
+                                            asuransiInput.removeAttribute('required');
+                                            asuransiInput.value = '';
+                                        }
+                                    } else {
+                                        document.getElementById('biaya_asuransi').checked = true;
+                                        if (asuransiInput) {
+                                            asuransiInput.setAttribute('required', 'required');
+                                            asuransiInput.value = bayarSecara;
+                                        }
+                                    }
+
+                                    // 11. Populate signature preview and hidden field
+                                    const signaturePreview = document.getElementById('signature-preview');
+                                    const signaturePlaceholder = document.getElementById('signature-placeholder');
+                                    const btnOpenSignature = document.getElementById('btn-open-signature');
+                                    const inputSignature = document.getElementById('input-signature');
+
+                                    if (reg.signature_pasien && reg.signature_pasien.signature_path && signaturePreview && signaturePlaceholder) {
+                                        const signatureUrl = '/storage/' + reg.signature_pasien.signature_path;
+                                        signaturePreview.src = signatureUrl;
+                                        signaturePreview.style.display = 'block';
+                                        signaturePlaceholder.style.display = 'none';
+                                        if (btnOpenSignature) {
+                                            btnOpenSignature.style.borderStyle = 'solid';
+                                            btnOpenSignature.style.borderColor = 'var(--primary)';
+                                        }
+                                        if (inputSignature) {
+                                            inputSignature.value = signatureUrl;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>
