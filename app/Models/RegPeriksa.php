@@ -26,4 +26,9 @@ class RegPeriksa extends Model
     {
         return $this->hasOne(SignaturePasien::class, 'no_rawat', 'no_rawat');
     }
+
+    public function suratPersetujuanRawatInap()
+    {
+        return $this->hasOne(SuratPersetujuanRawatInap::class, 'no_rawat', 'no_rawat');
+    }
 }

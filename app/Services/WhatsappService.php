@@ -19,16 +19,29 @@ class WhatsappService
     {
         $target = $this->formatNumber($noTelp);
         $message = $customMessage ?: $this->getDefaultMessage($signedUrl);
+        return $this->sendMessage($target, $message);
+    }
+
+    /**
+     * Send plain text message via WhatsApp gateway.
+     *
+     * @param string $noTelp
+     * @param string $message
+     * @return bool
+     */
+    public function sendMessage(string $noTelp, string $message): bool
+    {
+        $target = $this->formatNumber($noTelp);
 
         // Check if custom WA gateway is configured
         $waUrl = env('WA_URL');
         $deviceId = env('WA_DEVICE_ID');
-        // dd($waUrl);
+
         try {
             if ($waUrl && $deviceId) {
-                // Use custom gateway with multiple common headers for compatibility
+                // Use custom gateway
                 $response = Http::timeout(10)
-                    ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!') // 🔥 INI YANG KURANG
+                    ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!')
                     ->withHeaders([
                         'X-Device-Id' => $deviceId,
                     ])
@@ -60,7 +73,7 @@ class WhatsappService
             ]);
             return false;
         } catch (\Exception $e) {
-            Log::error('WhatsappService Error: ' . $e->getMessage());
+            Log::error('WhatsappService sendMessage Error: ' . $e->getMessage());
             return false;
         }
     }
@@ -83,19 +96,50 @@ class WhatsappService
         $deviceId = env('WA_DEVICE_ID');
 
         try {
-            // Ensure file exists
-            if (!Storage::exists($relativeStoragePath)) {
-                Log::error("WhatsappService: File not found at {$relativeStoragePath}");
-                return false;
-            }
+            $fileContent = null;
+            $fileName = '';
 
-            $absolutePath = Storage::path($relativeStoragePath);
-            $fileContent = Storage::get($relativeStoragePath);
-            $fileName = basename($absolutePath);
+            // Check if it's a URL or a local path
+            if (str_starts_with($relativeStoragePath, 'http')) {
+                $fileName = basename(parse_url($relativeStoragePath, PHP_URL_PATH));
+                
+                // It's a URL, download content with a shorter timeout
+                try {
+                    $response = Http::timeout(10)->get($relativeStoragePath);
+                    if ($response->successful()) {
+                        $fileContent = $response->body();
+                    } else {
+                        Log::warning("WhatsappService: HTTP GET failed with status {$response->status()} for URL: {$relativeStoragePath}");
+                    }
+                } catch (\Exception $urlEx) {
+                    Log::warning("WhatsappService: Failed to download from URL due to exception: " . $urlEx->getMessage());
+                }
+
+                // Fallback: If URL download failed, try local file backup
+                if (empty($fileContent)) {
+                    $localPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload\\" . $fileName;
+                    if (file_exists($localPath)) {
+                        $fileContent = file_get_contents($localPath);
+                        Log::info("WhatsappService: Successfully fell back to local file path: {$localPath}");
+                    } else {
+                        Log::error("WhatsappService: Failed to download file from URL and local fallback not found at {$localPath}");
+                        return false;
+                    }
+                }
+            } else {
+                // It's a local storage path
+                if (!Storage::exists($relativeStoragePath)) {
+                    Log::error("WhatsappService: File not found at {$relativeStoragePath}");
+                    return false;
+                }
+                $absolutePath = Storage::path($relativeStoragePath);
+                $fileContent = Storage::get($relativeStoragePath);
+                $fileName = basename($absolutePath);
+            }
 
             if ($waUrl && $deviceId) {
                 // Use custom gateway - Assuming /send/file endpoint
-                $response = Http::timeout(20)
+                $response = Http::timeout(30)
                     ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!')
                     ->withHeaders([
                         'X-Device-Id' => $deviceId,
@@ -104,7 +148,7 @@ class WhatsappService
                     ->post($waUrl . '/send/file', [
                         'phone'   => $target,
                         'message' => $message,
-                        'caption' => $message, // Added caption for broader gateway compatibility
+                        'caption' => $message,
                     ]);
             } else {
                 // Fallback to Fonnte

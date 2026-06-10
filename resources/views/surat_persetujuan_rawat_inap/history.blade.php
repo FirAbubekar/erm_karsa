@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Karsa ERM | Riwayat General Consent</title>
+    <title>Karsa ERM | Riwayat Surat Persetujuan Rawat Inap</title>
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +45,7 @@
             min-height: 100vh;
         }
 
-        /* ─── Sidebar Styles ─── */
+        /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
             background: white;
@@ -88,6 +88,7 @@
         .nav-section {
             padding: 24px 16px;
             flex-grow: 1;
+            overflow-y: auto;
         }
 
         .nav-label {
@@ -124,41 +125,15 @@
             color: var(--primary);
         }
 
-        .nav-item svg { width: 20px; height: 20px; }
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+        }
 
         .sidebar-footer {
             padding: 16px;
             border-top: 1px solid var(--border);
             margin-top: auto;
-        }
-
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px;
-            width: 100%;
-            background: #FEF2F2;
-            color: #EF4444;
-            border: 1px solid #FEE2E2;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-logout:hover {
-            background: #FEE2E2;
-            border-color: #FECACA;
-            transform: translateY(-1px);
-        }
-
-        .btn-logout svg {
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
         }
 
         .mobile-header {
@@ -179,11 +154,37 @@
         .sidebar-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 45;
         }
-        .sidebar-overlay.active { display: block; }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 64px;
+            }
+        }
 
         /* ─── Main Content ─── */
         .main-content {
@@ -269,36 +270,6 @@
 
         .hero-breadcrumb .current {
             color: rgba(255,255,255,0.7);
-            font-weight: 600;
-        }
-
-        .user-chip {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px 8px 8px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-        }
-
-        .user-chip .avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent), var(--primary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 12px;
-            color: white;
-        }
-
-        .user-chip span {
-            color: rgba(255,255,255,0.85);
-            font-size: 13px;
             font-weight: 600;
         }
 
@@ -568,10 +539,6 @@
             background: white;
         }
 
-        .filter-input::placeholder {
-            color: #CBD5E1;
-        }
-
         .filter-actions {
             display: flex;
             gap: 12px;
@@ -647,10 +614,6 @@
             box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
         }
 
-        .btn-create:active {
-            transform: translateY(0);
-        }
-
         .btn-create svg {
             width: 18px;
             height: 18px;
@@ -717,8 +680,6 @@
             border-bottom: 1px solid var(--border);
             text-align: left;
             white-space: nowrap;
-            position: sticky;
-            top: 0;
         }
 
         .data-table thead th:last-child {
@@ -728,10 +689,6 @@
         .data-table tbody tr {
             transition: all 0.15s ease;
             border-bottom: 1px solid #F1F5F9;
-        }
-
-        .data-table tbody tr:last-child {
-            border-bottom: none;
         }
 
         .data-table tbody tr:hover {
@@ -745,7 +702,7 @@
             vertical-align: middle;
         }
 
-        /* No. Surat Badge */
+        /* Badges */
         .surat-badge {
             display: inline-flex;
             align-items: center;
@@ -758,11 +715,26 @@
             font-weight: 600;
             color: var(--accent);
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            letter-spacing: -0.3px;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        }
+
+        .badge-success {
+            background: #ECFDF5;
+            color: #10B981;
+            border: 1px solid #A7F3D0;
+        }
+
+        .badge-secondary {
+            background: #F1F5F9;
+            color: #64748B;
+            border: 1px solid #E2E8F0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border-radius: 6px;
+            font-weight: 700;
         }
 
         /* Patient Info Cell */
@@ -797,8 +769,6 @@
             color: var(--text-main);
             font-size: 13px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .patient-rm {
@@ -839,6 +809,7 @@
 
         .hub-badge.suami { background: #DBEAFE; color: #1E40AF; }
         .hub-badge.istri { background: #FCE7F3; color: #9D174D; }
+        .hub-badge.diri { background: #ECFDF5; color: #065F46; }
         .hub-badge.default { background: #F1F5F9; color: #475569; }
 
         /* Action Buttons */
@@ -878,12 +849,12 @@
 
         .btn-edit {
             background: rgba(59, 130, 246, 0.08);
-            color: var(--accent-blue);
+            color: var(--info);
             border: 1px solid rgba(59, 130, 246, 0.15);
         }
 
         .btn-edit:hover {
-            background: var(--accent-blue);
+            background: var(--info);
             color: white;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
@@ -903,21 +874,16 @@
         }
 
         .btn-wa {
-            background: rgba(37, 211, 102, 0.08);
-            color: #25D366;
-            border: 1px solid rgba(37, 211, 102, 0.15);
+            background: rgba(59, 130, 246, 0.08);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.15);
         }
 
         .btn-wa:hover {
-            background: #25D366;
+            background: var(--info);
             color: white;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-        }
-
-        .btn-action svg {
-            width: 14px;
-            height: 14px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
         }
 
         /* Empty State */
@@ -948,7 +914,6 @@
             font-weight: 700;
             color: var(--text-main);
             margin-bottom: 6px;
-            letter-spacing: -0.2px;
         }
 
         .empty-state p {
@@ -1031,11 +996,6 @@
             color: var(--accent);
         }
 
-        .pagination-wrapper nav svg {
-            width: 16px;
-            height: 16px;
-        }
-
         /* ─── Modal ─── */
         .modal-overlay {
             position: fixed;
@@ -1056,7 +1016,7 @@
         .modal-panel {
             background: white;
             width: 100%;
-            max-width: 640px;
+            max-width: 720px;
             max-height: 90vh;
             border-radius: 24px;
             overflow: hidden;
@@ -1110,11 +1070,6 @@
             color: white;
         }
 
-        .modal-close svg {
-            width: 18px;
-            height: 18px;
-        }
-
         .modal-body {
             padding: 28px;
             overflow-y: auto;
@@ -1131,6 +1086,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-top: 12px;
         }
 
         .modal-section-title::after {
@@ -1143,8 +1099,8 @@
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 28px;
+            gap: 16px 24px;
+            margin-bottom: 24px;
         }
 
         .info-item label {
@@ -1182,7 +1138,7 @@
             background: #FAFBFC;
             border: 2px dashed var(--border);
             border-radius: 16px;
-            padding: 24px;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1196,7 +1152,7 @@
         }
 
         .sig-box img {
-            max-height: 100px;
+            max-height: 120px;
             max-width: 100%;
             object-fit: contain;
         }
@@ -1207,213 +1163,156 @@
             align-items: center;
             gap: 8px;
             color: var(--text-muted);
+            font-size: 13px;
         }
 
         .sig-placeholder svg {
             width: 28px;
             height: 28px;
-            opacity: 0.3;
-        }
-
-        .sig-placeholder span {
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .modal-footer {
-            padding: 16px 28px;
-            background: #FAFBFC;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: flex-end;
+            opacity: 0.5;
         }
 
         .btn-close-modal {
-            padding: 10px 28px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: white;
+            padding: 10px 20px;
+            background: #F1F5F9;
+            color: var(--text-main);
             border: none;
             border-radius: 12px;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
 
         .btn-close-modal:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+            background: #E2E8F0;
         }
 
-        /* ─── Animations ─── */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-in {
-            animation: fadeInUp 0.4s ease-out both;
-        }
-
-        .animate-delay-1 { animation-delay: 0.05s; }
-        .animate-delay-2 { animation-delay: 0.1s; }
-        .animate-delay-3 { animation-delay: 0.15s; }
-
-        /* ─── Responsive ─── */
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; width: 100%; }
-            .mobile-header { display: flex; }
-            .page-hero { padding: 80px 20px 50px; }
-            .stats-row { grid-template-columns: 1fr; margin: -28px 20px 0; }
-            .content-area { padding: 24px 20px; }
-            .toolbar { flex-direction: column; gap: 12px; align-items: stretch; }
-            .search-box input { width: 100%; }
-        }
-
-        @media (max-width: 768px) {
-            .info-grid { grid-template-columns: 1fr; }
-            .stats-row { grid-template-columns: 1fr; }
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            background: #FAFBFC;
         }
     </style>
 </head>
 <body>
+
     @include('partials.sidebar')
 
-    <div class="main-content">
-        <!-- ─── Hero Header ─── -->
+    <main class="main-content">
+        <!-- Hero Header -->
         <div class="page-hero">
             <div class="hero-breadcrumb">
                 <a href="{{ route('dashboard') }}">Dashboard</a>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                <span class="current">Riwayat General Consent</span>
+                <span>/</span>
+                <span class="current">Riwayat Surat Persetujuan Rawat Inap</span>
             </div>
             <div class="hero-top">
                 <div class="hero-title">
-                    <h1>📋 Riwayat General Consent</h1>
-                    <p>Kelola data persetujuan umum pasien yang telah tersimpan.</p>
-                </div>
-                <div class="user-chip">
-                    <div class="avatar">{{ strtoupper(substr(Session::get('user_id', '?'), 0, 1)) }}</div>
-                    <span>{{ Session::get('user_id') }}</span>
+                    <h1>RM 02</h1>
+                    <p>Daftar Riwayat Surat Persetujuan & Penolakan Rawat Inap Pasien</p>
                 </div>
             </div>
         </div>
 
-        <!-- ─── Stats Cards ─── -->
-        <div class="stats-row">
-            <div class="stat-card animate-in animate-delay-1">
+        <!-- Stats Row -->
+        <div class="stats-row animate-in">
+            <div class="stat-card">
                 <div class="stat-icon green">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ number_format($stats['total']) }}</span>
-                    <span class="stat-label">Total Persetujuan</span>
+                    <span class="stat-value">{{ $stats['total'] }}</span>
+                    <span class="stat-label">Total Dokumen</span>
                 </div>
             </div>
-            <div class="stat-card animate-in animate-delay-2">
+            <div class="stat-card">
                 <div class="stat-icon blue">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ number_format($stats['today']) }}</span>
+                    <span class="stat-value">{{ $stats['today'] }}</span>
                     <span class="stat-label">Hari Ini</span>
                 </div>
             </div>
-            <div class="stat-card animate-in animate-delay-3">
+            <div class="stat-card">
                 <div class="stat-icon purple">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value">{{ number_format($stats['month']) }}</span>
-                    <span class="stat-label">Bulan Ini</span>
+                    <span class="stat-value">{{ $stats['month'] }}</span>
+                    <span class="stat-label font-semibold">Bulan Ini</span>
                 </div>
             </div>
         </div>
 
-        <!-- ─── Content Area ─── -->
+        <!-- Content Area -->
         <div class="content-area">
-            @if(session('error'))
-                <div class="animate-in" style="background: #FFF1F2; color: #E11D48; padding: 14px 20px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #FFE4E6; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    {{ session('error') }}
+            
+            <!-- Toolbar -->
+            <div class="toolbar animate-in">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" id="tableSearch" onkeyup="filterTable(this.value)" placeholder="Cari cepat di tabel ini...">
+                    </div>
                 </div>
-            @endif
+                <a href="{{ route('surat-persetujuan-rawat-inap.index') }}" class="btn-create">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Buat Baru
+                </a>
+            </div>
 
-            <!-- Pencarian Lanjutan -->
+            <!-- Advanced Filter Card -->
             <div class="filter-card animate-in">
                 <div class="filter-header">
                     <div class="filter-header-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                     </div>
                     <div class="filter-header-text">
                         <div class="filter-title">
-                            Pencarian Lanjutan
-                            @php 
-                                $isDefaultToday = !request('search') && !request('no_rawat') && !request('person') && 
-                                                 request('start_date') === now()->toDateString() && 
-                                                 request('end_date') === now()->toDateString();
-                                $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); 
-                            @endphp
-                            @if($isDefaultToday)
-                                <span class="filter-badge today">Default: Hari Ini</span>
-                            @elseif($activeFilters > 0)
+                            Pencarian & Penyaringan Lanjutan
+                            @if($activeFilters > 0)
                                 <span class="filter-badge active">{{ $activeFilters }} Filter Aktif</span>
-                            @endif
-                        </div>
-                        <div style="font-size: 12px; color: #94A3B8; margin-top: 1px;">
-                            @if($isDefaultToday)
-                                Menampilkan data hari ini. Isi form di bawah untuk mencari data lainnya.
                             @else
-                                Menampilkan hasil pencarian dengan filter yang diterapkan.
+                                <span class="filter-badge today">Hari Ini</span>
                             @endif
                         </div>
                     </div>
                 </div>
                 
-                <form action="{{ route('general-consent.index') }}" method="GET">
+                <form action="{{ route('surat-persetujuan-rawat-inap.history') }}" method="GET">
                     <div class="filter-body">
                         <div class="filter-form">
+                            <!-- Search -->
                             <div class="filter-group">
-                                <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                    Identitas Pasien
-                                </label>
+                                <label>Pencarian</label>
                                 <div class="filter-input-wrapper">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <input type="text" name="search" value="{{ request('search') }}" class="filter-input" placeholder="Nama, No.RM, atau No.Surat">
+                                    <input type="text" name="search" value="{{ request('search') }}" class="filter-input" placeholder="Nama Pasien / No. RM / No. Surat">
                                 </div>
                             </div>
-
+                            <!-- No Rawat -->
                             <div class="filter-group">
-                                <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                    Registrasi (No. Rawat)
-                                </label>
+                                <label>No. Rawat</label>
                                 <div class="filter-input-wrapper">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.53 0 1.04.21 1.41.59L17 7l-3.59 3.59A2 2 0 0112 11H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
-                                    <input type="text" name="no_rawat" value="{{ request('no_rawat') }}" class="filter-input" placeholder="Format: YYYY/MM/DD/xxxxxx">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <input type="text" name="no_rawat" value="{{ request('no_rawat') }}" class="filter-input" placeholder="Contoh: 2026/05/21/000001">
                                 </div>
                             </div>
-
+                            <!-- Penanggung Jawab -->
                             <div class="filter-group">
-                                <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                    Penanggung Jawab / Staf
-                                </label>
+                                <label>Penanggung Jawab / Petugas</label>
                                 <div class="filter-input-wrapper">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                    <input type="text" name="person" value="{{ request('person') }}" class="filter-input" placeholder="Cari nama PJ atau Petugas">
+                                    <input type="text" name="person" value="{{ request('person') }}" class="filter-input" placeholder="Nama PJ / Nama Petugas">
                                 </div>
                             </div>
-
+                            <!-- Tanggal Range -->
                             <div class="filter-group">
-                                <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
-                                    Periode Pemeriksaan
-                                </label>
+                                <label>Periode Tanggal</label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <div class="filter-input-wrapper" style="flex: 1;">
                                         <input type="date" name="start_date" value="{{ request('start_date') }}" class="filter-input" style="padding-left: 14px;">
@@ -1429,7 +1328,7 @@
 
                     <div class="filter-actions">
                         @if($activeFilters > 0)
-                            <a href="{{ route('general-consent.index') }}" class="btn-filter-reset">
+                            <a href="{{ route('surat-persetujuan-rawat-inap.history') }}" class="btn-filter-reset">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Reset Pencarian
                             </a>
@@ -1442,10 +1341,8 @@
                 </form>
             </div>
 
-
             <!-- Tabel Data -->
             <div class="table-card animate-in">
-                <!-- Table Header Bar -->
                 <div class="table-top-bar">
                     <div class="table-top-bar-left">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -1454,14 +1351,14 @@
                     </div>
                 </div>
                 <div class="table-wrapper">
-                    <table class="data-table" id="consentTable">
+                    <table class="data-table" id="historyTable">
                         <thead>
                             <tr>
                                 <th>No. Surat</th>
                                 <th>Informasi Pasien</th>
-                                <th>Tgl. Periksa</th>
+                                <th>Tanggal</th>
                                 <th>Penanggung Jawab</th>
-                                <th>Hubungan</th>
+                                <th>Ruang & Kelas</th>
                                 <th style="text-align: center;">Aksi</th>
                             </tr>
                         </thead>
@@ -1477,7 +1374,7 @@
                                         @if($consent->regPeriksa->signaturePasien)
                                             <span class="badge badge-success" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
                                                 <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                                                Tanda Tangan Lengkap
+                                                Tanda Tangan Ada
                                             </span>
                                         @else
                                             <span class="badge badge-secondary" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
@@ -1504,16 +1401,29 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span style="font-weight: 600; color: var(--text-secondary);">{{ $consent->nama_pj }}</span>
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        @php
+                                            $pjNamaDisplay = $consent->nama_pj;
+                                            if (preg_match('/^([^\(]+)\((\d+)\)\(([LP])\)$/i', $pjNamaDisplay, $matches)) {
+                                                $pjNamaDisplay = trim($matches[1]);
+                                            }
+                                        @endphp
+                                        <span style="font-weight: 700; color: var(--text-secondary);">{{ $pjNamaDisplay }}</span>
+                                        @php
+                                            $hub = strtolower($consent->hubungan);
+                                            $hubClass = 'default';
+                                            if (str_contains($hub, 'suami')) $hubClass = 'suami';
+                                            elseif (str_contains($hub, 'istri')) $hubClass = 'istri';
+                                            elseif (str_contains($hub, 'diri') || str_contains($hub, 'saya')) $hubClass = 'diri';
+                                        @endphp
+                                        <span class="hub-badge {{ $hubClass }}" style="width: fit-content; font-size: 10px; padding: 2px 8px;">{{ $consent->hubungan }}</span>
+                                    </div>
                                 </td>
                                 <td>
-                                    @php
-                                        $hub = strtolower($consent->bertindak_atas);
-                                        $hubClass = 'default';
-                                        if (str_contains($hub, 'suami')) $hubClass = 'suami';
-                                        elseif (str_contains($hub, 'istri')) $hubClass = 'istri';
-                                    @endphp
-                                    <span class="hub-badge {{ $hubClass }}">{{ $consent->bertindak_atas }}</span>
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <span style="font-weight: 600; color: var(--text-main); font-size: 13px;">{{ $consent->nm_bangsal ?? $consent->ruang ?? '-' }}</span>
+                                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">{{ $consent->kelas_kamar ?? $consent->kelas ?? '-' }}</span>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="action-group">
@@ -1521,15 +1431,23 @@
                                             class="btn-action btn-detail"
                                             onclick="openDetailModal({{ json_encode([
                                                 'no_surat' => $consent->no_surat,
+                                                'no_rawat' => $consent->no_rawat,
                                                 'nm_pasien' => $consent->regPeriksa->pasien->nm_pasien ?? 'Unknown',
                                                 'no_rm' => $consent->regPeriksa->no_rkm_medis ?? '-',
                                                 'tgl_periksa' => $consent->tanggal,
-                                                'nama_pj' => $consent->nama_pj,
-                                                'hubungan' => $consent->bertindak_atas,
+                                                'nama_pj' => $pjNamaDisplay,
+                                                'hubungan' => $consent->hubungan,
                                                 'ktp_pj' => $consent->no_ktppj,
-                                                'telp_pj' => $consent->no_telp,
-                                                'kepercayaan' => $consent->nilai_kepercayaan,
-                                                'signature' => $consent->signatures_path ? asset('storage/' . $consent->signatures_path) : null
+                                                'telp_pj' => $consent->no_telppj,
+                                                'alamat_pj' => $consent->alamatpj,
+                                                'pendidikan_pj' => $consent->pendidikan_pj,
+                                                'hak_kelas' => $consent->hak_kelas,
+                                                'ruang_diinginkan' => $consent->nm_bangsal ?? $consent->ruang,
+                                                'kelas' => $consent->kelas_kamar ?? $consent->kelas,
+                                                'bayar_secara' => $consent->bayar_secara,
+                                                'nama_alamat_keluarga_terdekat' => $consent->nama_alamat_keluarga_terdekat,
+                                                'petugas' => ($consent->pegawai->nama ?? '-') . ' (' . ($consent->nip ?? '-') . ')',
+                                                'signature' => $consent->regPeriksa->signaturePasien ? asset('storage/' . $consent->regPeriksa->signaturePasien->signature_path) : null
                                             ]) }})"
                                         >
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1537,23 +1455,26 @@
                                         </button>
                                         <a
                                             class="btn-action btn-edit"
-                                            href="{{ route('general-consent') }}?no_rm={{ $consent->regPeriksa->no_rkm_medis }}&no_rawat={{ urlencode($consent->no_rawat) }}&edit=true"
+                                            href="{{ route('surat-persetujuan-rawat-inap.index') }}?no_rm={{ $consent->regPeriksa->no_rkm_medis }}&no_rawat={{ urlencode($consent->no_rawat) }}&edit=true"
+                                            title="Edit Surat Persetujuan"
                                         >
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                             Edit
                                         </a>
                                         <button
                                             class="btn-action btn-pdf"
-                                            onclick="downloadPDF('{{ route('general-consent.download', $consent->no_surat) }}')"
+                                            onclick="downloadPDF('{{ route('surat-persetujuan-rawat-inap.download', $consent->no_surat) }}')"
+                                            title="Unduh PDF"
                                         >
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                             PDF
                                         </button>
                                         <button
                                             class="btn-action btn-wa"
                                             onclick="sendWA('{{ $consent->no_surat }}', this, event)"
+                                            title="Kirim WhatsApp"
                                         >
-                                            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                            <svg fill="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                                             WA
                                         </button>
                                     </div>
@@ -1568,15 +1489,15 @@
                                         </div>
                                         @if($isDefaultToday)
                                             <h3>Belum Ada Dokumen Hari Ini</h3>
-                                            <p>Tidak ada general consent yang dibuat pada {{ now()->format('d M Y') }}. Gunakan Pencarian Lanjutan di atas untuk mencari data dari tanggal lain.</p>
-                                            <a href="{{ route('general-consent.index') }}?start_date=&end_date=" class="empty-action">
+                                            <p>Tidak ada surat persetujuan rawat inap yang dibuat pada {{ now()->format('d M Y') }}. Gunakan Pencarian Lanjutan di atas untuk mencari data dari tanggal lain.</p>
+                                            <a href="{{ route('surat-persetujuan-rawat-inap.history') }}?start_date=&end_date=" class="empty-action">
                                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                                 Lihat Semua Riwayat
                                             </a>
                                         @else
                                             <h3>Tidak Ada Hasil Ditemukan</h3>
                                             <p>Tidak ada dokumen yang cocok dengan filter pencarian Anda. Coba ubah atau reset filter di atas.</p>
-                                            <a href="{{ route('general-consent.index') }}" class="empty-action">
+                                            <a href="{{ route('surat-persetujuan-rawat-inap.history') }}" class="empty-action">
                                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                 Reset Pencarian
                                             </a>
@@ -1591,22 +1512,22 @@
             </div>
 
             <!-- Pagination -->
-            <div class="pagination-wrapper">
+            <div class="pagination-wrapper animate-in">
                 {{ $consents->links() }}
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- ─── Detail Modal ─── -->
+    <!-- Detail Modal -->
     <div class="modal-overlay" id="detailModal">
-        <div class="modal-panel">
+        <div class="modal-panel animate-in">
             <div class="modal-top">
                 <div>
-                    <h3>Detail General Consent</h3>
-                    <p>Informasi lengkap persetujuan pasien</p>
+                    <h3>Detail Surat Persetujuan Rawat Inap</h3>
+                    <p>Informasi lengkap dokumen persetujuan pasien</p>
                 </div>
                 <button class="modal-close" onclick="closeDetailModal()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
@@ -1619,8 +1540,8 @@
                         <span id="modalNoSurat" class="info-value mono">-</span>
                     </div>
                     <div class="info-item">
-                        <label>Tgl. Periksa</label>
-                        <span id="modalTglPeriksa" class="info-value">-</span>
+                        <label>No. Rawat</label>
+                        <span id="modalNoRawat" class="info-value">-</span>
                     </div>
                     <div class="info-item">
                         <label>Nama Pasien</label>
@@ -1630,78 +1551,110 @@
                         <label>No. Rekam Medis</label>
                         <span id="modalNoRM" class="info-value">-</span>
                     </div>
+                    <div class="info-item">
+                        <label>Tanggal Dokumen</label>
+                        <span id="modalTglPeriksa" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Petugas Entry</label>
+                        <span id="modalPetugas" class="info-value">-</span>
+                    </div>
                 </div>
 
                 <!-- Penanggung Jawab -->
-                <div class="modal-section-title">Penanggung Jawab</div>
+                <div class="modal-section-title">Penanggung Jawab (Pihak Pertama)</div>
                 <div class="info-grid">
                     <div class="info-item">
                         <label>Nama Lengkap</label>
                         <span id="modalNamaPJ" class="info-value">-</span>
                     </div>
                     <div class="info-item">
-                        <label>Hubungan</label>
+                        <label>NIK / KTP Penanggung Jawab</label>
+                        <span id="modalKTPPJ" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Hubungan dengan Pasien</label>
                         <span id="modalHubungan" class="info-value">-</span>
                     </div>
                     <div class="info-item">
-                        <label>No. Telepon</label>
+                        <label>Pendidikan</label>
+                        <span id="modalPendidikanPJ" class="info-value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>No. Telepon / HP</label>
                         <span id="modalTelpPJ" class="info-value">-</span>
                     </div>
-                    <div class="info-item" style="display:none;">
-                        <label>No. KTP / NIK</label>
-                        <span id="modalKTPPJ" class="info-value">-</span>
+                    <div class="info-item">
+                        <label>Penanggung Jawab Biaya</label>
+                        <span id="modalBayarSecara" class="info-value">-</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>Alamat Lengkap PJ</label>
+                        <span id="modalAlamatPJ" class="info-value">-</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>Keluarga Terdekat (Darurat)</label>
+                        <span id="modalKeluargaTerdekat" class="info-value">-</span>
                     </div>
                 </div>
 
-                <!-- Pelepasan Informasi -->
-                <div class="modal-section-title">Pelepasan Informasi (Pihak Berwenang)</div>
-                <div id="modalPelepasanContainer">
-                    <div id="modalPelepasanLoading" style="text-align:center; padding:16px; color:#64748B; font-size:13px;">
-                        <em>Memuat data...</em>
+                <!-- Hak & Kelas Perawatan -->
+                <div class="modal-section-title">Pilihan Kamar & Perawatan</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Hak Kelas Perawatan</label>
+                        <span id="modalHakKelas" class="info-value">-</span>
                     </div>
-                    <table id="modalPelepasanTable" style="width:100%; border-collapse:collapse; display:none;">
-                        <thead>
-                            <tr>
-                                <th style="text-align:left; padding:10px 14px; background:linear-gradient(to bottom,#FAFBFC,#F6F8FA); color:#64748B; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #E2E8F0;">No.</th>
-                                <th style="text-align:left; padding:10px 14px; background:linear-gradient(to bottom,#FAFBFC,#F6F8FA); color:#64748B; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #E2E8F0;">Nama</th>
-                                <th style="text-align:left; padding:10px 14px; background:linear-gradient(to bottom,#FAFBFC,#F6F8FA); color:#64748B; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #E2E8F0;">No. Telp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modalPelepasanBody"></tbody>
-                    </table>
-                    <div id="modalPelepasanEmpty" style="display:none; text-align:center; padding:20px; color:#94A3B8; font-size:13px;">
-                        <em>Tidak ada data pihak berwenang.</em>
+                    <div class="info-item">
+                        <label>Kamar/Ruang yang Diinginkan</label>
+                        <span id="modalKamarDiinginkan" class="info-value">-</span>
                     </div>
                 </div>
 
                 <!-- Signature -->
-                <div class="modal-section-title" style="margin-top:28px;">Tanda Tangan Digital</div>
+                <div class="modal-section-title">Tanda Tangan Penanggung Jawab</div>
                 <div class="sig-box">
                     <img id="modalSignature" src="" alt="Tanda Tangan" style="display:none;">
                     <div id="modalNoSignature" class="sig-placeholder">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        <span>Tanda tangan tidak tersedia</span>
+                        <span>Tanda tangan belum diunggah</span>
                     </div>
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <button class="btn-close-modal" onclick="closeDetailModal()">Tutup</button>
+            <div class="modal-footer" style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-action btn-pdf" id="modalBtnPdf" onclick="" style="padding: 10px 20px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Unduh PDF
+                </button>
+                <button class="btn-action btn-wa" id="modalBtnWa" onclick="" style="padding: 10px 20px;">
+                    <svg fill="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Kirim WA
+                </button>
+                <button class="btn-close-modal" onclick="closeDetailModal()" style="margin-left: auto;">Tutup</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ─── Detail Modal ───
+        // Open Detail Modal
         function openDetailModal(data) {
             document.getElementById('modalNoSurat').textContent = data.no_surat;
+            document.getElementById('modalNoRawat').textContent = data.no_rawat;
             document.getElementById('modalNamaPasien').textContent = data.nm_pasien;
             document.getElementById('modalNoRM').textContent = data.no_rm;
             document.getElementById('modalTglPeriksa').textContent = data.tgl_periksa;
             document.getElementById('modalNamaPJ').textContent = data.nama_pj;
-            document.getElementById('modalHubungan').textContent = data.hubungan;
             document.getElementById('modalKTPPJ').textContent = data.ktp_pj;
-            document.getElementById('modalTelpPJ').textContent = data.telp_pj;
+            document.getElementById('modalHubungan').textContent = data.hubungan;
+            document.getElementById('modalPendidikanPJ').textContent = data.pendidikan_pj || '-';
+            document.getElementById('modalTelpPJ').textContent = data.telp_pj ? '+' + data.telp_pj : '-';
+            document.getElementById('modalAlamatPJ').textContent = data.alamat_pj;
+            document.getElementById('modalBayarSecara').textContent = data.bayar_secara;
+            document.getElementById('modalKeluargaTerdekat').textContent = data.nama_alamat_keluarga_terdekat || '-';
+            document.getElementById('modalHakKelas').textContent = data.hak_kelas;
+            document.getElementById('modalKamarDiinginkan').textContent = data.ruang_diinginkan + ' (' + data.kelas + ')';
+            document.getElementById('modalPetugas').textContent = data.petugas;
 
             const sigImg = document.getElementById('modalSignature');
             const noSig = document.getElementById('modalNoSignature');
@@ -1715,69 +1668,37 @@
                 noSig.style.display = 'flex';
             }
 
-            // ─── Fetch Pelepasan Informasi ───
-            const tableEl = document.getElementById('modalPelepasanTable');
-            const bodyEl = document.getElementById('modalPelepasanBody');
-            const loadingEl = document.getElementById('modalPelepasanLoading');
-            const emptyEl = document.getElementById('modalPelepasanEmpty');
-
-            // Reset state
-            tableEl.style.display = 'none';
-            emptyEl.style.display = 'none';
-            loadingEl.style.display = 'block';
-            bodyEl.innerHTML = '';
-
-            if (data.no_surat) {
-                fetch(`/pelepasan-informasi/${data.no_surat}`)
-                    .then(res => res.json())
-                    .then(items => {
-                        loadingEl.style.display = 'none';
-                        if (items.length > 0) {
-                            items.forEach((item, idx) => {
-                                const tr = document.createElement('tr');
-                                tr.innerHTML = `
-                                    <td style="padding:10px 14px; border-bottom:1px solid #F1F5F9; font-size:13px; color:#64748B; font-weight:600;">${idx + 1}</td>
-                                    <td style="padding:10px 14px; border-bottom:1px solid #F1F5F9; font-size:13px; font-weight:600; color:#0F172A;">${item.nama}</td>
-                                    <td style="padding:10px 14px; border-bottom:1px solid #F1F5F9; font-size:13px; color:#334155;">${item.no_telp || '-'}</td>
-                                `;
-                                bodyEl.appendChild(tr);
-                            });
-                            tableEl.style.display = 'table';
-                        } else {
-                            emptyEl.style.display = 'block';
-                        }
-                    })
-                    .catch(() => {
-                        loadingEl.style.display = 'none';
-                        emptyEl.style.display = 'block';
-                    });
-            } else {
-                loadingEl.style.display = 'none';
-                emptyEl.style.display = 'block';
-            }
+            // Bind action buttons in the detail modal dynamically
+            document.getElementById('modalBtnPdf').onclick = function() {
+                downloadPDF('/surat-persetujuan-rawat-inap/download/' + encodeURIComponent(data.no_surat));
+            };
+            document.getElementById('modalBtnWa').onclick = function(e) {
+                sendWA(data.no_surat, this, e);
+            };
 
             document.getElementById('detailModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
+        // Close Detail Modal
         function closeDetailModal() {
             document.getElementById('detailModal').classList.remove('active');
             document.body.style.overflow = '';
         }
 
-        // Close on overlay click
-        document.getElementById('detailModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeDetailModal();
-        });
-
-        // Close on Escape key
+        // Close modal on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeDetailModal();
         });
 
-        // ─── Client-side table search ───
+        // Close modal on click overlay
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeDetailModal();
+        });
+
+        // Client-side quick filter
         function filterTable(query) {
-            const rows = document.querySelectorAll('#consentTable tbody .table-row');
+            const rows = document.querySelectorAll('#historyTable tbody .table-row');
             const q = query.toLowerCase().trim();
 
             rows.forEach(row => {
@@ -1785,6 +1706,7 @@
                 row.style.display = text.includes(q) ? '' : 'none';
             });
         }
+
         // ─── PDF Download with Geolocation ───
         function downloadPDF(baseUrl) {
             // Helper fungsion untuk buka tab
@@ -1817,6 +1739,7 @@
             }
         }
 
+        // ─── Kirim WhatsApp with Template Prompt ───
         async function sendWA(noSurat, btn, event) {
             if (event) event.preventDefault();
             console.log('sendWA triggered for:', noSurat);
@@ -1827,7 +1750,7 @@
             
             try {
                 // 1. Fetch template
-                const templateResponse = await fetch(`/general-consent/wa-template/${encodeURIComponent(noSurat)}`);
+                const templateResponse = await fetch(`/surat-persetujuan-rawat-inap/wa-template/${encodeURIComponent(noSurat)}`);
                 if (!templateResponse.ok) throw new Error('Gagal mengambil template');
                 const { template } = await templateResponse.json();
                 
@@ -1838,32 +1761,65 @@
                 btn.innerHTML = '<span style="font-size:10px;">Sending...</span>';
                 
                 // 3. Send POST
-                const response = await fetch(`/general-consent/send-wa/${encodeURIComponent(noSurat)}`, {
+                const response = await fetch(`/surat-persetujuan-rawat-inap/send-wa`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ no_surat: noSurat, message })
                 });
-                // const result = await response.json();
-                // const text = await response.text();
-               
-                console.log('sendWA triggered for:', response);
-                // if (response.ok) {
-                //     alert(result.message);
-                // } else {
-                //     alert(result.error || 'Gagal mengirim WhatsApp');
-                // }
+                
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showWaSuccessModal();
+                } else {
+                    alert(result.error || 'Gagal mengirim WhatsApp');
+                }
             } catch (err) {
-                // console.log(noSurat);
-                alert('Terjadi kesalahan jaringan' + err);
+                alert('Terjadi kesalahan jaringan: ' + err);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
             }
         }
+
+        // ─── Beautiful success notification modal handlers ───
+        function showWaSuccessModal() {
+            const modal = document.getElementById('wa-success-modal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWaSuccessModal() {
+            const modal = document.getElementById('wa-success-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
     </script>
+
+    <!-- Beautiful WhatsApp Success Notification Modal -->
+    <div id="wa-success-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; transition: all 0.3s ease;">
+        <div style="background: white; border-radius: 24px; padding: 32px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid rgba(16, 185, 129, 0.2);">
+                <svg style="width: 36px; height: 36px; color: #10B981;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin-bottom: 10px;">Antrean Terkirim!</h3>
+            <p style="font-size: 14px; color: #64748B; line-height: 1.6; margin-bottom: 24px;">Pesan WhatsApp beserta lampiran dokumen digital telah berhasil masuk ke antrean untuk dikirimkan ke nomor WhatsApp pasien.</p>
+            <button onclick="closeWaSuccessModal()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); outline: none;">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </body>
 </html>

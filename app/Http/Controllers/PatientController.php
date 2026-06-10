@@ -19,7 +19,12 @@ class PatientController extends Controller
         }
 
         // Get Patient Details
-        $pasien = Pasien::where('no_rkm_medis', $noRm)->first();
+        $pasien = Pasien::where('pasien.no_rkm_medis', $noRm)
+            ->leftJoin('kelurahan', 'pasien.kd_kel', '=', 'kelurahan.kd_kel')
+            ->leftJoin('kecamatan', 'pasien.kd_kec', '=', 'kecamatan.kd_kec')
+            ->leftJoin('kabupaten', 'pasien.kd_kab', '=', 'kabupaten.kd_kab')
+            ->select('pasien.*', 'kelurahan.nm_kel', 'kecamatan.nm_kec', 'kabupaten.nm_kab')
+            ->first();
 
         if (!$pasien) {
             return response()->json(['error' => 'Data pasien tidak ditemukan'], 404);
@@ -36,8 +41,8 @@ class PatientController extends Controller
                 ->get(['nama', 'no_telp']);
         }
 
-        // Get History of Registrations for this patient, including their General Consent status
-        $history = RegPeriksa::with('generalConsent')
+        // Get History of Registrations for this patient, including their General Consent and SPRI status
+        $history = RegPeriksa::with(['generalConsent', 'signaturePasien', 'suratPersetujuanRawatInap'])
             ->where('no_rkm_medis', $noRm)
             ->orderBy('tgl_registrasi', 'desc')
             ->limit(10)
