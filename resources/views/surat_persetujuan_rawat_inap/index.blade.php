@@ -554,7 +554,7 @@
                                     </div>
                                     <input type="text" class="form-control" name="pj_alamat" id="field-pj-alamat" placeholder="Masukkan alamat lengkap penanggung jawab..." required>
                                 </div>
-                                <div class="form-group full-width">
+                                <div class="form-group full-width" style="display: none;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                         <label style="margin-bottom: 0;">Nama & Alamat Keluarga Terdekat (Yang Dapat Dihubungi Dalam Keadaan Darurat)</label>
                                         <button type="button" id="copy-alamat-keluarga" style="background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
@@ -562,7 +562,7 @@
                                             Salin Alamat Pasien
                                         </button>
                                     </div>
-                                    <input type="text" class="form-control" name="nama_alamat_keluarga_terdekat" id="field-pj-keluarga-terdekat" placeholder="Contoh: Budi (Adik) - Jl. Merdeka No. 12 Batu" required>
+                                    <input type="text" class="form-control" name="nama_alamat_keluarga_terdekat" id="field-pj-keluarga-terdekat" value="-" required>
                                 </div>
                             </div>
 

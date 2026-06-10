@@ -45,24 +45,24 @@ class PdfService
         $internalPath = self::getInternalPath($consent);
         $filename = basename($internalPath);
 
-        // 1. Save to Internal Storage (Backup)
-        Storage::put($internalPath, $pdfOutput);
+        // 1. Save to Internal Storage (Backup) - Disabled
+        // Storage::put($internalPath, $pdfOutput);
 
         $safeFilename = str_replace('/', '_', $consent->no_surat) . '.pdf';
 
-        // 2. Save to External Path 1: D:\xampp\htdocs\file_erm\rm01
-        $extPath1 = "D:\\xampp\\htdocs\\file_erm\\rm01";
-        if (!File::isDirectory($extPath1)) {
-            File::makeDirectory($extPath1, 0755, true);
-        }
-        File::put($extPath1 . DIRECTORY_SEPARATOR . $safeFilename, $pdfOutput);
+        // 2. Save to External Path 1: D:\xampp\htdocs\file_erm\rm01 - Disabled
+        // $extPath1 = "D:\\xampp\\htdocs\\file_erm\\rm01";
+        // if (!File::isDirectory($extPath1)) {
+        //     File::makeDirectory($extPath1, 0755, true);
+        // }
+        // File::put($extPath1 . DIRECTORY_SEPARATOR . $safeFilename, $pdfOutput);
 
-        // 3. Save to External Path 2: D:\xampp\htdocs\webapps\berkasrawat\pages\upload
-        $extPath2 = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload";
-        if (!File::isDirectory($extPath2)) {
-            File::makeDirectory($extPath2, 0755, true);
-        }
-        File::put($extPath2 . DIRECTORY_SEPARATOR . $safeFilename, $pdfOutput);
+        // 3. Save to External Path 2: D:\xampp\htdocs\webapps\berkasrawat\pages\upload - Disabled
+        // $extPath2 = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload";
+        // if (!File::isDirectory($extPath2)) {
+        //     File::makeDirectory($extPath2, 0755, true);
+        // }
+        // File::put($extPath2 . DIRECTORY_SEPARATOR . $safeFilename, $pdfOutput);
 
         // 4. Send to Remote Server 192.168.30.24 using cURL
         $filenameOri = str_replace('/', '_', $consent->no_surat) . ".pdf";

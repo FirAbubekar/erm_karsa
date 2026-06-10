@@ -449,7 +449,6 @@
                         @else
                             <span class="solid-underline" style="display: inline-block; width: 25px; text-align: center;">-</span>&nbsp;-&nbsp;<span class="solid-underline" style="display: inline-block; width: 25px; text-align: center;">-</span>&nbsp;-&nbsp;<span class="solid-underline" style="display: inline-block; width: 45px; text-align: center;">-</span>
                         @endif
-                        &nbsp;/&nbsp;<span class="solid-underline" style="display: inline-block; width: 180px; text-align: left; padding-left: 5px;">{{ $ageYears }} Tahun / {{ $ageMonths }} Bulan</span>&nbsp;&nbsp;Tahun / Bulan
                     </td>
                 </tr>
                 <tr>
@@ -481,7 +480,7 @@
                     <td class="label">Kelas Perawatan yang diinginkan</td>
                     <td class="colon">:</td>
                     <td>
-                        Ruang <span class="solid-underline" style="display: inline-block; width: 260px; text-align: left; padding-left: 5px;">{{ $consent->ruang }} ({{ $consent->kelas }})</span>&nbsp;/ Utama / I / II *)
+                        Ruang <span class="solid-underline" style="display: inline-block; width: 260px; text-align: left; padding-left: 5px;">{{ $consent->ruang }} ({{ $consent->kelas }})</span>&nbsp;*)
                     </td>
                 </tr>
                 <tr>

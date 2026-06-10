@@ -321,13 +321,10 @@ class GeneralConsentController extends Controller
     public function downloadSignedPdf(Request $request, $no_surat)
     {
         $consent = GeneralConsent::where('no_surat', $no_surat)->firstOrFail();
-        $path = PdfService::getInternalPath($consent);
+        $safeNoSurat = str_replace('/', '_', $consent->no_surat);
+        $namaFile = $safeNoSurat . '.pdf';
 
-        if (!Storage::exists($path)) {
-            abort(404, 'Dokumen PDF tidak ditemukan.');
-        }
-
-        return Storage::download($path, "General_Consent_" . str_replace('/', '_', $no_surat) . ".pdf");
+        return redirect('http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile);
     }
 
     public function getWaTemplate($no_surat, WhatsappService $whatsappService)

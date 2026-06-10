@@ -183,16 +183,16 @@ class SuratPersetujuanRawatInapController extends Controller
                     $safeNoSurat = str_replace('/', '_', $spri->no_surat);
                     $pdfFilename = $safeNoSurat . '.pdf';
 
-                    // Save to internal storage (Backup)
-                    $internalPdfPath = "private/pdf/spri/{$year}/{$month}/spri_{$safeNoSurat}.pdf";
-                    Storage::put($internalPdfPath, $pdfOutput);
+                    // Save to internal storage (Backup) - Disabled
+                    // $internalPdfPath = "private/pdf/spri/{$year}/{$month}/spri_{$safeNoSurat}.pdf";
+                    // Storage::put($internalPdfPath, $pdfOutput);
 
-                    // Save to local webapps folder
-                    $localUploadPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload";
-                    if (!\Illuminate\Support\Facades\File::isDirectory($localUploadPath)) {
-                        \Illuminate\Support\Facades\File::makeDirectory($localUploadPath, 0755, true);
-                    }
-                    \Illuminate\Support\Facades\File::put($localUploadPath . DIRECTORY_SEPARATOR . $pdfFilename, $pdfOutput);
+                    // Save to local webapps folder - Disabled
+                    // $localUploadPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload";
+                    // if (!\Illuminate\Support\Facades\File::isDirectory($localUploadPath)) {
+                    //     \Illuminate\Support\Facades\File::makeDirectory($localUploadPath, 0755, true);
+                    // }
+                    // \Illuminate\Support\Facades\File::put($localUploadPath . DIRECTORY_SEPARATOR . $pdfFilename, $pdfOutput);
 
                     // Send to Remote Server 192.168.30.24 via cURL POST
                     $response = \Illuminate\Support\Facades\Http::attach(
@@ -436,36 +436,6 @@ class SuratPersetujuanRawatInapController extends Controller
                 'error' => 'Data tidak ditemukan'
             ], 404);
         }
-
-        // Fetch human-readable room name to replace kd_kamar for PDF
-        $kamarData = DB::table('kamar')
-            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
-            ->where('kamar.kd_kamar', $consent->ruang)
-            ->select('bangsal.nm_bangsal')
-            ->first();
-        if ($kamarData) {
-            $consent->ruang = $kamarData->nm_bangsal;
-        }
-
-        // Generate PDF and save to storage
-        $deviceInfo = [
-            'ip' => $request->ip(),
-            'lat' => $request->input('lat') ?? $request->query('lat') ?? '-',
-            'lng' => $request->input('lng') ?? $request->query('lng') ?? '-',
-            'downloaded_at' => now()->format('d/m/Y H:i:s'),
-        ];
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('surat_persetujuan_rawat_inap.pdf', compact('consent', 'deviceInfo'));
-        $pdf->setPaper('a4', 'portrait');
-        $pdfOutput = $pdf->output();
-
-        $year = date('Y', strtotime($consent->tanggal));
-        $month = date('m', strtotime($consent->tanggal));
-        $safeId = str_replace('/', '_', $consent->no_surat);
-        $pdfPath = "private/pdf/spri/{$year}/{$month}/spri_{$safeId}.pdf";
-
-        // Save PDF to storage
-        Storage::put($pdfPath, $pdfOutput);
 
         // Queue to t_antrean_wa
         $remoteFileName = str_replace('/', '_', $consent->no_surat) . ".pdf";
