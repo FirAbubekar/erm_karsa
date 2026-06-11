@@ -11,6 +11,8 @@ class Pegawai extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
+        protected $appends = ['signature_base64'];
+
 
     protected $fillable = [
         'nik', 'nama', 'jk', 'jbtn', 'jnj_jabatan',

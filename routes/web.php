@@ -50,4 +50,32 @@ Route::get('/surat-persetujuan-rawat-inap/download/{no_surat}', [SuratPersetujua
 Route::get('/surat-persetujuan-rawat-inap/wa-template/{no_surat}', [SuratPersetujuanRawatInapController::class, 'getWaTemplate'])->name('surat-persetujuan-rawat-inap.wa-template');
 Route::post('/surat-persetujuan-rawat-inap/send-wa', [SuratPersetujuanRawatInapController::class, 'sendWhatsappManual'])->name('surat-persetujuan-rawat-inap.send-wa');
 
+Route::get('/edukasi-pasien', function () {
+    if (!Session::get('is_logged_in')) {
+        return redirect('/');
+    }
+    return app(App\Http\Controllers\PatientEducationController::class)->index();
+})->name('edukasi-pasien');
+
+Route::post('/edukasi-pasien/save-assessment', [App\Http\Controllers\PatientEducationController::class, 'storeAssessment'])->name('edukasi-pasien.store-assessment');
+Route::get('/edukasi-pasien/get-assessment', [App\Http\Controllers\PatientEducationController::class, 'getAssessment'])->name('edukasi-pasien.get-assessment');
+Route::post('/edukasi-pasien/save-implementation', [App\Http\Controllers\PatientEducationController::class, 'storeImplementation'])->name('edukasi-pasien.store-implementation');
+Route::get('/riwayat-edukasi-pasien', [App\Http\Controllers\PatientEducationController::class, 'history'])->name('edukasi-pasien.history');
+Route::get('/edukasi-pasien/{id_uuid}/pdf', [App\Http\Controllers\PatientEducationController::class, 'downloadPDF'])->name('edukasi-pasien.download-pdf');
+
+// Prospective Reviu (Farmasi)
+Route::get('/prospective-reviu', function (\Illuminate\Http\Request $request) {
+    if (!Session::get('is_logged_in')) {
+        return redirect('/');
+    }
+    return app(App\Http\Controllers\ProspectiveReviewController::class)->index($request);
+})->name('prospective-reviu');
+
+Route::post('/prospective-reviu/save', [App\Http\Controllers\ProspectiveReviewController::class, 'store'])->name('prospective-reviu.store');
+Route::get('/prospective-reviu/search-dokter', [App\Http\Controllers\ProspectiveReviewController::class, 'searchDokter'])->name('prospective-reviu.search-dokter');
+Route::get('/prospective-reviu/search-pegawai', [App\Http\Controllers\ProspectiveReviewController::class, 'searchPegawai'])->name('prospective-reviu.search-pegawai');
+Route::get('/prospective-reviu/history', [App\Http\Controllers\ProspectiveReviewController::class, 'history'])->name('prospective-reviu.history');
+Route::get('/prospective-reviu/pdf/{id_uuid}', [App\Http\Controllers\ProspectiveReviewController::class, 'downloadPdf'])->name('prospective-reviu.pdf');
+Route::get('/riwayat-prospective-reviu', [App\Http\Controllers\ProspectiveReviewController::class, 'historyPage'])->name('prospective-reviu.history-page');
+
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
