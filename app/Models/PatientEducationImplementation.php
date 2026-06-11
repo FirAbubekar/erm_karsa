@@ -27,8 +27,8 @@ class PatientEducationImplementation extends Model
         'ip_address_submit',
         'tgl_reedukasi',
         'created_at',
-        'updated_at'
-
+        'updated_at',
+        'tgl_akhir_edukasi'
     ];
 
     public function regPeriksa()

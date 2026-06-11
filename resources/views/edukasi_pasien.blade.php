@@ -425,15 +425,23 @@
                                     <td class="topik-cell" data-original-topik="{{ $topik['topik'] }}">
                                         @if (str_contains(strtolower($topik['topik']), '(sebutkan)'))
                                             {{ str_ireplace('(sebutkan)', '', $topik['topik']) }}
-                                            <input type="text" class="topik-sebutkan-input form-control"
-                                                style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px"
-                                                placeholder="Sebutkan detail...">
+                                            <textarea class="topik-sebutkan-input form-control"
+                                                style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px;resize:vertical;min-height:50px;"
+                                                placeholder="Sebutkan detail..."></textarea>
                                         @else
                                             {{ $topik['topik'] }}
                                         @endif
                                     </td>
-                                    <td><input type="datetime-local" class="form-control"
-                                            style="font-size:11px;padding:6px 8px" value="{{ date('Y-m-d\TH:i') }}">
+                                    <td>
+                                        <div style="margin-bottom:6px">
+                                            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
+                                            <div class="text-start" style="font-size:11px;font-weight:600;color:var(--text-main);padding:4px 2px">(Otomatis saat disimpan)</div>
+                                        </div>
+                                        <div>
+                                            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
+                                            <input type="datetime-local" class="form-control input-end"
+                                                style="font-size:11px;padding:4px 6px">
+                                        </div>
                                     </td>
                                     <td class="verif-cell">
                                         @foreach ($pilihanVerifikasi as $v)

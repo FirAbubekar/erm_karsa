@@ -422,7 +422,13 @@
                 <tr>
                     <td class="text-center">{{ $impl->poli_unit }}</td>
                     <td>{!! nl2br(e($impl->nama_topik)) !!}</td>
-                    <td class="text-center">{{ $impl->created_at ? \Carbon\Carbon::parse($impl->created_at)->format('d/m/y H:i') : '' }}</td>
+                    <td class="text-center">
+                        {{ $impl->created_at ? \Carbon\Carbon::parse($impl->created_at)->format('d/m/y H:i') : '' }}
+                        @if($impl->tgl_akhir_edukasi)
+                            <br>s.d.<br>
+                            {{ \Carbon\Carbon::parse($impl->tgl_akhir_edukasi)->format('d/m/y H:i') }}
+                        @endif
+                    </td>
                     <td style="">
                         <table>
                             @php

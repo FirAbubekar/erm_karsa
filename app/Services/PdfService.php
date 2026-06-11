@@ -102,7 +102,7 @@ class PdfService
 
         $topikEdukasi = [
             [ 'kode' => 'TE_HAK_PARTISIPASI', 'poli_unit' => 'Pendaftaran', 'topik' => "Hak untuk Berpartisipasi Pada Proses Pelayanan", 'is_custom' => false ],
-            [ 'kode' => 'TE_KONDISI', 'poli_unit' => 'Dokter', 'topik' => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa", 'is_custom' => false ],
+            [ 'kode' => 'TE_KONDISI', 'poli_unit' => 'Dokter', 'topik' => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa\n(sebutkan)", 'is_custom' => false ],
             [ 'kode' => 'TE_PROSEDUR_PENUNJANG', 'poli_unit' => 'Rawat Inap', 'topik' => 'Prosedur Pemeriksaan Penunjang (sebutkan)', 'is_custom' => false ],
             [ 'kode' => 'TE_INFORMED_CONSENT', 'poli_unit' => 'Pendaftaran', 'topik' => 'Proses Pemberian Informed Consent (sebutkan)', 'is_custom' => false ],
             [ 'kode' => 'TE_DIET_NUTRISI', 'poli_unit' => 'Gizi', 'topik' => 'Diet dan Nutrisi (sebutkan)', 'is_custom' => false ],
@@ -133,6 +133,7 @@ class PdfService
                 $dummy->ttd_pasien = null;
                 $dummy->ttd_edukator = null;
                 $dummy->tgl_reedukasi = null;
+                $dummy->tgl_akhir_edukasi = null;
                 $mergedImplementations[] = $dummy;
             }
         }

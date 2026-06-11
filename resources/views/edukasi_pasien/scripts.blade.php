@@ -274,9 +274,20 @@ function populateImplementations(implementations) {
         }
 
         // Tgl/Jam Edukasi (datetime-local)
-        if(impl.tgl_edukasi) {
-            const dtInput = row.querySelector('input[type="datetime-local"]');
-            if(dtInput) dtInput.value = impl.tgl_edukasi;
+        if(impl.created_at) {
+            const dtStart = row.querySelector('.text-start');
+            if(dtStart) {
+                const d = new Date(impl.created_at.replace(' ', 'T'));
+                const pad = n => String(n).padStart(2, '0');
+                dtStart.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}`;
+            }
+        }
+        if(impl.tgl_akhir_edukasi) {
+            const dtInputEnd = row.querySelector('.input-end');
+            if(dtInputEnd) {
+                let dtStr = String(impl.tgl_akhir_edukasi).replace(' ', 'T');
+                dtInputEnd.value = dtStr.substring(0, 16);
+            }
         }
     });
 }
@@ -324,8 +335,10 @@ function resetAssessmentForm() {
         row.querySelectorAll('.verif-cell input[type="text"]').forEach(input => input.value = '');
 
         // Reset datetime-local value to today's date-time
-        const dtLocal = row.querySelector('input[type="datetime-local"]');
-        if(dtLocal) dtLocal.value = nowDt;
+        const dtStart = row.querySelector('.text-start');
+        if(dtStart) dtStart.textContent = '(Otomatis saat disimpan)';
+        const dtInputEnd = row.querySelector('.input-end');
+        if(dtInputEnd) dtInputEnd.value = '';
 
         // Reset ttd-pasien
         const ttdPasienBox = row.querySelector('[id^="ttd-pasien-"]');
@@ -436,7 +449,17 @@ document.getElementById('btn-add-topik').addEventListener('click',()=>{
     row.innerHTML=`
         <td><input type="text" class="poli-input" placeholder="Poli/Unit" value=""></td>
         <td class="topik-cell"><input type="text" class="form-control" style="font-size:12px;padding:6px 8px" placeholder="Tulis topik edukasi..." value=""></td>
-        <td><input type="datetime-local" class="form-control" style="font-size:11px;padding:6px 8px" value="${nowDt}"></td>
+        <td>
+            <div style="margin-bottom:6px">
+                <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
+                <div class="text-start" style="font-size:11px;font-weight:600;color:var(--text-main);padding:4px 2px">(Otomatis saat disimpan)</div>
+            </div>
+            <div>
+                <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
+                <input type="datetime-local" class="form-control input-end"
+                    style="font-size:11px;padding:4px 6px">
+            </div>
+        </td>
         <td class="verif-cell">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                 <label style="font-size:11px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-secondary);margin:0;">Tujuan</label>
@@ -577,8 +600,8 @@ async function saveImplementationRow(btn) {
     if(!namaTopik) return showError('Topik edukasi tidak boleh kosong.');
 
     // Datetime
-    const dtInput = row.querySelector('input[type="datetime-local"]');
-    const tglJam = dtInput ? dtInput.value : null;
+    const dtInputEnd = row.querySelector('.input-end');
+    const tglSelesai = dtInputEnd ? dtInputEnd.value : null;
 
     // Verifikasi inputs
     const verifCell = row.querySelector('.verif-cell');
@@ -616,6 +639,7 @@ async function saveImplementationRow(btn) {
         verifikasi: verifikasi,
         ttd_pasien: (ttdPasienData && ttdPasienData !== 'existing') ? ttdPasienData : null,
         tgl_reedukasi: tglReedukasi || null,
+        tgl_akhir_edukasi: tglSelesai || null,
     };
 
     btn.disabled = true;

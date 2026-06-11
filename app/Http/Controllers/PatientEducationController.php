@@ -47,7 +47,7 @@ class PatientEducationController extends Controller
                 'kode'      => 'TE_KONDISI',
                 'no_urut'   => 2,
                 'poli_unit' => 'Dokter',
-                'topik'     => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa",
+                'topik'     => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa\n(sebutkan)",
                 'is_custom' => false,
             ],
             [
@@ -194,8 +194,9 @@ class PatientEducationController extends Controller
                     'verifikasi'    => json_decode($impl->verifikasi, true),
                     'ttd_pasien'    => $impl->ttd_pasien,
                     'ttd_edukator'  => $impl->ttd_edukator,
-                    'tgl_reedukasi' => $impl->tgl_reedukasi,
-                    'tgl_edukasi'   => $impl->created_at ? $impl->created_at->format('Y-m-d\TH:i') : null,
+                    'tgl_reedukasi'     => $impl->tgl_reedukasi,
+                    'created_at'        => $impl->created_at ? $impl->created_at->format('Y-m-d H:i:s') : null,
+                    'tgl_akhir_edukasi' => $impl->tgl_akhir_edukasi ? \Carbon\Carbon::parse($impl->tgl_akhir_edukasi)->format('Y-m-d H:i:s') : null,
                 ];
             });
 
@@ -380,6 +381,7 @@ class PatientEducationController extends Controller
                         'ttd_edukator'      => $ttdEdukatorPath,
                         'ip_address_submit' => $request->ip(),
                         'tgl_reedukasi'     => $request->tgl_reedukasi,
+                        'tgl_akhir_edukasi' => $request->tgl_akhir_edukasi,
                     ]
                 );
 
@@ -509,6 +511,7 @@ class PatientEducationController extends Controller
                 $dummy->ttd_pasien = null;
                 $dummy->ttd_edukator = null;
                 $dummy->tgl_reedukasi = null;
+                $dummy->tgl_akhir_edukasi = null;
                 $mergedImplementations[] = $dummy;
             }
         }
