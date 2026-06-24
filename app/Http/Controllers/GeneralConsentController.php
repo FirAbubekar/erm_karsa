@@ -112,6 +112,7 @@ class GeneralConsentController extends Controller
             'no_ktppj' => 'required|string',
             'jkpj' => 'required|in:L,P',
             'bertindak_atas' => 'required|string',
+            'no_telp_prefix' => 'required|string',
             'no_telp' => 'required|string',
             'signature' => 'required|string', // Base64 string
             'auth_name_1' => 'nullable|string',
@@ -126,6 +127,26 @@ class GeneralConsentController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
+                $consent = GeneralConsent::where('no_surat', $request->no_surat)->first() ?? new GeneralConsent();
+                $isEdit = $consent->exists;
+
+                // Capture old pelepasan_informasi and signature
+                if ($isEdit) {
+                    $consent->old_pelepasan_informasi = DB::table('pelepasan_informasi')
+                        ->where('no_surat', $consent->no_surat)
+                        ->select('nama', 'no_telp')
+                        ->get()
+                        ->toArray();
+                        
+                    $oldSig = DB::table('signature_pasien')
+                        ->where('no_rawat', $consent->no_rawat)
+                        ->first();
+                    $consent->old_signature = $oldSig ? $oldSig->signature_path : null;
+                } else {
+                    $consent->old_pelepasan_informasi = [];
+                    $consent->old_signature = null;
+                }
+
                 // Ensure auth_name_1 is synced with Penanggung Jawab data as requested
                 // Format: Nama / Hubungan
                 $pjNameWithHubungan = $request->nama_pj . ' / ' . $request->bertindak_atas;
@@ -134,51 +155,82 @@ class GeneralConsentController extends Controller
                     'auth_telp_1' => $request->no_telp
                 ]);
 
-                // Process Signature
-                $imageData = $request->signature;
-                $imageData = str_replace('data:image/png;base64,', '', $imageData);
-                $imageData = str_replace(' ', '+', $imageData);
-                $imageBinary = base64_decode($imageData);
+                // Process Signature conditionally (if new)
+                $isNewSignature = str_starts_with($request->signature, 'data:image/');
+                $path = null;
 
-                // Folder structure: signatures/YYYY/MM/DD/
-                $year = date('Y');
-                $month = date('m');
-                $day = date('d');
-                $directory = "signatures/{$year}/{$month}/{$day}";
-                
-                $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
-                $path = "{$directory}/{$filename}";
+                if ($isNewSignature) {
+                    $imageData = $request->signature;
+                    $imageData = str_replace('data:image/png;base64,', '', $imageData);
+                    $imageData = str_replace(' ', '+', $imageData);
+                    $imageBinary = base64_decode($imageData);
 
-                // Save to storage (public disk)
-                Storage::disk('public')->put($path, $imageBinary);
+                    // Folder structure: signatures/YYYY/MM/DD/
+                    $year = date('Y');
+                    $month = date('m');
+                    $day = date('d');
+                    $directory = "signatures/{$year}/{$month}/{$day}";
+                    
+                    $filename = 'TTD_' . str_replace('/', '', $request->no_rawat) . '_' . time() . '.png';
+                    $path = "{$directory}/{$filename}";
+
+                    // Save to storage (public disk)
+                    Storage::disk('public')->put($path, $imageBinary);
+                }
+
+                // Prepare new signature
+                $consent->new_signature = $isNewSignature ? $path : $consent->old_signature;
+
+                // Prepare new pelepasan_informasi
+                $newPelepasan = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $name = $request->{"auth_name_$i"};
+                    $telp = $request->{"auth_telp_$i"};
+                    if (!empty($name)) {
+                        $newPelepasan[] = [
+                            'nama' => $name,
+                            'no_telp' => $this->formatPhoneNumber($telp, $i == 1 ? $request->no_telp_prefix : '+62') ?? '-'
+                        ];
+                    }
+                }
+                $consent->new_pelepasan_informasi = $newPelepasan;
 
                 // 1. Save to surat_persetujuan_umum
-                $consent = GeneralConsent::updateOrCreate(
-                    ['no_surat' => $request->no_surat],
-                    [
-                        'no_rawat' => $request->no_rawat,
-                        'tanggal' => $request->tanggal,
-                        'pengobatan_kepada' => $request->pengobatan_kepada,
-                        'nilai_kepercayaan' => $request->nilai_kepercayaan,
-                        'nama_pj' => $request->nama_pj,
-                        'umur_pj' => $request->umur_pj,
-                        'no_ktppj' => $request->no_ktppj,
-                        'jkpj' => $request->jkpj,
-                        'bertindak_atas' => $request->bertindak_atas,
-                        'no_telp' => $this->formatPhoneNumber($request->no_telp),
-                        'nip' => Session::get('user_id'),
-                    ]
-                );
-
-                // 2. Save to signature_pasien
-                SignaturePasien::create([
-                    'id_uuid' => (string) Str::uuid(),
-                    'no_rekamedis' => $request->no_rm,
+                $consent->fill([
                     'no_rawat' => $request->no_rawat,
-                    'signature_path' => $path,
+                    'tanggal' => $request->tanggal,
+                    'pengobatan_kepada' => $request->pengobatan_kepada,
+                    'nilai_kepercayaan' => $request->nilai_kepercayaan,
+                    'nama_pj' => $request->nama_pj,
+                    'umur_pj' => $request->umur_pj,
+                    'no_ktppj' => $request->no_ktppj,
+                    'jkpj' => $request->jkpj,
+                    'bertindak_atas' => $request->bertindak_atas,
+                    'no_telp' => $this->formatPhoneNumber($request->no_telp, $request->no_telp_prefix),
+                    'nip' => Session::get('user_id'),
                 ]);
 
-                // 3. Save to pelepasan_informasi
+                if (!$isEdit) {
+                    $consent->no_surat = $request->no_surat;
+                }
+                $consent->save();
+
+                // 2. Save or update signature_pasien only if a new signature was uploaded
+                if ($isNewSignature) {
+                    SignaturePasien::updateOrCreate(
+                        ['no_rawat' => $request->no_rawat],
+                        [
+                            'id_uuid' => (string) Str::uuid(),
+                            'no_rekamedis' => $request->no_rm,
+                            'signature_path' => $path,
+                        ]
+                    );
+                }
+
+                // 3. Delete existing pelepasan_informasi for this no_surat to prevent duplicates on edit/update
+                PelepasanInformasi::where('no_surat', $request->no_surat)->delete();
+
+                // 4. Save to pelepasan_informasi
                 for ($i = 1; $i <= 4; $i++) {
                     $name = $request->{"auth_name_$i"};
                     $telp = $request->{"auth_telp_$i"};
@@ -188,14 +240,19 @@ class GeneralConsentController extends Controller
                             'no_surat' => $request->no_surat,
                             'no_rekamedis' => $request->no_rm,
                             'nama' => $name,
-                            'no_telp' => $this->formatPhoneNumber($telp) ?? '-',
+                            'no_telp' => $this->formatPhoneNumber($telp, $i == 1 ? $request->no_telp_prefix : '+62') ?? '-',
                             'status' => 'aktif',
                             'created_date' => now()
                         ]);
                     }
                 }
 
-                // 4. Save to berkas_digital_perawatan
+                // Log activity if it is an edit but the model was not dirty (so updated event did not fire)
+                if ($isEdit && !$consent->wasChanged()) {
+                    GeneralConsent::logActivity($consent, 'UPDATE');
+                }
+
+                // 5. Save to berkas_digital_perawatan
                 $safeNoSurat = str_replace('/', '_', $request->no_surat);
                 DB::table('berkas_digital_perawatan')->updateOrInsert(
                     ['no_rawat' => $request->no_rawat, 'kode' => '28'],
@@ -205,12 +262,37 @@ class GeneralConsentController extends Controller
                 // 5. Generate PDF and Save to Storage
                 $pdfPath = $this->pdfService->generateAndSave($consent);
                 
-                // 6. Send WhatsApp Notification (File directly)
-                $this->whatsappService->sendFile($consent->no_telp, $pdfPath);
+                // 6. Save to WhatsApp Queue (Outbox) with remote URL
+                try {
+                    $consent->load('regPeriksa.pasien');
+                    $namaPj = $consent->nama_pj;
+                    $nmPasien = $consent->regPeriksa->pasien->nm_pasien ?? '-';
+                    $noRm = $consent->regPeriksa->pasien->no_rkm_medis ?? '-';
+
+                    $remoteFileName = str_replace('/', '_', $consent->no_surat) . ".pdf";
+                    $remoteUrl = "http://192.168.30.24/webapps/berkasrawat/pages/upload/" . $remoteFileName;
+
+                    $waMessage = "Yth. Bapak/Ibu *" . $namaPj . "*,\n\n" .
+                                 "Terima kasih telah mempercayakan pelayanan kesehatan Anda kepada kami di *RSUD Karsa Husada Batu*.\n\n" .
+                                 "Bersama pesan ini, kami lampirkan dokumen digital *General Consent (Persetujuan Umum)* untuk Pasien *" . $nmPasien . "* (No. RM: *" . $noRm . "*).\n\n" .
+                                 "Mohon simpan dokumen digital ini dengan baik sebagai bukti administrasi yang sah. Atas perhatian dan kerja samanya, kami ucapkan terima kasih.";
+
+                    DB::table('t_antrean_wa')->insert([
+                        'no_surat' => $consent->no_surat,
+                        'no_telp' => $consent->no_telp,
+                        'pesan' => $waMessage,
+                        'file_path' => $remoteUrl,
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } catch (\Exception $waEx) {
+                    \Illuminate\Support\Facades\Log::error("Gagal memasukkan antrean WA otomatis saat simpan General Consent: " . $waEx->getMessage());
+                }
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Pernyataan General Consent berhasil disimpan dan PDF telah dikirim ke WhatsApp.',
+                    'message' => 'Pernyataan General Consent berhasil disimpan dan dokumen telah masuk antrean pengiriman WhatsApp.',
                     'data' => $consent
                 ]);
 
@@ -223,11 +305,17 @@ class GeneralConsentController extends Controller
         });
     }
 
-    private function formatPhoneNumber($number)
+    private function formatPhoneNumber($number, $prefix = '+62')
     {
         if (empty($number) || $number === '-') return $number;
         
-        // Remove non-digits
+        // Remove non-digits from prefix to get numeric code (e.g. "+62" -> "62")
+        $prefixDigits = preg_replace('/\D/', '', $prefix);
+        if (empty($prefixDigits)) {
+            $prefixDigits = '62'; // Fallback if no digits found in prefix
+        }
+        
+        // Remove non-digits from number
         $digits = preg_replace('/\D/', '', $number);
         
         // If it starts with 0, remove it
@@ -235,39 +323,22 @@ class GeneralConsentController extends Controller
             $digits = substr($digits, 1);
         }
         
-        // If it already starts with 62, return it
-        if (str_starts_with($digits, '62')) {
+        // If it already starts with the prefix digits, return it
+        if (str_starts_with($digits, $prefixDigits)) {
             return $digits;
         }
         
-        // Prepend 62
-        return '62' . $digits;
+        // Prepend prefix digits
+        return $prefixDigits . $digits;
     }
 
     public function downloadPDF(Request $request, $no_surat)
     {
-        $consent = GeneralConsent::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai'])
-            ->where('no_surat', $no_surat)
-            ->firstOrFail();
+        $consent = GeneralConsent::where('no_surat', $no_surat)->firstOrFail();
+        $safeNoSurat = str_replace('/', '_', $consent->no_surat);
+        $namaFile = $safeNoSurat . '.pdf';
 
-        // Fetch pelepasan_informasi by no_rekamedis
-        $pelepasanInformasi = PelepasanInformasi::where('no_rekamedis', $consent->regPeriksa->pasien->no_rkm_medis)
-            ->where('status', 'aktif')
-            ->get();
-
-        // Device info for footer
-        $deviceInfo = [
-            'ip' => $request->ip(),
-            'lat' => $request->query('lat', '-'),
-            'lng' => $request->query('lng', '-'),
-            'downloaded_at' => now()->format('d/m/Y H:i:s'),
-        ];
-
-        $pdf = Pdf::loadView('general_consent.pdf', compact('consent', 'pelepasanInformasi', 'deviceInfo'));
-        
-        $pdf->setPaper('a4', 'portrait');
-
-        return $pdf->download('General_Consent_' . str_replace('/', '_', $consent->no_surat) . '.pdf');
+        return redirect('http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile);
     }
 
     public function getPelepasanInformasi($no_surat)
@@ -294,13 +365,10 @@ class GeneralConsentController extends Controller
     public function downloadSignedPdf(Request $request, $no_surat)
     {
         $consent = GeneralConsent::where('no_surat', $no_surat)->firstOrFail();
-        $path = PdfService::getInternalPath($consent);
+        $safeNoSurat = str_replace('/', '_', $consent->no_surat);
+        $namaFile = $safeNoSurat . '.pdf';
 
-        if (!Storage::exists($path)) {
-            abort(404, 'Dokumen PDF tidak ditemukan.');
-        }
-
-        return Storage::download($path, "General_Consent_" . str_replace('/', '_', $no_surat) . ".pdf");
+        return redirect('http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile);
     }
 
     public function getWaTemplate($no_surat, WhatsappService $whatsappService)
@@ -333,21 +401,24 @@ class GeneralConsentController extends Controller
             ], 400);
         }        
 
-        // Get the storage path for the PDF
-        $pdfPath = PdfService::getInternalPath($consent);
+        // Get the remote URL for the PDF
+        $remoteFileName = str_replace('/', '_', $consent->no_surat) . ".pdf";
+        $remoteUrl = "http://192.168.30.24/webapps/berkasrawat/pages/upload/" . $remoteFileName;
 
-        // Send the file via WhatsApp
-        $success = $whatsappService->sendFile($consent->no_telp, $pdfPath, $message);
-        if ($success) {
-            return response()->json([
-                'success' => true,
-                'message' => 'WhatsApp berhasil dikirim ke ' . $consent->no_telp
-            ]);
-        }       
+        // Queue the file via t_antrean_wa
+        DB::table('t_antrean_wa')->insert([
+            'no_surat' => $consent->no_surat,
+            'no_telp' => $consent->no_telp,
+            'pesan' => $message,
+            'file_path' => $remoteUrl,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         return response()->json([
-            'success' => false,
-            'error' => 'Gagal mengirim WhatsApp melalui gateway'.$pdfPath
-        ], 500);
+            'success' => true,
+            'message' => 'Pesan WhatsApp berhasil dimasukkan ke antrean pengiriman.'
+        ]);
     }
 }

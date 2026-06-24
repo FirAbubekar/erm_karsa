@@ -242,6 +242,16 @@
             border-right: 1.5px solid var(--border);
             user-select: none;
         }
+        input.telp-prefix {
+            border-top: none;
+            border-left: none;
+            border-bottom: none;
+            outline: none;
+            width: 64px;
+            text-align: center;
+            padding: 11px 0;
+            cursor: text;
+        }
         .telp-input-group .form-control {
             border: none !important;
             background: transparent !important;
@@ -432,8 +442,25 @@
                         <div class="form-group">
                             <label>Nomor Telp / HP</label>
                             <div class="telp-input-group">
-                                <div class="telp-prefix">+62</div>
-                                <input type="text" id="field-pj-telp" class="form-control telp-input" placeholder="8xxxxxxxxxx">
+                                <!-- Select Prefix Container -->
+                                <div id="telp-prefix-select-container" style="display: flex; align-items: center; background: #F1F5F9; border-right: 1.5px solid var(--border);">
+                                    <select id="field-pj-telp-prefix-select" style="border: none; background: transparent; font-weight: 700; font-size: 14px; padding: 11px 24px 11px 16px; outline: none; cursor: pointer; color: var(--text-secondary); width: 85px; height: 100%; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'%23475569\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
+                                        <option value="+62" selected>+62</option>
+                                        <option value="+60">+60</option>
+                                        <option value="+65">+65</option>
+                                        <option value="custom">Lainnya...</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Custom Prefix Input Container (Hidden by default) -->
+                                <div id="telp-prefix-custom-container" style="display: none; align-items: center; background: #F1F5F9; border-right: 1.5px solid var(--border);">
+                                    <input type="text" class="telp-prefix" id="field-pj-telp-prefix" value="+62" placeholder="+62" style="border: none !important; width: 55px; text-align: center; padding: 11px 0; background: transparent;" required>
+                                    <button type="button" id="btn-cancel-custom-prefix" style="border: none; background: transparent; padding: 0 8px 0 4px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; height: 100%;">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                </div>
+
+                                <input type="text" id="field-pj-telp" class="form-control telp-input" placeholder="8xxxxxxxxxx" required>
                             </div>
                         </div>
                     </div>
@@ -474,7 +501,7 @@
                             <div class="form-group">
                                 <label>No. HP / Telp 1</label>
                                 <div class="telp-input-group">
-                                    <div class="telp-prefix">+62</div>
+                                    <div class="telp-prefix" id="field-auth-telp-prefix-1">+62</div>
                                     <input type="text" id="field-auth-telp-1" class="form-control telp-input" placeholder="Otomatis dari PJ" readonly>
                                 </div>
                             </div>
@@ -816,6 +843,7 @@
         const btnSearch = document.getElementById('btn-search');
         const inputNoRm = document.getElementById('search-no-rm');
         const historyTableBody = document.getElementById('history-table-body');
+        let activePatientData = null;
  
         inputNoRm.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -837,6 +865,7 @@
 
                 if (response.ok) {
                     const { pasien, history, latest_auth_parties } = result;
+                    activePatientData = pasien;
 
                     // Update Form Fields
                     document.getElementById('field-no-rm').value = pasien.no_rkm_medis;
@@ -1082,6 +1111,36 @@
             }
         });
 
+        // Geolocation coordinate fetcher for form submission
+        const getCoordinates = () => {
+            return new Promise((resolve) => {
+                if (navigator.geolocation && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            resolve({
+                                lat: position.coords.latitude.toFixed(6),
+                                lng: position.coords.longitude.toFixed(6)
+                            });
+                        },
+                        function(error) {
+                            // Fallback to IP API
+                            fetch('http://ip-api.com/json/')
+                                .then(res => res.json())
+                                .then(data => resolve({ lat: data.lat, lng: data.lon }))
+                                .catch(() => resolve({ lat: '-', lng: '-' }));
+                        },
+                        { timeout: 3000 } // 3 seconds timeout
+                    );
+                } else {
+                    // Fallback to IP API
+                    fetch('http://ip-api.com/json/')
+                        .then(res => res.json())
+                        .then(data => resolve({ lat: data.lat, lng: data.lon }))
+                        .catch(() => resolve({ lat: '-', lng: '-' }));
+                }
+            });
+        };
+
         // Save Consent Logic
         btnSave.addEventListener('click', async () => {
             const signatureData = signaturePreview.src;
@@ -1092,6 +1151,12 @@
             if (!checkAgree.checked) {
                 return showError('Anda harus menyetujui ketentuan untuk menyimpan.');
             }
+
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<svg class="animate-spin" style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
+
+            // 1. Fetch Geolocation coordinates first
+            const coords = await getCoordinates();
 
             const formData = {
                 no_surat: document.getElementById('field-no-rawat').value + '_GC', // Temporary logic if no_pernyataan is not provided or just use field
@@ -1105,6 +1170,7 @@
                 no_ktppj: '-',
                 jkpj: document.getElementById('field-pj-jk').value,
                 bertindak_atas: document.getElementById('field-pj-hubungan').value,
+                no_telp_prefix: document.getElementById('field-pj-telp-prefix').value,
                 no_telp: document.getElementById('field-pj-telp').value,
                 signature: signatureData,
                 auth_name_1: document.getElementById('field-auth-name-1').value,
@@ -1115,6 +1181,8 @@
                 auth_telp_3: document.getElementById('field-auth-telp-3').value,
                 auth_name_4: document.getElementById('field-auth-name-4').value,
                 auth_telp_4: document.getElementById('field-auth-telp-4').value,
+                lat: coords.lat,
+                lng: coords.lng,
             };
 
             // Override no_surat with actual No. Pernyataan from field if exists
@@ -1125,11 +1193,11 @@
 
             // Basic Validation
             if (!formData.no_rawat || !formData.nama_pj) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Simpan Pernyataan';
+                validateConsent();
                 return showError('Mohon lengkapi data pasien dan penanggung jawab.');
             }
-
-            btnSave.disabled = true;
-            btnSave.innerHTML = '<svg class="animate-spin" style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
 
             try {
                 const response = await fetch('{{ route("general-consent.store") }}', {
@@ -1304,11 +1372,261 @@
                 fieldAuthName1.value = nama;
             }
             fieldAuthTelp1.value = telp;
+
+            // Sync prefix label for Auth 1
+            const pjPrefixInput = document.getElementById('field-pj-telp-prefix');
+            const authPrefix1 = document.getElementById('field-auth-telp-prefix-1');
+            if (pjPrefixInput && authPrefix1) {
+                authPrefix1.textContent = pjPrefixInput.value;
+            }
         }
 
         fieldPjNama.addEventListener('input', syncAuth1);
         fieldPjHubungan.addEventListener('change', syncAuth1);
         fieldPjTelp.addEventListener('input', syncAuth1);
+
+        // Phone Prefix Selector & Custom Typing Logic
+        const prefixInput = document.getElementById('field-pj-telp-prefix');
+        const prefixSelect = document.getElementById('field-pj-telp-prefix-select');
+        const prefixSelectContainer = document.getElementById('telp-prefix-select-container');
+        const prefixCustomContainer = document.getElementById('telp-prefix-custom-container');
+        const btnCancelCustomPrefix = document.getElementById('btn-cancel-custom-prefix');
+
+        if (prefixSelect && prefixInput) {
+            prefixSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    prefixSelectContainer.style.display = 'none';
+                    prefixCustomContainer.style.display = 'flex';
+                    prefixInput.value = '+';
+                    prefixInput.focus();
+                } else {
+                    prefixInput.value = this.value;
+                }
+                syncAuth1();
+            });
+
+            btnCancelCustomPrefix.addEventListener('click', function() {
+                prefixCustomContainer.style.display = 'none';
+                prefixSelectContainer.style.display = 'flex';
+                prefixSelect.value = '+62';
+                prefixInput.value = '+62';
+                syncAuth1();
+            });
+
+            prefixInput.addEventListener('input', function(e) {
+                let val = this.value;
+                if (!val.startsWith('+')) {
+                    val = '+' + val.replace(/\D/g, '');
+                } else {
+                    val = '+' + val.substring(1).replace(/\D/g, '');
+                }
+                this.value = val;
+                syncAuth1();
+            });
+        }
+
+        // Auto Fill Penanggung Jawab Hubungan "Diri Sendiri" option trigger for convenience
+        document.getElementById('field-pj-hubungan').addEventListener('change', (e) => {
+            if (!activePatientData) return;
+            if (e.target.value === 'Diri Sendiri') {
+                document.getElementById('field-pj-nama').value = activePatientData.nm_pasien || '';
+                document.getElementById('field-pj-jk').value = activePatientData.jk || 'L';
+                
+                // Auto Fill & Sanitize Phone Number
+                let phoneVal = activePatientData.no_tlp || '';
+                let prefixVal = '+62';
+                if (phoneVal.startsWith('+')) {
+                    let match = phoneVal.match(/^\+(\d{1,4})/);
+                    if (match) {
+                        prefixVal = '+' + match[1];
+                        phoneVal = phoneVal.substring(prefixVal.length);
+                    }
+                } else if (phoneVal.startsWith('62')) {
+                    prefixVal = '+62';
+                    phoneVal = phoneVal.substring(2);
+                } else if (phoneVal.startsWith('0')) {
+                    prefixVal = '+62';
+                    phoneVal = phoneVal.substring(1);
+                }
+                
+                const prefixSelectEl = document.getElementById('field-pj-telp-prefix-select');
+                const prefixSelectContainerEl = document.getElementById('telp-prefix-select-container');
+                const prefixCustomContainerEl = document.getElementById('telp-prefix-custom-container');
+                
+                document.getElementById('field-pj-telp-prefix').value = prefixVal;
+                document.getElementById('field-pj-telp').value = phoneVal;
+                
+                if (prefixSelectEl) {
+                    const options = Array.from(prefixSelectEl.options).map(opt => opt.value);
+                    if (options.includes(prefixVal)) {
+                        prefixSelectEl.value = prefixVal;
+                        prefixSelectContainerEl.style.display = 'flex';
+                        prefixCustomContainerEl.style.display = 'none';
+                    } else {
+                        prefixSelectEl.value = 'custom';
+                        prefixSelectContainerEl.style.display = 'none';
+                        prefixCustomContainerEl.style.display = 'flex';
+                    }
+                }
+                
+                syncAuth1();
+            }
+        });
+
+        // Check for edit query parameters on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const noRm = urlParams.get('no_rm');
+            const noRawat = urlParams.get('no_rawat');
+            const isEdit = urlParams.get('edit') === 'true';
+
+            if (noRm) {
+                const searchInput = document.getElementById('search-no-rm');
+                if (searchInput) {
+                    searchInput.value = noRm;
+                    // Trigger search
+                    await searchPatient();
+                    
+                    if (noRawat) {
+                        // Find and select the corresponding registration row
+                        const rows = Array.from(document.getElementById('history-table-body').children);
+                        const targetRow = rows.find(row => {
+                            const cells = row.getElementsByTagName('td');
+                            return cells.length > 2 && cells[2].textContent.trim() === noRawat;
+                        });
+
+                        if (targetRow) {
+                            // Trigger click event on the target row to select it
+                            targetRow.click();
+
+                            if (isEdit) {
+                                // If edit mode, populate form with existing General Consent details
+                                const reg = window.historyData.find(h => h.no_rawat === noRawat);
+                                if (reg && reg.general_consent) {
+                                    const consent = reg.general_consent;
+                                    
+                                    // Update form fields
+                                    document.getElementById('field-pj-nama').value = consent.nama_pj || '';
+                                    document.getElementById('field-pj-jk').value = consent.jkpj || 'L';
+                                    document.getElementById('field-pj-hubungan').value = consent.bertindak_atas || 'Diri Sendiri';
+                                    
+                                    // Parse phone prefix and phone number
+                                    let phoneVal = consent.no_telp || '';
+                                    let prefixVal = '+62';
+                                    if (phoneVal.startsWith('62')) {
+                                        prefixVal = '+62';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('60')) {
+                                        prefixVal = '+60';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('65')) {
+                                        prefixVal = '+65';
+                                        phoneVal = phoneVal.substring(2);
+                                    } else if (phoneVal.startsWith('+')) {
+                                        let match = phoneVal.match(/^\+(\d{1,4})/);
+                                        if (match) {
+                                            prefixVal = '+' + match[1];
+                                            phoneVal = phoneVal.substring(prefixVal.length);
+                                        }
+                                    } else if (phoneVal.startsWith('0')) {
+                                        phoneVal = phoneVal.substring(1);
+                                        prefixVal = '+62';
+                                    }
+
+                                    const prefixSelectEl = document.getElementById('field-pj-telp-prefix-select');
+                                    const prefixSelectContainerEl = document.getElementById('telp-prefix-select-container');
+                                    const prefixCustomContainerEl = document.getElementById('telp-prefix-custom-container');
+                                    const prefixInputEl = document.getElementById('field-pj-telp-prefix');
+                                    
+                                    if (prefixInputEl) {
+                                        prefixInputEl.value = prefixVal;
+                                    }
+                                    document.getElementById('field-pj-telp').value = phoneVal;
+
+                                    if (prefixSelectEl) {
+                                        const options = Array.from(prefixSelectEl.options).map(opt => opt.value);
+                                        if (options.includes(prefixVal)) {
+                                            prefixSelectEl.value = prefixVal;
+                                            prefixSelectContainerEl.style.display = 'flex';
+                                            prefixCustomContainerEl.style.display = 'none';
+                                        } else {
+                                            prefixSelectEl.value = 'custom';
+                                            prefixSelectContainerEl.style.display = 'none';
+                                            prefixCustomContainerEl.style.display = 'flex';
+                                        }
+                                    }
+
+                                    // Set signature preview if exists
+                                    const signaturePreview = document.getElementById('signature-preview');
+                                    const signaturePlaceholder = document.getElementById('signature-placeholder');
+                                    const btnOpenSignature = document.getElementById('btn-open-signature');
+                                    
+            if (reg.signature_pasien && reg.signature_pasien.signature_path && signaturePreview && signaturePlaceholder) {
+                                        const signatureUrl = '/storage/' + reg.signature_pasien.signature_path;
+                                        signaturePreview.src = signatureUrl;
+                                        signaturePreview.style.display = 'block';
+                                        signaturePlaceholder.style.display = 'none';
+                                        btnOpenSignature.style.borderStyle = 'solid';
+                                        btnOpenSignature.style.borderColor = 'var(--primary)';
+                                    }
+
+                                    // Sync first auth party's details
+                                    syncAuth1();
+
+                                    // Load specific Pelepasan Informasi (Authorized Parties) for this no_surat
+                                    try {
+                                        const authResponse = await fetch(`/pelepasan-informasi/${encodeURIComponent(consent.no_surat)}`);
+                                        if (authResponse.ok) {
+                                            const authParties = await authResponse.json();
+                                            
+                                            // Reset all auth fields first
+                                            for (let i = 1; i <= 4; i++) {
+                                                const fieldName = document.getElementById(`field-auth-name-${i}`);
+                                                const fieldTelp = document.getElementById(`field-auth-telp-${i}`);
+                                                if (fieldName) fieldName.value = '';
+                                                if (fieldTelp) fieldTelp.value = '';
+                                            }
+
+                                            // Populate auth fields
+                                            authParties.forEach((party, index) => {
+                                                if (index < 4) {
+                                                    const fieldName = document.getElementById(`field-auth-name-${index + 1}`);
+                                                    const fieldTelp = document.getElementById(`field-auth-telp-${index + 1}`);
+                                                    if (fieldName) fieldName.value = party.nama || '';
+                                                    
+                                                    if (fieldTelp) {
+                                                        let phone = party.no_telp || '';
+                                                        if (index === 0) { // First party phone format (uses active prefix)
+                                                            const activePrefixDigits = prefixVal.replace(/\D/g, ''); 
+                                                            if (phone.startsWith(activePrefixDigits)) {
+                                                                phone = phone.substring(activePrefixDigits.length);
+                                                            }
+                                                        } else { // Other parties phone format (always assumes +62 prefix label)
+                                                            if (phone.startsWith('62')) {
+                                                                phone = phone.substring(2);
+                                                            }
+                                                        }
+                                                        fieldTelp.value = phone;
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    } catch (authError) {
+                                        console.error('Gagal memuat data pelepasan informasi:', authError);
+                                    }
+                                    
+                                    // Override no_surat with actual No. Pernyataan from loaded general_consent
+                                    const noPernyataanField = document.getElementById('field-no-pernyataan');
+                                    if (noPernyataanField && consent.no_surat) {
+                                        noPernyataanField.value = consent.no_surat;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
