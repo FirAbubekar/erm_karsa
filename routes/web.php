@@ -4,6 +4,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HasilLabController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\SuratPersetujuanRawatInapController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,7 +42,7 @@ Route::get('/hasil-lab/json/{ono}', [HasilLabController::class, 'getDetailJson']
 Route::get('/hasil-lab/pdf/{ono}', [HasilLabController::class, 'downloadPDF'])->name('hasil-lab.pdf');
 Route::post('/hasil-lab/send-wa', [HasilLabController::class, 'sendWhatsApp'])->name('hasil-lab.send-wa');
 
-use App\Http\Controllers\SuratPersetujuanRawatInapController;
+
 
 Route::get('/surat-persetujuan-rawat-inap', [SuratPersetujuanRawatInapController::class, 'index'])->name('surat-persetujuan-rawat-inap.index');
 Route::post('/surat-persetujuan-rawat-inap/store', [SuratPersetujuanRawatInapController::class, 'store'])->name('surat-persetujuan-rawat-inap.store');
@@ -84,8 +85,6 @@ Route::get('/hasil-lab/detail/{ono}', [HasilLabController::class, 'detail'])->na
 Route::get('/hasil-lab/json/{ono}', [HasilLabController::class, 'getDetailJson'])->name('hasil-lab.json');
 Route::get('/hasil-lab/pdf/{ono}', [HasilLabController::class, 'downloadPDF'])->name('hasil-lab.pdf');
 Route::post('/hasil-lab/send-wa', [HasilLabController::class, 'sendWhatsApp'])->name('hasil-lab.send-wa');
-
-use App\Http\Controllers\SuratPersetujuanRawatInapController;
 
 Route::get('/surat-persetujuan-rawat-inap', [SuratPersetujuanRawatInapController::class, 'index'])->name('surat-persetujuan-rawat-inap.index');
 Route::post('/surat-persetujuan-rawat-inap/store', [SuratPersetujuanRawatInapController::class, 'store'])->name('surat-persetujuan-rawat-inap.store');
