@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\HasAuditLogs;
 
 class SuratPersetujuanRawatInap extends Model
 {
+    use HasAuditLogs;
+
     protected $table = 'surat_persetujuan_rawat_inap';
     protected $primaryKey = 'no_surat';
     public $incrementing = false;

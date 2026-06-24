@@ -62,6 +62,8 @@ class SuratPersetujuanRawatInapController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
+                $isEdit = SuratPersetujuanRawatInap::where('no_surat', $request->no_surat)->exists();
+
                 // Fetch room/kamar from database
                 $kamar = DB::table('kamar')->where('kd_kamar', $request->kd_kamar)->first();
                 if (!$kamar) {
@@ -159,6 +161,11 @@ class SuratPersetujuanRawatInapController extends Controller
                         'nip' => Session::get('user_id') ?? $request->nip ?? '-',
                     ]
                 );
+
+                // Log activity if it is an edit but the model was not dirty (so updated event did not fire)
+                if ($isEdit && !$spri->wasChanged()) {
+                    SuratPersetujuanRawatInap::logActivity($spri, 'UPDATE');
+                }
 
                 // 8. Generate PDF and save it (Internal storage, Local webapps, Remote server)
                 try {

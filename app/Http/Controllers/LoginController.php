@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
+
 class LoginController extends Controller
 {
     public function login(Request $request)
@@ -29,13 +30,35 @@ class LoginController extends Controller
 
             $count = $result[0]->total ?? 0;
 
-            if ($count > 0) {
-                // Manually start session
-                Session::put('user_id', $username);
-                Session::put('is_logged_in', true);
+            // if ($count > 0) {
+            //     // Manually start session
+            //     Session::put('user_id', $username);
+            //     Session::put('is_logged_in', true);
 
-                return redirect()->intended('/dashboard');
-            }
+            //     return redirect()->intended('/dashboard');
+            // }
+            // if ($count > 0) {
+
+            //     $permissions = PermissionService::getPermissions($username);
+
+            //     Session::put('user_id', $username);
+            //     Session::put('is_logged_in', true);
+            //     Session::put('permissions', $permissions);
+
+            //     return redirect()->intended('/dashboard');
+            // }
+
+            if ($count > 0) {
+    // Ambil permission menggunakan class Service
+    $permissions = \App\Services\PermissionService::getPermissions($username);
+
+    Session::put('user_id', $username);
+    Session::put('is_logged_in', true);
+    Session::put('permissions', $permissions); // Simpan ke session
+
+    return redirect()->intended('/dashboard');
+}
+
 
             return back()->withErrors([
                 'login_error' => 'Username atau Password salah.',

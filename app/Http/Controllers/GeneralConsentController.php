@@ -127,6 +127,26 @@ class GeneralConsentController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
+                $consent = GeneralConsent::where('no_surat', $request->no_surat)->first() ?? new GeneralConsent();
+                $isEdit = $consent->exists;
+
+                // Capture old pelepasan_informasi and signature
+                if ($isEdit) {
+                    $consent->old_pelepasan_informasi = DB::table('pelepasan_informasi')
+                        ->where('no_surat', $consent->no_surat)
+                        ->select('nama', 'no_telp')
+                        ->get()
+                        ->toArray();
+                        
+                    $oldSig = DB::table('signature_pasien')
+                        ->where('no_rawat', $consent->no_rawat)
+                        ->first();
+                    $consent->old_signature = $oldSig ? $oldSig->signature_path : null;
+                } else {
+                    $consent->old_pelepasan_informasi = [];
+                    $consent->old_signature = null;
+                }
+
                 // Ensure auth_name_1 is synced with Penanggung Jawab data as requested
                 // Format: Nama / Hubungan
                 $pjNameWithHubungan = $request->nama_pj . ' / ' . $request->bertindak_atas;
@@ -158,23 +178,42 @@ class GeneralConsentController extends Controller
                     Storage::disk('public')->put($path, $imageBinary);
                 }
 
+                // Prepare new signature
+                $consent->new_signature = $isNewSignature ? $path : $consent->old_signature;
+
+                // Prepare new pelepasan_informasi
+                $newPelepasan = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $name = $request->{"auth_name_$i"};
+                    $telp = $request->{"auth_telp_$i"};
+                    if (!empty($name)) {
+                        $newPelepasan[] = [
+                            'nama' => $name,
+                            'no_telp' => $this->formatPhoneNumber($telp, $i == 1 ? $request->no_telp_prefix : '+62') ?? '-'
+                        ];
+                    }
+                }
+                $consent->new_pelepasan_informasi = $newPelepasan;
+
                 // 1. Save to surat_persetujuan_umum
-                $consent = GeneralConsent::updateOrCreate(
-                    ['no_surat' => $request->no_surat],
-                    [
-                        'no_rawat' => $request->no_rawat,
-                        'tanggal' => $request->tanggal,
-                        'pengobatan_kepada' => $request->pengobatan_kepada,
-                        'nilai_kepercayaan' => $request->nilai_kepercayaan,
-                        'nama_pj' => $request->nama_pj,
-                        'umur_pj' => $request->umur_pj,
-                        'no_ktppj' => $request->no_ktppj,
-                        'jkpj' => $request->jkpj,
-                        'bertindak_atas' => $request->bertindak_atas,
-                        'no_telp' => $this->formatPhoneNumber($request->no_telp, $request->no_telp_prefix),
-                        'nip' => Session::get('user_id'),
-                    ]
-                );
+                $consent->fill([
+                    'no_rawat' => $request->no_rawat,
+                    'tanggal' => $request->tanggal,
+                    'pengobatan_kepada' => $request->pengobatan_kepada,
+                    'nilai_kepercayaan' => $request->nilai_kepercayaan,
+                    'nama_pj' => $request->nama_pj,
+                    'umur_pj' => $request->umur_pj,
+                    'no_ktppj' => $request->no_ktppj,
+                    'jkpj' => $request->jkpj,
+                    'bertindak_atas' => $request->bertindak_atas,
+                    'no_telp' => $this->formatPhoneNumber($request->no_telp, $request->no_telp_prefix),
+                    'nip' => Session::get('user_id'),
+                ]);
+
+                if (!$isEdit) {
+                    $consent->no_surat = $request->no_surat;
+                }
+                $consent->save();
 
                 // 2. Save or update signature_pasien only if a new signature was uploaded
                 if ($isNewSignature) {
@@ -206,6 +245,11 @@ class GeneralConsentController extends Controller
                             'created_date' => now()
                         ]);
                     }
+                }
+
+                // Log activity if it is an edit but the model was not dirty (so updated event did not fire)
+                if ($isEdit && !$consent->wasChanged()) {
+                    GeneralConsent::logActivity($consent, 'UPDATE');
                 }
 
                 // 5. Save to berkas_digital_perawatan

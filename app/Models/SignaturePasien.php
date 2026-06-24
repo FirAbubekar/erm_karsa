@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SignaturePasien extends Model
 {
+
     protected $table = 'signature_pasien';
     protected $primaryKey = 'id_uuid';
     public $incrementing = false;

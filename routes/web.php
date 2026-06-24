@@ -79,3 +79,5 @@ Route::get('/prospective-reviu/pdf/{id_uuid}', [App\Http\Controllers\Prospective
 Route::get('/riwayat-prospective-reviu', [App\Http\Controllers\ProspectiveReviewController::class, 'historyPage'])->name('prospective-reviu.history-page');
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
