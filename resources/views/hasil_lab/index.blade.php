@@ -125,7 +125,38 @@
         #loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.8); z-index: 10; align-items: center; justify-content: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Custom Select2 styling for wa-number-select */
+        .modal-footer .select2-container {
+            width: 180px !important;
+        }
+        .modal-footer .select2-container--default .select2-selection--single {
+            height: 36px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            outline: none;
+        }
+        .modal-footer .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 0;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .modal-footer .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 34px;
+        }
     </style>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     @include('partials.sidebar')
@@ -375,6 +406,11 @@
                         });
                     }
 
+                    // Initialize Select2 on modal open
+                    $('#wa-number-select').select2({
+                        dropdownParent: $('#detailModal')
+                    }).val(null).trigger('change.select2'); // Reset selection view
+
                     // Calculate Age
                     if (data.header.BIRTH_DT) {
                         const birth = new Date(data.header.BIRTH_DT);
@@ -417,20 +453,17 @@
         }
 
         // Add event listener for WA selection change
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectEl = document.getElementById('wa-number-select');
-            if (selectEl) {
-                selectEl.addEventListener('change', function() {
-                    const val = this.value;
-                    if (val) {
-                        let cleanVal = val;
-                        if (cleanVal.startsWith('+62')) cleanVal = cleanVal.substring(3);
-                        else if (cleanVal.startsWith('62')) cleanVal = cleanVal.substring(2);
-                        else if (cleanVal.startsWith('0')) cleanVal = cleanVal.substring(1);
-                        document.getElementById('wa-number').value = cleanVal;
-                    }
-                });
-            }
+        $(document).ready(function() {
+            $('#wa-number-select').on('change', function() {
+                const val = $(this).val();
+                if (val) {
+                    let cleanVal = val;
+                    if (cleanVal.startsWith('+62')) cleanVal = cleanVal.substring(3);
+                    else if (cleanVal.startsWith('62')) cleanVal = cleanVal.substring(2);
+                    else if (cleanVal.startsWith('0')) cleanVal = cleanVal.substring(1);
+                    $('#wa-number').val(cleanVal);
+                }
+            });
         });
 
         function closeModal() {
