@@ -501,12 +501,19 @@
                                         <label>Hubungan Dengan Pasien</label>
                                         <select class="form-control" name="pj_hubungan" id="field-pj-hubungan" required>
                                             <option value="">Pilih Hubungan...</option>
-                                            <option value="Diri Sendiri">Diri Sendiri</option>
                                             <option value="Suami">Suami</option>
                                             <option value="Istri">Istri</option>
                                             <option value="Anak">Anak</option>
-                                            <option value="Orang Tua">Orang Tua</option>
-                                            <option value="Wali / Kurator">Wali / Kurator</option>
+                                            <option value="Ayah">Ayah</option>
+                                            <option value="Ibu">Ibu</option>
+                                            <option value="Saudara">Saudara</option>
+                                            <option value="Diri Sendiri">Diri Sendiri</option>
+                                            <option value="Keponakan">Keponakan</option>
+                                            <option value="Cucu">Cucu</option>
+                                            <option value="Kakek">Kakek</option>
+                                            <option value="Nenek">Nenek</option>
+                                            <option value="Kakak">Kakak</option>
+                                            <option value="Adik">Adik</option>
                                         </select>
                                     </div>
                                     <div class="form-group" style="margin-bottom: 0;">
