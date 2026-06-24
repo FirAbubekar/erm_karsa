@@ -257,9 +257,17 @@ class PatientEducationController extends Controller
                     $safeNoRawat = str_replace('/', '_', $request->no_rawat);
                     $directory = "education/{$safeNoRawat}";
                     $filename = 'TTD_ASSESSMENT_' . time() . '.png';
-                    $signaturePath = "{$directory}/{$filename}";
+                    $newSignaturePath = "{$directory}/{$filename}";
 
-                    Storage::disk('public')->put($signaturePath, $imageBinary);
+                    Storage::disk('public')->put($newSignaturePath, $imageBinary);
+                    
+                    // Hapus file lama jika ada
+                    if ($existing && $existing->ttd_pasien_wali && $existing->ttd_pasien_wali !== $newSignaturePath) {
+                        if (Storage::disk('public')->exists($existing->ttd_pasien_wali)) {
+                            Storage::disk('public')->delete($existing->ttd_pasien_wali);
+                        }
+                    }
+                    $signaturePath = $newSignaturePath;
                 }
 
                 if (!$signaturePath) {
@@ -355,11 +363,34 @@ class PatientEducationController extends Controller
                 if ($existing) {
                     $ttdPasienPath = $existing->ttd_pasien;
                 }
-                if ($request->ttd_pasien && str_starts_with($request->ttd_pasien, 'data:image')) {
-                    $imgData = str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->ttd_pasien);
-                    $filename = 'TTD_PASIEN_' . $request->kode_topik . '_' . time() . '.png';
-                    $ttdPasienPath = "{$directory}/{$filename}";
-                    Storage::disk('public')->put($ttdPasienPath, base64_decode($imgData));
+                if ($request->ttd_pasien) {
+                    $newTtdPath = null;
+                    if (str_starts_with($request->ttd_pasien, 'data:image')) {
+                        $imgData = str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->ttd_pasien);
+                        $filename = 'TTD_PASIEN_' . $request->kode_topik . '_' . time() . '.png';
+                        $newTtdPath = "{$directory}/{$filename}";
+                        Storage::disk('public')->put($newTtdPath, base64_decode($imgData));
+                    } elseif (str_starts_with($request->ttd_pasien, '/storage/')) {
+                        // Salin file fisik dari Bagian B
+                        $sourcePath = str_replace('/storage/', '', $request->ttd_pasien);
+                        if (Storage::disk('public')->exists($sourcePath)) {
+                            $filename = 'TTD_PASIEN_' . $request->kode_topik . '_COPIED_' . time() . '.png';
+                            $newTtdPath = "{$directory}/{$filename}";
+                            Storage::disk('public')->copy($sourcePath, $newTtdPath);
+                        } else {
+                            $newTtdPath = $sourcePath;
+                        }
+                    } else {
+                        $newTtdPath = $request->ttd_pasien;
+                    }
+
+                    // Hapus file lama jika ada dan berbeda dengan yang baru
+                    if ($newTtdPath && $existing && $existing->ttd_pasien && $existing->ttd_pasien !== $newTtdPath) {
+                        if (Storage::disk('public')->exists($existing->ttd_pasien)) {
+                            Storage::disk('public')->delete($existing->ttd_pasien);
+                        }
+                    }
+                    $ttdPasienPath = $newTtdPath;
                 }
 
                 // Process TTD Edukator

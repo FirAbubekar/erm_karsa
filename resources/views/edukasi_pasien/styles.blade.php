@@ -308,6 +308,7 @@
 
     .form-control {
         width: 100%;
+        height: 40px;
         padding: 10px 14px;
         background: #F8FAFC;
         border: 1.5px solid var(--border);
