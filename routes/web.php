@@ -51,3 +51,5 @@ Route::get('/surat-persetujuan-rawat-inap/wa-template/{no_surat}', [SuratPersetu
 Route::post('/surat-persetujuan-rawat-inap/send-wa', [SuratPersetujuanRawatInapController::class, 'sendWhatsappManual'])->name('surat-persetujuan-rawat-inap.send-wa');
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+

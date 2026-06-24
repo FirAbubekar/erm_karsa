@@ -4,9 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\HasAuditLogs;
 
 class GeneralConsent extends Model
 {
+    use HasAuditLogs;
+
+    // Public properties to hold relation data without polluting Eloquent database attributes
+    public $old_pelepasan_informasi;
+    public $new_pelepasan_informasi;
+    public $old_signature;
+    public $new_signature;
+
     protected $table = 'surat_persetujuan_umum';
     protected $primaryKey = 'no_surat';
     public $incrementing = false;

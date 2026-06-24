@@ -471,27 +471,17 @@
                                     <label>Nama Lengkap</label>
                                     <input type="text" class="form-control" name="pj_nama" id="field-pj-nama" placeholder="Masukkan nama lengkap" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="display: none;">
                                     <label>No. KTP / NIK Penanggung Jawab</label>
-                                    <input type="text" class="form-control" name="no_ktp" id="field-pj-ktp" placeholder="Masukkan NIK penanggung jawab" required>
+                                    <input type="text" class="form-control" name="no_ktp" id="field-pj-ktp" value="-" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Umur (Tahun)</label>
                                     <input type="number" class="form-control" name="pj_umur" id="field-pj-umur" placeholder="Contoh: 35" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="display: none;">
                                     <label>Pendidikan Penanggung Jawab</label>
-                                    <select class="form-control" name="pendidikan_pj" id="field-pj-pendidikan" required>
-                                        <option value="">Pilih Pendidikan...</option>
-                                        <option value="TS">Tidak Sekolah</option>
-                                        <option value="SD">SD</option>
-                                        <option value="SMP">SMP</option>
-                                        <option value="SMA">SMA / SMK</option>
-                                        <option value="D3">Diploma (D3)</option>
-                                        <option value="S1">Sarjana (S1)</option>
-                                        <option value="S2">Magister (S2)</option>
-                                        <option value="S3">Doktor (S3)</option>
-                                    </select>
+                                    <input type="text" class="form-control" name="pendidikan_pj" id="field-pj-pendidikan" value="-" required>
                                 </div>
                                 <div class="pihak-pertama-three-cols">
                                     <div class="form-group" style="margin-bottom: 0;">
@@ -761,7 +751,7 @@
             if (!activePatientData) return;
             if (e.target.value === 'Diri Sendiri') {
                 document.getElementById('field-pj-nama').value = activePatientData.nm_pasien || '';
-                document.getElementById('field-pj-ktp').value = activePatientData.no_ktp || '';
+                document.getElementById('field-pj-ktp').value = '-';
                 document.getElementById('field-pj-alamat').value = activePatientFullAddress;
                 document.getElementById('copy-alamat-pasien').checked = true;
                 

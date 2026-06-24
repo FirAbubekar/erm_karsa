@@ -1,0 +1,15 @@
+Menemukan 2 antrean. Mulai memproses...
+Memproses antrean ID: 5 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
+Memproses antrean ID: 6 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
+Menemukan 2 antrean. Mulai memproses...
+Memproses antrean ID: 3 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
+Memproses antrean ID: 4 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
+Menemukan 2 antrean. Mulai memproses...
+Memproses antrean ID: 2 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
+Memproses antrean ID: 3 untuk No. Surat: PPU20260511042940
+Berhasil mengirim ke 6281334555468
