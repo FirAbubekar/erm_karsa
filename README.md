@@ -68,19 +68,18 @@ cp .env.example .env
 Sesuaikan parameter koneksi database SIMKES Khanza dan API WhatsApp:
 ```ini
 DB_CONNECTION=mysql
-DB_HOST=192.168.200.201
-DB_PORT=3306
-DB_DATABASE=sik
-DB_USERNAME=simrs
-DB_PASSWORD='your_password'
+DB_HOST=''
+DB_PORT=''
+DB_DATABASE=''
+DB_USERNAME=''
+DB_PASSWORD=''
 
 # WhatsApp Gateway
-WA_URL=http://192.168.200.182:3004
-WA_DEVICE_ID=your_device_id
+WA_URL=''
+WA_DEVICE_ID=''
 
 # Path TTD Pegawai
-STAFF_SIGNATURE_PATH=http://192.168.30.24/webapps/penggajian/temp
-```
+STAFF_SIGNATURE_PATH=''
 
 ### 4. Generate App Key & Jalankan Migrasi
 ```bash
