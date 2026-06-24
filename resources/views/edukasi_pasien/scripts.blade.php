@@ -170,7 +170,16 @@ function populateImplementations(implementations) {
             row.innerHTML = `
                 <td><input type="text" class="poli-input" placeholder="Poli/Unit" value="${impl.poli_unit || ''}"></td>
                 <td class="topik-cell"><input type="text" class="form-control" style="font-size:12px;padding:6px 8px" placeholder="Tulis topik edukasi..." value="${impl.nama_topik || ''}"></td>
-                <td><input type="datetime-local" class="form-control" style="font-size:11px;padding:6px 8px"></td>
+                <td>
+                    <div style="margin-bottom:6px">
+                        <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
+                        <input type="datetime-local" class="form-control input-start" style="font-size:11px;padding:4px 6px" value="${getNowDatetime()}">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
+                        <input type="datetime-local" class="form-control input-end" style="font-size:11px;padding:4px 6px">
+                    </div>
+                </td>
                 <td class="verif-cell">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                         <label style="font-size:11px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-secondary);margin:0;">Tujuan</label>
@@ -189,7 +198,14 @@ function populateImplementations(implementations) {
                         <input type="text" maxlength="1" data-verif="Evaluasi" oninput="this.value=this.value.replace(/[^1-4]/g,'')" style="width:24px;height:20px;text-align:center;font-size:11px;border:1px solid #94a3b8;border-radius:4px;outline:none;background-color:#ffffff;" placeholder="">
                     </div>
                 </td>
-                <td class="ttd-cell"><div class="ttd-mini" id="ttd-pasien-${impl.kode_topik}" onclick="openSignatureModal('ttd-pasien-${impl.kode_topik}')"><span class="ttd-placeholder" style="font-size:9px;color:var(--text-muted)">TTD</span></div></td>
+                <td class="ttd-cell">
+                    <div class="ttd-mini" id="ttd-pasien-${impl.kode_topik}" onclick="openSignatureModal('ttd-pasien-${impl.kode_topik}')"><span class="ttd-placeholder" style="font-size:9px;color:var(--text-muted)">TTD</span></div>
+                    <div style="margin-top:4px; text-align:center;">
+                        <label style="font-size:9px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                            <input type="checkbox" class="copy-ttd-cb" data-target="ttd-pasien-${impl.kode_topik}"> Salin TTD B
+                        </label>
+                    </div>
+                </td>
                 <td><input type="date" class="form-control" style="font-size:11px;padding:6px 8px"></td>
                 <td style="text-align:center;white-space:nowrap">
                     <button class="btn-icon btn-icon-save" title="Simpan baris" style="margin-right:4px">
@@ -275,11 +291,10 @@ function populateImplementations(implementations) {
 
         // Tgl/Jam Edukasi (datetime-local)
         if(impl.created_at) {
-            const dtStart = row.querySelector('.text-start');
+            const dtStart = row.querySelector('.input-start');
             if(dtStart) {
-                const d = new Date(impl.created_at.replace(' ', 'T'));
-                const pad = n => String(n).padStart(2, '0');
-                dtStart.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}`;
+                let dtStr = String(impl.created_at).replace(' ', 'T');
+                dtStart.value = dtStr.substring(0, 16);
             }
         }
         if(impl.tgl_akhir_edukasi) {
@@ -335,8 +350,8 @@ function resetAssessmentForm() {
         row.querySelectorAll('.verif-cell input[type="text"]').forEach(input => input.value = '');
 
         // Reset datetime-local value to today's date-time
-        const dtStart = row.querySelector('.text-start');
-        if(dtStart) dtStart.textContent = '(Otomatis saat disimpan)';
+        const dtStart = row.querySelector('.input-start');
+        if(dtStart) dtStart.value = nowDt;
         const dtInputEnd = row.querySelector('.input-end');
         if(dtInputEnd) dtInputEnd.value = '';
 
@@ -419,6 +434,10 @@ document.getElementById('save-signature-modal').addEventListener('click',()=>{
             if(placeholder) placeholder.style.display='none';
             container.style.borderStyle='solid';container.style.borderColor='var(--primary)';
             container.dataset.signatureData=dataURL;
+
+            // Uncheck copy-ttd-cb if manually signed
+            const cb = document.querySelector(`.copy-ttd-cb[data-target="${activeSignatureTarget}"]`);
+            if(cb) cb.checked = false;
         }
     }
     sigModal.style.display='none';document.body.style.overflow='';
@@ -679,6 +698,60 @@ document.getElementById('topik-table-body').addEventListener('click', (e) => {
     if(saveBtn) {
         e.preventDefault();
         saveImplementationRow(saveBtn);
+    }
+});
+
+// Event delegation for Copy TTD B checkbox
+document.getElementById('topik-table-body').addEventListener('change', (e) => {
+    if (e.target.classList.contains('copy-ttd-cb')) {
+        const targetId = e.target.dataset.target;
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        
+        if (e.target.checked) {
+            const sigBoxB = document.getElementById('konfirmasi-signature-box');
+            let dataToCopy = null;
+            let imgB = null;
+            
+            if (sigBoxB) {
+                if (sigBoxB.dataset.signatureData && sigBoxB.dataset.signatureData !== 'existing') {
+                    dataToCopy = sigBoxB.dataset.signatureData;
+                }
+                imgB = sigBoxB.querySelector('img');
+            }
+            
+            if (!imgB || !imgB.src) {
+                e.target.checked = false;
+                showError('Belum ada tanda tangan di Bagian B untuk disalin.');
+                return;
+            }
+            
+            let finalData = dataToCopy;
+            if (!finalData) {
+                if (imgB.src.startsWith('data:image')) {
+                    finalData = imgB.src;
+                } else {
+                    try { finalData = new URL(imgB.src).pathname; }
+                    catch(e) { finalData = imgB.src; }
+                }
+            }
+            
+            let img = container.querySelector('img');
+            let placeholder = container.querySelector('.ttd-placeholder');
+            if(!img){img=document.createElement('img');img.style.cssText='max-width:100%;max-height:100%;object-fit:contain';container.appendChild(img)}
+            img.src = imgB.src;
+            img.style.display='block';
+            if(placeholder) placeholder.style.display='none';
+            container.style.borderStyle='solid';container.style.borderColor='var(--primary)';
+            container.dataset.signatureData = finalData;
+        } else {
+            const img = container.querySelector('img');
+            const placeholder = container.querySelector('.ttd-placeholder');
+            if(img) img.style.display='none';
+            if(placeholder) placeholder.style.display='flex';
+            container.style.borderStyle='';container.style.borderColor='';
+            delete container.dataset.signatureData;
+        }
     }
 });
 </script>

@@ -113,9 +113,21 @@
                             <div class="form-group"><label>Nama Penerima Info *</label><input type="text"
                                     id="field-nama-penerima" class="form-control"
                                     placeholder="Masukkan nama penerima"></div>
-                            <div class="form-group"><label>Hubungan dgn Pasien</label><input type="text"
-                                    id="field-hubungan-pasien" class="form-control"
-                                    placeholder="Misal: Orang Tua, Suami, Istri"></div>
+                            <div class="form-group">
+                                <label>Hubungan dgn Pasien</label>
+                                <select id="field-hubungan-pasien" class="form-control">
+                                    <option value="" disabled selected>Pilih hubungan...</option>
+                                    <option value="Diri Sendiri">Diri Sendiri</option>
+                                    <option value="Suami">Suami</option>
+                                    <option value="Istri">Istri</option>
+                                    <option value="Ayah">Ayah</option>
+                                    <option value="Ibu">Ibu</option>
+                                    <option value="Anak">Anak</option>
+                                    <option value="Saudara">Saudara</option>
+                                    <option value="Keluarga Lainnya">Keluarga Lainnya</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
                             <div class="form-group"><label>Tanggal</label><input type="date" id="field-tanggal"
                                     class="form-control" value="{{ date('Y-m-d') }}"></div>
                         </div>
@@ -377,7 +389,7 @@
             </div>
 
             <!-- ── C. Pelaksanaan Edukasi ── -->
-            <div class="glass-card">
+            <div class="glass-card" id="card-pelaksanaan">
                 <!-- <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
                     <div class="section-title" style="margin-bottom:0">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px">
@@ -393,7 +405,7 @@
                                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
                         Tambah Pelaksanaan
-                    </button> 
+                    </button>
                 </div> -->
 
                 <div style="overflow-x:auto">
@@ -412,6 +424,31 @@
                         <tbody id="topik-table-body">
                             @php $badgeColors = ['Pendaftaran'=>'badge-blue','Dokter'=>'badge-red','Gizi'=>'badge-green','Farmasi'=>'badge-orange','Rawat Inap'=>'badge-purple']; @endphp
                             @foreach ($topikEdukasi as $topik)
+                                @php
+                                    $canEditRow = false;
+                                    $poliUnit = strtolower($topik['poli_unit'] ?? '');
+
+                                    if ($poliUnit == 'pendaftaran' && hasPermission('ep.create.pendaftaran')) {
+                                        $canEditRow = true;
+                                    } elseif ($poliUnit == 'dokter' && hasPermission('ep.create.dpjp')) {
+                                        $canEditRow = true;
+                                    } elseif ($poliUnit == 'gizi' && hasPermission('ep.create.gizi')) {
+                                        $canEditRow = true;
+                                    } elseif ($poliUnit == 'farmasi' && hasPermission('ep.create.farmasi')) {
+                                        $canEditRow = true;
+                                    } elseif ($poliUnit == 'rawat inap' && hasPermission('ep.create.ranap')) {
+                                        $canEditRow = true;
+                                    } elseif (
+                                        empty($poliUnit) &&
+                                        (hasPermission('ep.create.ranap') ||
+                                            hasPermission('ep.create.dpjp') ||
+                                            hasPermission('ep.create.farmasi') ||
+                                            hasPermission('ep.create.gizi') ||
+                                            hasPermission('ep.create.pendaftaran'))
+                                    ) {
+                                        $canEditRow = true;
+                                    }
+                                @endphp
                                 <tr data-kode="{{ $topik['kode'] }}"
                                     data-is-custom="{{ $topik['is_custom'] ? 'true' : 'false' }}">
                                     <td>
@@ -419,7 +456,8 @@
                                             <span
                                                 class="badge {{ $badgeColors[$topik['poli_unit']] ?? 'badge-blue' }}">{{ $topik['poli_unit'] }}</span>
                                         @else
-                                            <input type="text" class="poli-input" placeholder="Poli/Unit">
+                                            <input type="text" class="poli-input" placeholder="Poli/Unit"
+                                                {{ !$canEditRow ? 'disabled' : '' }}>
                                         @endif
                                     </td>
                                     <td class="topik-cell" data-original-topik="{{ $topik['topik'] }}">
@@ -427,45 +465,59 @@
                                             {{ str_ireplace('(sebutkan)', '', $topik['topik']) }}
                                             <textarea class="topik-sebutkan-input form-control"
                                                 style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px;resize:vertical;min-height:50px;"
-                                                placeholder="Sebutkan detail..."></textarea>
+                                                placeholder="Sebutkan detail..." {{ !$canEditRow ? 'disabled' : '' }}></textarea>
                                         @else
-                                            {{ $topik['topik'] }}
+                                            {!! nl2br(e($topik['topik'])) !!}
                                         @endif
                                     </td>
                                     <td>
                                         <div style="margin-bottom:6px">
-                                            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
-                                            <div class="text-start" style="font-size:11px;font-weight:600;color:var(--text-main);padding:4px 2px">(Otomatis saat disimpan)</div>
+                                            <label
+                                                style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
+                                            <input type="datetime-local" class="form-control input-start"
+                                                style="font-size:11px;padding:4px 6px" value="{{ now()->format('Y-m-d\TH:i') }}" {{ !$canEditRow ? 'disabled' : '' }}>
                                         </div>
                                         <div>
-                                            <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
+                                            <label
+                                                style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
                                             <input type="datetime-local" class="form-control input-end"
-                                                style="font-size:11px;padding:4px 6px">
+                                                style="font-size:11px;padding:4px 6px"
+                                                {{ !$canEditRow ? 'disabled' : '' }}>
                                         </div>
                                     </td>
                                     <td class="verif-cell">
                                         @foreach ($pilihanVerifikasi as $v)
-                                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                                                <label style="font-size:11px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-secondary);margin:0;">{{ $v }}</label>
-                                                <input type="text" maxlength="1" data-verif="{{ $v }}" 
-                                                    oninput="this.value=this.value.replace(/[^1-4]/g,'')" 
-                                                    style="width:24px;height:20px;text-align:center;font-size:11px;border:1px solid #94a3b8;border-radius:4px;outline:none;background-color:#ffffff;" 
-                                                    placeholder="">
+                                            <div
+                                                style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                                                <label
+                                                    style="font-size:11px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-secondary);margin:0;">{{ $v }}</label>
+                                                <input type="text" maxlength="1"
+                                                    data-verif="{{ $v }}"
+                                                    oninput="this.value=this.value.replace(/[^1-4]/g,'')"
+                                                    style="width:24px;height:20px;text-align:center;font-size:11px;border:1px solid #94a3b8;border-radius:4px;outline:none;background-color:#ffffff;"
+                                                    placeholder="" {{ !$canEditRow ? 'disabled' : '' }}>
                                             </div>
                                         @endforeach
                                     </td>
                                     <td class="ttd-cell">
                                         <div class="ttd-mini" id="ttd-pasien-{{ $topik['kode'] }}"
-                                            onclick="openSignatureModal('ttd-pasien-{{ $topik['kode'] }}')">
+                                            @if ($canEditRow) onclick="openSignatureModal('ttd-pasien-{{ $topik['kode'] }}')" @else style="cursor:not-allowed;opacity:0.5;" @endif>
                                             <span class="ttd-placeholder"
                                                 style="font-size:9px;color:var(--text-muted)">TTD</span>
+                                        </div>
+                                        <div style="margin-top:4px; text-align:center;">
+                                            <label style="font-size:9px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                                                <input type="checkbox" class="copy-ttd-cb" data-target="ttd-pasien-{{ $topik['kode'] }}" {{ !$canEditRow ? 'disabled' : '' }}> Salin TTD B
+                                            </label>
                                         </div>
                                     </td>
 
                                     <td><input type="date" class="form-control"
-                                            style="font-size:11px;padding:6px 8px"></td>
+                                            style="font-size:11px;padding:6px 8px"
+                                            {{ !$canEditRow ? 'disabled' : '' }}></td>
                                     <td style="text-align:center">
-                                        <button class="btn-icon btn-icon-save" title="Simpan baris">
+                                        <button class="btn-icon btn-icon-save" title="Simpan baris"
+                                            @if (!$canEditRow) disabled style="opacity:0.4;cursor:not-allowed;" @endif>
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                 style="width:16px;height:16px">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -494,6 +546,45 @@
 
     @include('edukasi_pasien.modals')
     @include('edukasi_pasien.scripts')
+
+    @if (!hasPermission('ep.create.ranap'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Disable all form elements except search and section C (pelaksanaan)
+                const containers = document.querySelectorAll(
+                    '.content-area .glass-card:not(#card-search):not(#card-pelaksanaan)');
+                containers.forEach(container => {
+                    const elements = container.querySelectorAll('input, select, textarea, button');
+                    elements.forEach(el => {
+                        // Do not disable print buttons (e.g., .btn-print) if any
+                        if (!el.classList.contains('btn-print') && !el.closest('.btn-print')) {
+                            el.disabled = true;
+                        }
+                    });
+
+                    // Block signature canvas
+                    const canvases = container.querySelectorAll('canvas');
+                    canvases.forEach(canvas => {
+                        canvas.style.pointerEvents = 'none';
+                        canvas.style.opacity = '0.7';
+                    });
+                });
+
+                // Hide specific action buttons explicitly
+                const actionBtns = document.querySelectorAll('#btn-save-edukasi, #btn-add-topik');
+                actionBtns.forEach(btn => {
+                    if (btn) btn.style.display = 'none';
+                });
+
+                // Show alert or info
+                const rightColumn = document.querySelector('#card-data-pasien').parentNode;
+                const alertDiv = document.createElement('div');
+                alertDiv.innerHTML =
+                    '<div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:13px; font-weight:500; border:1px solid #FCA5A5; display:flex; align-items:center; gap:8px;"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Anda berada dalam Mode Read-Only karena tidak memiliki hak akses.</div>';
+                rightColumn.insertBefore(alertDiv, rightColumn.firstChild);
+            });
+        </script>
+    @endif
 </body>
 
 </html>
