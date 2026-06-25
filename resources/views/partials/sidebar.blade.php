@@ -108,17 +108,17 @@
                 <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
             <div class="nav-dropdown-content">
-                <a href="{{ asset('pdf/pedoman_general_consent.pdf') }}" target="_blank" class="nav-dropdown-item">
+                <a href="{{ asset('pdf/Tutorial Penggunaan Aplikasi ERM General Consent.pdf') }}" target="_blank" class="nav-dropdown-item">
                     General Consent
                 </a>
-                <a href="{{ asset('pdf/pedoman_hasil_lab.pdf') }}" target="_blank" class="nav-dropdown-item">
-                    Hasil Lab
-                </a>
-                <a href="{{ asset('pdf/pedoman_surat_persetujuan_rawat_inap.pdf') }}" target="_blank" class="nav-dropdown-item">
+                <a href="{{ asset('pdf/Tutorial Penggunaan Aplikasi Surat Persetujuan Rawat Inap.pdf') }}" target="_blank" class="nav-dropdown-item">
                     Surat Persetujuan Rawat Inap
                 </a>
-                <a href="{{ asset('pdf/pedoman_rm_10.pdf') }}" target="_blank" class="nav-dropdown-item">
+                <a href="{{ asset('pdf/Manual_Book_KARSA_ERM_RM10.pdf') }}" target="_blank" class="nav-dropdown-item">
                     RM 10
+                </a>
+                <a href="{{ asset('pdf/Tutorial Penggunaan Aplikasi ERM Hasil Lab.pdf') }}" target="_blank" class="nav-dropdown-item">
+                    Hasil Lab
                 </a>
             </div>
         </div>
