@@ -52,26 +52,4 @@ Route::post('/surat-persetujuan-rawat-inap/send-wa', [SuratPersetujuanRawatInapC
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::group(['prefix' => 'tutorial', 'as' => 'tutorial.'], function () {
-    Route::get('/general-consent', function () {
-        if (!Session::get('is_logged_in')) return redirect('/');
-        return view('tutorial.general_consent');
-    })->name('general-consent');
-
-    Route::get('/hasil-lab', function () {
-        if (!Session::get('is_logged_in')) return redirect('/');
-        return view('tutorial.hasil_lab');
-    })->name('hasil-lab');
-
-    Route::get('/surat-persetujuan-rawat-inap', function () {
-        if (!Session::get('is_logged_in')) return redirect('/');
-        return view('tutorial.surat_persetujuan_rawat_inap');
-    })->name('surat-persetujuan-rawat-inap');
-
-    Route::get('/rm-10', function () {
-        if (!Session::get('is_logged_in')) return redirect('/');
-        return view('tutorial.rm_10');
-    })->name('rm-10');
-});
-
 
