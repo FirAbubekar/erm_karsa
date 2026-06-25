@@ -73,6 +73,16 @@
     .nav-section {
         padding: 24px 16px;
         flex-grow: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+    
+    .nav-section::-webkit-scrollbar {
+        width: 4px;
+    }
+    .nav-section::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: 4px;
     }
 
     .nav-label {

@@ -16,9 +16,18 @@
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
-    <div class="logo-section">
-        <div class="logo-box">K</div>
-        <div class="logo-text">KARSA ERM</div>
+    <div class="logo-section" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="logo-box">K</div>
+            <div class="logo-text">KARSA ERM</div>
+        </div>
+        <button id="desktop-toggle" class="desktop-only-btn"
+            style="background: none; border: none; cursor: pointer; color: var(--text-muted);">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7">
+                </path>
+            </svg>
+        </button>
     </div>
 
     <div class="nav-section">
@@ -117,7 +126,8 @@
                         RM 10 Edukasi Pasien
                     </div>
                     <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                        </path>
                     </svg>
                 </div>
                 <div class="nav-dropdown-content">
@@ -291,6 +301,78 @@
 </div>
 
 <style>
+    /* Minimized Sidebar Styles */
+    @media (max-width: 1024px) {
+        .desktop-only-btn {
+            display: none !important;
+        }
+    }
+
+    body.sidebar-minimized .sidebar {
+        width: 80px !important;
+    }
+
+    body.sidebar-minimized .main-content {
+        margin-left: 80px !important;
+        max-width: calc(100vw - 80px) !important;
+    }
+
+    body.sidebar-minimized .logo-text,
+    body.sidebar-minimized .nav-label,
+    body.sidebar-minimized .chevron,
+    body.sidebar-minimized .nav-dropdown-content,
+    body.sidebar-minimized .logo-box {
+        display: none !important;
+    }
+
+    body.sidebar-minimized .logo-section {
+        justify-content: center !important;
+        padding: 24px 0 !important;
+    }
+
+    body.sidebar-minimized #desktop-toggle svg {
+        transform: rotate(180deg);
+    }
+
+    body.sidebar-minimized .nav-item,
+    body.sidebar-minimized .nav-dropdown-toggle,
+    body.sidebar-minimized .btn-logout {
+        padding: 12px !important;
+        justify-content: center !important;
+        font-size: 0 !important;
+        gap: 0 !important;
+    }
+
+    body.sidebar-minimized .nav-dropdown-label {
+        font-size: 0 !important;
+        gap: 0 !important;
+    }
+
+    body.sidebar-minimized .nav-item svg,
+    body.sidebar-minimized .nav-dropdown-label svg,
+    body.sidebar-minimized .btn-logout svg {
+        margin: 0 !important;
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Sidebar Scrolling Fix (Global) */
+    .sidebar .nav-section {
+        overflow-y: auto !important;
+        min-height: 0 !important;
+    }
+
+    .sidebar .nav-section::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sidebar .nav-section::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: 4px;
+    }
+
     /* Dropdown Styles */
     .nav-dropdown {
         margin-bottom: 4px;
@@ -419,6 +501,30 @@
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const toggle = document.getElementById('mobile-toggle');
+    const desktopToggle = document.getElementById('desktop-toggle');
+
+    // Dropdown Logic
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+    // Desktop Minimize Logic
+    const isMinimized = localStorage.getItem('sidebar_minimized') === 'true';
+    if (isMinimized) {
+        document.body.classList.add('sidebar-minimized');
+        dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+    }
+
+    if (desktopToggle) {
+        desktopToggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-minimized');
+            const minimizedState = document.body.classList.contains('sidebar-minimized');
+            localStorage.setItem('sidebar_minimized', minimizedState);
+
+            // Close dropdowns if minimizing
+            if (minimizedState) {
+                dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+            }
+        });
+    }
 
     function toggleSidebar() {
         sidebar.classList.toggle('active');
@@ -430,7 +536,6 @@
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
     // Dropdown Logic
-    const dropdowns = document.querySelectorAll('.nav-dropdown');
     dropdowns.forEach(dropdown => {
         const toggleBtn = dropdown.querySelector('.nav-dropdown-toggle');
         toggleBtn.addEventListener('click', () => {
