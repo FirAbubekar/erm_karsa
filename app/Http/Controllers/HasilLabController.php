@@ -126,9 +126,15 @@ class HasilLabController extends Controller
             ->orderBy('DISP_SEQ')
             ->get();
 
+        $phoneList = DB::table('list_no_telp')
+            ->select('nama', 'no_telp')
+            ->orderBy('nama')
+            ->get();
+
         return response()->json([
             'header' => $header,
-            'details' => $details
+            'details' => $details,
+            'phone_list' => $phoneList
         ]);
     }
 

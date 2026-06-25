@@ -125,7 +125,38 @@
         #loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.8); z-index: 10; align-items: center; justify-content: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Custom Select2 styling for wa-number-select */
+        .modal-footer .select2-container {
+            width: 180px !important;
+        }
+        .modal-footer .select2-container--default .select2-selection--single {
+            height: 36px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            outline: none;
+        }
+        .modal-footer .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 0;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .modal-footer .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 34px;
+        }
     </style>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     @include('partials.sidebar')
@@ -287,6 +318,9 @@
                         <span style="padding: 0 10px; background: #f1f5f9; color: #475569; font-size: 14px; font-weight: 600; border-right: 1px solid var(--border); height: 36px; line-height: 36px;">+62</span>
                         <input type="text" id="wa-number" class="form-control" style="border: none; flex-grow: 1; height: 34px; padding: 0 12px; font-size: 14px; outline: none;" placeholder="8xxxxxxxxxx">
                     </div>
+                    <select id="wa-number-select" class="form-control" style="width: auto; max-width: 180px; height: 36px; font-size: 13px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary);">
+                        <option value="">-- Pilih No. Telp --</option>
+                    </select>
                 </div>
                 <button class="btn btn-light" type="button" onclick="closeModal()">Tutup</button>
                 <a id="btn-preview-pdf" href="#" target="_blank" class="btn btn-accent" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; display: flex; align-items: center; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s;">
@@ -343,6 +377,40 @@
                         waInput.value = '';
                     }
 
+                    // Populate WA Number Select Options
+                    const selectEl = document.getElementById('wa-number-select');
+                    selectEl.innerHTML = '<option value="">-- Pilih No. Telp --</option>';
+
+                    if (data.header.no_tlp && data.header.no_tlp !== '0' && data.header.no_tlp !== '-') {
+                        let cleanPatientPhone = data.header.no_tlp;
+                        if (cleanPatientPhone.startsWith('0')) {
+                            cleanPatientPhone = '+62' + cleanPatientPhone.substring(1);
+                        } else if (cleanPatientPhone.startsWith('62')) {
+                            cleanPatientPhone = '+' + cleanPatientPhone;
+                        } else if (!cleanPatientPhone.startsWith('+')) {
+                            cleanPatientPhone = '+62' + cleanPatientPhone;
+                        }
+
+                        const opt = document.createElement('option');
+                        opt.value = cleanPatientPhone;
+                        opt.innerText = `No. Pasien (${cleanPatientPhone})`;
+                        selectEl.appendChild(opt);
+                    }
+
+                    if (data.phone_list && data.phone_list.length > 0) {
+                        data.phone_list.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item.no_telp;
+                            opt.innerText = `${item.nama} (${item.no_telp})`;
+                            selectEl.appendChild(opt);
+                        });
+                    }
+
+                    // Initialize Select2 on modal open
+                    $('#wa-number-select').select2({
+                        dropdownParent: $('#detailModal')
+                    }).val(null).trigger('change.select2'); // Reset selection view
+
                     // Calculate Age
                     if (data.header.BIRTH_DT) {
                         const birth = new Date(data.header.BIRTH_DT);
@@ -383,6 +451,20 @@
                     closeModal();
                 });
         }
+
+        // Add event listener for WA selection change
+        $(document).ready(function() {
+            $('#wa-number-select').on('change', function() {
+                const val = $(this).val();
+                if (val) {
+                    let cleanVal = val;
+                    if (cleanVal.startsWith('+62')) cleanVal = cleanVal.substring(3);
+                    else if (cleanVal.startsWith('62')) cleanVal = cleanVal.substring(2);
+                    else if (cleanVal.startsWith('0')) cleanVal = cleanVal.substring(1);
+                    $('#wa-number').val(cleanVal);
+                }
+            });
+        });
 
         function closeModal() {
             document.getElementById('detailModal').classList.remove('active');
