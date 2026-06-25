@@ -96,6 +96,32 @@
                 </div>
             </div>
         @endif
+
+        <div class="nav-label" style="margin-top: 24px;">Tutorial</div>
+        
+        <div class="nav-dropdown {{ Route::is('tutorial.*') ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    Video Tutorial
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+            <div class="nav-dropdown-content">
+                <a href="{{ route('tutorial.general-consent') }}" class="nav-dropdown-item {{ Route::is('tutorial.general-consent') ? 'active' : '' }}">
+                    General Consent
+                </a>
+                <a href="{{ route('tutorial.hasil-lab') }}" class="nav-dropdown-item {{ Route::is('tutorial.hasil-lab') ? 'active' : '' }}">
+                    Hasil Lab
+                </a>
+                <a href="{{ route('tutorial.surat-persetujuan-rawat-inap') }}" class="nav-dropdown-item {{ Route::is('tutorial.surat-persetujuan-rawat-inap') ? 'active' : '' }}">
+                    Surat Persetujuan Rawat Inap
+                </a>
+                <a href="{{ route('tutorial.rm-10') }}" class="nav-dropdown-item {{ Route::is('tutorial.rm-10') ? 'active' : '' }}">
+                    RM 10
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="sidebar-footer">
