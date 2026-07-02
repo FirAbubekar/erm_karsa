@@ -461,21 +461,19 @@
                                         @endif
                                     </td>
                                     <td class="topik-cell" data-original-topik="{{ $topik['topik'] }}">
-                                        @if (str_contains(strtolower($topik['topik']), '(sebutkan)'))
-                                            {{ str_ireplace('(sebutkan)', '', $topik['topik']) }}
-                                            <textarea class="topik-sebutkan-input form-control"
-                                                style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px;resize:vertical;min-height:50px;"
-                                                placeholder="Sebutkan detail..." {{ !$canEditRow ? 'disabled' : '' }}></textarea>
-                                        @else
-                                            {!! nl2br(e($topik['topik'])) !!}
-                                        @endif
+                                        {!! nl2br(e(trim(str_ireplace('(sebutkan)', '', $topik['topik'])))) !!}
+                                        <textarea class="topik-sebutkan-input form-control"
+                                            style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px;resize:vertical;min-height:50px;"
+                                            placeholder="Sebutkan detail..." {{ !$canEditRow ? 'disabled' : '' }}></textarea>
                                     </td>
                                     <td>
                                         <div style="margin-bottom:6px">
                                             <label
                                                 style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
                                             <input type="datetime-local" class="form-control input-start"
-                                                style="font-size:11px;padding:4px 6px" value="{{ now()->format('Y-m-d\TH:i') }}" {{ !$canEditRow ? 'disabled' : '' }}>
+                                                style="font-size:11px;padding:4px 6px"
+                                                value="{{ now()->format('Y-m-d\TH:i') }}"
+                                                {{ !$canEditRow ? 'disabled' : '' }}>
                                         </div>
                                         <div>
                                             <label
@@ -505,9 +503,12 @@
                                             <span class="ttd-placeholder"
                                                 style="font-size:9px;color:var(--text-muted)">TTD</span>
                                         </div>
-                                        <div style="margin-top:4px; text-align:center;">
-                                            <label style="font-size:9px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
-                                                <input type="checkbox" class="copy-ttd-cb" data-target="ttd-pasien-{{ $topik['kode'] }}" {{ !$canEditRow ? 'disabled' : '' }}> Salin TTD B
+                                        <div style="margin-top:4px; text-align:center;display:none">
+                                            <label
+                                                style="font-size:9px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                                                <input type="checkbox" class="copy-ttd-cb"
+                                                    data-target="ttd-pasien-{{ $topik['kode'] }}"
+                                                    {{ !$canEditRow ? 'disabled' : '' }}> Salin TTD B
                                             </label>
                                         </div>
                                     </td>
