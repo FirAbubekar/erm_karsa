@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Traits\HasAuditLogs;
 
 class PatientEducationImplementation extends Model
 {
-    use HasUuids;
+    use HasUuids, HasAuditLogs;
 
     protected $table = 'patient_education_implementations';
     protected $primaryKey = 'id_uuid';

@@ -307,6 +307,10 @@ class PatientEducationController extends Controller
                     $data
                 );
 
+                if ($isUpdate && !$assessment->wasChanged()) {
+                    PatientEducationAssessment::logActivity($assessment, 'UPDATE');
+                }
+
                 try {
                     $pdfService = app(\App\Services\PdfService::class);
                     $pdfService->generateAndSaveEdukasiPasien($assessment);
@@ -415,6 +419,10 @@ class PatientEducationController extends Controller
                         'tgl_akhir_edukasi' => $request->tgl_akhir_edukasi,
                     ]
                 );
+
+                if ($existing && !$impl->wasChanged()) {
+                    PatientEducationImplementation::logActivity($impl, 'UPDATE');
+                }
 
                 try {
                     $pdfService = app(\App\Services\PdfService::class);

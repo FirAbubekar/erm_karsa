@@ -43,6 +43,11 @@ trait HasAuditLogs
                             $noRawat = $spri->no_rawat;
                         }
                     }
+                } elseif (!empty($model->assessment_id)) {
+                    $assessment = DB::table('patient_education_assessments')->where('id_uuid', $model->assessment_id)->first();
+                    if ($assessment) {
+                        $noRawat = $assessment->no_rawat;
+                    }
                 }
             }
 
