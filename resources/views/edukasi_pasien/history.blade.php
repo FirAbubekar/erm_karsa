@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +9,8 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -124,7 +126,10 @@
             color: var(--primary);
         }
 
-        .nav-item svg { width: 20px; height: 20px; }
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+        }
 
         .sidebar-footer {
             padding: 16px;
@@ -179,11 +184,17 @@
         .sidebar-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 45;
         }
-        .sidebar-overlay.active { display: block; }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
 
         /* ─── Main Content ─── */
         .main-content {
@@ -243,7 +254,7 @@
         }
 
         .hero-title p {
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
             font-weight: 400;
         }
@@ -254,21 +265,21 @@
             gap: 8px;
             margin-bottom: 16px;
             font-size: 12px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .hero-breadcrumb a {
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .hero-breadcrumb a:hover {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .hero-breadcrumb .current {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 600;
         }
 
@@ -277,8 +288,8 @@
             align-items: center;
             gap: 10px;
             padding: 8px 16px 8px 8px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             backdrop-filter: blur(10px);
         }
@@ -297,7 +308,7 @@
         }
 
         .user-chip span {
-            color: rgba(255,255,255,0.85);
+            color: rgba(255, 255, 255, 0.85);
             font-size: 13px;
             font-weight: 600;
         }
@@ -317,7 +328,7 @@
             border-radius: 20px;
             padding: 24px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 10px 15px -3px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 10px 15px -3px rgba(0, 0, 0, 0.04);
             display: flex;
             align-items: center;
             gap: 16px;
@@ -326,7 +337,7 @@
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
         }
 
         .stat-icon {
@@ -534,7 +545,7 @@
 
         .filter-input-wrapper {
             position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             border-radius: 12px;
             transition: all 0.2s ease;
         }
@@ -662,7 +673,7 @@
             border-radius: 20px;
             border: 1px solid var(--border);
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
         .table-top-bar {
@@ -837,9 +848,20 @@
             white-space: nowrap;
         }
 
-        .hub-badge.suami { background: #DBEAFE; color: #1E40AF; }
-        .hub-badge.istri { background: #FCE7F3; color: #9D174D; }
-        .hub-badge.default { background: #F1F5F9; color: #475569; }
+        .hub-badge.suami {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .hub-badge.istri {
+            background: #FCE7F3;
+            color: #9D174D;
+        }
+
+        .hub-badge.default {
+            background: #F1F5F9;
+            color: #475569;
+        }
 
         /* Action Buttons */
         .action-group {
@@ -981,7 +1003,7 @@
             gap: 4px;
         }
 
-        .pagination-wrapper nav > div:first-child {
+        .pagination-wrapper nav>div:first-child {
             display: none;
         }
 
@@ -1054,8 +1076,15 @@
         }
 
         @keyframes modalIn {
-            from { transform: translateY(30px) scale(0.97); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+            from {
+                transform: translateY(30px) scale(0.97);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
         }
 
         .modal-top {
@@ -1075,13 +1104,13 @@
 
         .modal-top p {
             font-size: 12px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .modal-close {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
             width: 36px;
             height: 36px;
             border-radius: 10px;
@@ -1093,7 +1122,7 @@
         }
 
         .modal-close:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
         }
 
@@ -1235,37 +1264,88 @@
 
         /* ─── Animations ─── */
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .animate-in {
             animation: fadeInUp 0.4s ease-out both;
         }
 
-        .animate-delay-1 { animation-delay: 0.05s; }
-        .animate-delay-2 { animation-delay: 0.1s; }
-        .animate-delay-3 { animation-delay: 0.15s; }
+        .animate-delay-1 {
+            animation-delay: 0.05s;
+        }
+
+        .animate-delay-2 {
+            animation-delay: 0.1s;
+        }
+
+        .animate-delay-3 {
+            animation-delay: 0.15s;
+        }
 
         /* ─── Responsive ─── */
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; width: 100%; }
-            .mobile-header { display: flex; }
-            .page-hero { padding: 80px 20px 50px; }
-            .stats-row { grid-template-columns: 1fr; margin: -28px 20px 0; }
-            .content-area { padding: 24px 20px; }
-            .toolbar { flex-direction: column; gap: 12px; align-items: stretch; }
-            .search-box input { width: 100%; }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .page-hero {
+                padding: 80px 20px 50px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+                margin: -28px 20px 0;
+            }
+
+            .content-area {
+                padding: 24px 20px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
         }
 
         @media (max-width: 768px) {
-            .info-grid { grid-template-columns: 1fr; }
-            .stats-row { grid-template-columns: 1fr; }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
     @include('partials.sidebar')
 
@@ -1274,7 +1354,10 @@
         <div class="page-hero">
             <div class="hero-breadcrumb">
                 <a href="{{ route('dashboard') }}">Dashboard</a>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
                 <span class="current">Riwayat Edukasi Pasien</span>
             </div>
             <div class="hero-top">
@@ -1293,7 +1376,10 @@
         <div class="stats-row">
             <div class="stat-card animate-in animate-delay-1">
                 <div class="stat-icon green">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ number_format($stats['total']) }}</span>
@@ -1302,7 +1388,10 @@
             </div>
             <div class="stat-card animate-in animate-delay-2">
                 <div class="stat-icon blue">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ number_format($stats['today']) }}</span>
@@ -1311,7 +1400,10 @@
             </div>
             <div class="stat-card animate-in animate-delay-3">
                 <div class="stat-icon purple">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                 </div>
                 <div class="stat-info">
                     <span class="stat-value">{{ number_format($stats['month']) }}</span>
@@ -1322,9 +1414,14 @@
 
         <!-- ─── Content Area ─── -->
         <div class="content-area">
-            @if(session('error'))
-                <div class="animate-in" style="background: #FFF1F2; color: #E11D48; padding: 14px 20px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #FFE4E6; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            @if (session('error'))
+                <div class="animate-in"
+                    style="background: #FFF1F2; color: #E11D48; padding: 14px 20px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #FFE4E6; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                     {{ session('error') }}
                 </div>
             @endif
@@ -1333,25 +1430,36 @@
             <div class="filter-card animate-in">
                 <div class="filter-header">
                     <div class="filter-header-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
                     <div class="filter-header-text">
                         <div class="filter-title">
                             Pencarian Lanjutan
-                            @php 
-                                $isDefaultToday = !request('search') && !request('no_rawat') && !request('person') && 
-                                                 request('start_date') === now()->toDateString() && 
-                                                 request('end_date') === now()->toDateString();
-                                $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); 
+                            @php
+                                $isDefaultToday =
+                                    !request('search') &&
+                                    !request('no_rawat') &&
+                                    !request('person') &&
+                                    request('start_date') === now()->toDateString() &&
+                                    request('end_date') === now()->toDateString();
+                                $activeFilters = count(
+                                    array_filter(
+                                        request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']),
+                                    ),
+                                );
                             @endphp
-                            @if($isDefaultToday)
+                            @if ($isDefaultToday)
                                 <span class="filter-badge today">Default: Hari Ini</span>
                             @elseif($activeFilters > 0)
                                 <span class="filter-badge active">{{ $activeFilters }} Filter Aktif</span>
                             @endif
                         </div>
                         <div style="font-size: 12px; color: #94A3B8; margin-top: 1px;">
-                            @if($isDefaultToday)
+                            @if ($isDefaultToday)
                                 Menampilkan data hari ini. Isi form di bawah untuk mencari data lainnya.
                             @else
                                 Menampilkan hasil pencarian dengan filter yang diterapkan.
@@ -1359,55 +1467,84 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <form action="{{ route('edukasi-pasien.history') }}" method="GET">
                     <div class="filter-body">
                         <div class="filter-form">
                             <div class="filter-group">
                                 <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
                                     Identitas Pasien
                                 </label>
                                 <div class="filter-input-wrapper">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <input type="text" name="search" value="{{ request('search') }}" class="filter-input" placeholder="Nama, No.RM, atau No.Surat">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                        class="filter-input" placeholder="Nama, No.RM, atau No.Surat">
                                 </div>
                             </div>
 
                             <div class="filter-group">
                                 <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        style="width:14px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
                                     Registrasi (No. Rawat)
                                 </label>
                                 <div class="filter-input-wrapper">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.53 0 1.04.21 1.41.59L17 7l-3.59 3.59A2 2 0 0112 11H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
-                                    <input type="text" name="no_rawat" value="{{ request('no_rawat') }}" class="filter-input" placeholder="Format: YYYY/MM/DD/xxxxxx">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 7h.01M7 3h5c.53 0 1.04.21 1.41.59L17 7l-3.59 3.59A2 2 0 0112 11H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                                    </svg>
+                                    <input type="text" name="no_rawat" value="{{ request('no_rawat') }}"
+                                        class="filter-input" placeholder="Format: YYYY/MM/DD/xxxxxx">
                                 </div>
                             </div>
 
                             <div class="filter-group">
                                 <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        style="width:14px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
                                     Penanggung Jawab / Staf
                                 </label>
                                 <div class="filter-input-wrapper">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                    <input type="text" name="person" value="{{ request('person') }}" class="filter-input" placeholder="Cari nama PJ atau Petugas">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <input type="text" name="person" value="{{ request('person') }}"
+                                        class="filter-input" placeholder="Cari nama PJ atau Petugas">
                                 </div>
                             </div>
 
                             <div class="filter-group">
                                 <label>
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        style="width:14px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z" />
+                                    </svg>
                                     Periode Pemeriksaan
                                 </label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="filter-input" style="padding-left: 14px;">
+                                        <input type="date" name="start_date" value="{{ request('start_date') }}"
+                                            class="filter-input" style="padding-left: 14px;">
                                     </div>
                                     <span style="color: #94A3B8; font-size: 11px; font-weight: 700;">s/d</span>
                                     <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="filter-input" style="padding-left: 14px;">
+                                        <input type="date" name="end_date" value="{{ request('end_date') }}"
+                                            class="filter-input" style="padding-left: 14px;">
                                     </div>
                                 </div>
                             </div>
@@ -1415,14 +1552,21 @@
                     </div>
 
                     <div class="filter-actions">
-                        @if($activeFilters > 0)
+                        @if ($activeFilters > 0)
                             <a href="{{ route('edukasi-pasien.history') }}" class="btn-filter-reset">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <svg width="18" height="18" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 Reset Pencarian
                             </a>
                         @endif
                         <button type="submit" class="btn-filter-submit">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <svg width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                             Terapkan Filter
                         </button>
                     </div>
@@ -1435,8 +1579,15 @@
                 <!-- Table Header Bar -->
                 <div class="table-top-bar">
                     <div class="table-top-bar-left">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <h2>Daftar Dokumen @if($isDefaultToday)(Hari Ini, {{ now()->format('d M Y') }})@endif</h2>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h2>Daftar Dokumen @if ($isDefaultToday)
+                                (Hari Ini, {{ now()->format('d M Y') }})
+                            @endif
+                        </h2>
                         <span class="result-count-badge">{{ $assessments->total() }} dokumen</span>
                     </div>
                 </div>
@@ -1454,107 +1605,150 @@
                         </thead>
                         <tbody>
                             @forelse($assessments as $assessment)
-                            <tr class="table-row">
-                                <td>
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                                        <div class="surat-badge" title="{{ $assessment->no_rawat }}">
-                                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            {{ $assessment->no_rawat }}
+                                <tr class="table-row">
+                                    <td>
+                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                            <div class="surat-badge" title="{{ $assessment->no_rawat }}">
+                                                <svg width="12" height="12" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                {{ $assessment->no_rawat }}
+                                            </div>
+                                            @if ($assessment->regPeriksa?->signaturePasien)
+                                                <span class="badge badge-success"
+                                                    style="width: fit-content; font-size: 9px; padding: 2px 6px;">
+                                                    <svg width="8" height="8" fill="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                    </svg>
+                                                    Tanda Tangan Lengkap
+                                                </span>
+                                            @else
+                                                <span class="badge badge-secondary"
+                                                    style="width: fit-content; font-size: 9px; padding: 2px 6px;">
+                                                    Belum TTD
+                                                </span>
+                                            @endif
                                         </div>
-                                        @if($assessment->regPeriksa->signaturePasien)
-                                            <span class="badge badge-success" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
-                                                <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                                                Tanda Tangan Lengkap
-                                            </span>
-                                        @else
-                                            <span class="badge badge-secondary" style="width: fit-content; font-size: 9px; padding: 2px 6px;">
-                                                Belum TTD
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="patient-info">
-                                        <div class="patient-avatar">
-                                            {{ strtoupper(substr($assessment->regPeriksa->pasien->nm_pasien ?? '?', 0, 1)) }}
+                                    </td>
+                                    <td>
+                                        <div class="patient-info">
+                                            <div class="patient-avatar">
+                                                {{ strtoupper(substr($assessment->regPeriksa->pasien->nm_pasien ?? '?', 0, 1)) }}
+                                            </div>
+                                            <div class="patient-details">
+                                                <span
+                                                    class="patient-name">{{ $assessment->regPeriksa->pasien->nm_pasien ?? 'Unknown' }}</span>
+                                                <span
+                                                    class="patient-rm">{{ $assessment->regPeriksa->no_rkm_medis ?? '-' }}</span>
+                                            </div>
                                         </div>
-                                        <div class="patient-details">
-                                            <span class="patient-name">{{ $assessment->regPeriksa->pasien->nm_pasien ?? 'Unknown' }}</span>
-                                            <span class="patient-rm">{{ $assessment->regPeriksa->no_rkm_medis ?? '-' }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="date-cell">
+                                            <span
+                                                class="date-value">{{ \Carbon\Carbon::parse($assessment->tanggal_edukasi)->format('d M Y') }}</span>
+                                            <span
+                                                class="date-relative">{{ \Carbon\Carbon::parse($assessment->tanggal_edukasi)->diffForHumans() }}</span>
                                         </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="date-cell">
-                                        <span class="date-value">{{ \Carbon\Carbon::parse($assessment->tanggal_edukasi)->format('d M Y') }}</span>
-                                        <span class="date-relative">{{ \Carbon\Carbon::parse($assessment->tanggal_edukasi)->diffForHumans() }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span style="font-weight: 600; color: var(--text-secondary);">{{ $assessment->nama_penerima_info }}</span>
-                                </td>
-                                <td>
-                                    @php
-                                        $hub = strtolower($assessment->hubungan_dgn_pasien);
-                                        $hubClass = 'default';
-                                        if (str_contains($hub, 'suami')) $hubClass = 'suami';
-                                        elseif (str_contains($hub, 'istri')) $hubClass = 'istri';
-                                    @endphp
-                                    <span class="hub-badge {{ $hubClass }}">{{ $assessment->hubungan_dgn_pasien }}</span>
-                                </td>
-                                <td>
-                                    <div class="action-group">
-                                        <button
-                                            class="btn-action btn-detail"
-                                            onclick="openDetailModal({{ json_encode([
-                                                'no_rawat' => $assessment->no_rawat,
-                                                'nm_pasien' => $assessment->regPeriksa->pasien->nm_pasien ?? 'Unknown',
-                                                'no_rm' => $assessment->regPeriksa->no_rkm_medis ?? '-',
-                                                'tgl_periksa' => $assessment->tanggal_edukasi,
-                                                'nama_pj' => $assessment->nama_penerima_info,
-                                                'hubungan' => $assessment->hubungan_dgn_pasien,
-                                                'signature' => $assessment->ttd_pasien_wali ? asset('storage/' . $assessment->ttd_pasien_wali) : null
-                                            ]) }})"
-                                        >
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            Detail
-                                        </button>
-                                        <button
-                                            class="btn-action btn-pdf"
-                                            onclick="downloadPDF('{{ route('edukasi-pasien.download-pdf', $assessment->id_uuid) }}')"
-                                        >
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            PDF
-                                        </button>
-                                        
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td>
+                                        <span
+                                            style="font-weight: 600; color: var(--text-secondary);">{{ $assessment->nama_penerima_info }}</span>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $hub = strtolower($assessment->hubungan_dgn_pasien);
+                                            $hubClass = 'default';
+                                            if (str_contains($hub, 'suami')) {
+                                                $hubClass = 'suami';
+                                            } elseif (str_contains($hub, 'istri')) {
+                                                $hubClass = 'istri';
+                                            }
+                                        @endphp
+                                        <span
+                                            class="hub-badge {{ $hubClass }}">{{ $assessment->hubungan_dgn_pasien }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-group">
+                                            <button class="btn-action btn-detail"
+                                                onclick="openDetailModal({{ json_encode([
+                                                    'no_rawat' => $assessment->no_rawat,
+                                                    'nm_pasien' => $assessment->regPeriksa->pasien->nm_pasien ?? 'Unknown',
+                                                    'no_rm' => $assessment->regPeriksa->no_rkm_medis ?? '-',
+                                                    'tgl_periksa' => $assessment->tanggal_edukasi,
+                                                    'nama_pj' => $assessment->nama_penerima_info,
+                                                    'hubungan' => $assessment->hubungan_dgn_pasien,
+                                                    'signature' => $assessment->ttd_pasien_wali ? asset('storage/' . $assessment->ttd_pasien_wali) : null,
+                                                ]) }})">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                Detail
+                                            </button>
+                                            <button class="btn-action btn-pdf"
+                                                onclick="downloadPDF('{{ route('edukasi-pasien.download-pdf', $assessment->id_uuid) }}')">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                PDF
+                                            </button>
+
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
-                            <tr>
-                                <td colspan="6">
-                                    <div class="empty-state">
-                                        <div class="empty-icon">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <div class="empty-icon">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1.5"
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            @if ($isDefaultToday)
+                                                <h3>Belum Ada Dokumen Hari Ini</h3>
+                                                <p>Tidak ada edukasi pasien yang dibuat pada
+                                                    {{ now()->format('d M Y') }}. Gunakan Pencarian Lanjutan di atas
+                                                    untuk mencari data dari tanggal lain.</p>
+                                                <a href="{{ route('edukasi-pasien.history') }}?start_date=&end_date="
+                                                    class="empty-action">
+                                                    <svg width="14" height="14" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                    </svg>
+                                                    Lihat Semua Riwayat
+                                                </a>
+                                            @else
+                                                <h3>Tidak Ada Hasil Ditemukan</h3>
+                                                <p>Tidak ada dokumen yang cocok dengan filter pencarian Anda. Coba ubah
+                                                    atau reset filter di atas.</p>
+                                                <a href="{{ route('edukasi-pasien.history') }}" class="empty-action">
+                                                    <svg width="14" height="14" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    Reset Pencarian
+                                                </a>
+                                            @endif
                                         </div>
-                                        @if($isDefaultToday)
-                                            <h3>Belum Ada Dokumen Hari Ini</h3>
-                                            <p>Tidak ada edukasi pasien yang dibuat pada {{ now()->format('d M Y') }}. Gunakan Pencarian Lanjutan di atas untuk mencari data dari tanggal lain.</p>
-                                            <a href="{{ route('edukasi-pasien.history') }}?start_date=&end_date=" class="empty-action">
-                                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                Lihat Semua Riwayat
-                                            </a>
-                                        @else
-                                            <h3>Tidak Ada Hasil Ditemukan</h3>
-                                            <p>Tidak ada dokumen yang cocok dengan filter pencarian Anda. Coba ubah atau reset filter di atas.</p>
-                                            <a href="{{ route('edukasi-pasien.history') }}" class="empty-action">
-                                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                Reset Pencarian
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -1577,7 +1771,10 @@
                     <p>Informasi lengkap asesmen pasien</p>
                 </div>
                 <button class="modal-close" onclick="closeDetailModal()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
 
@@ -1631,7 +1828,10 @@
                 <div class="sig-box">
                     <img id="modalSignature" src="" alt="Tanda Tangan" style="display:none;">
                     <div id="modalNoSignature" class="sig-placeholder">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
                         <span>Tanda tangan tidak tersedia</span>
                     </div>
                 </div>
@@ -1702,7 +1902,7 @@
         function downloadPDF(baseUrl) {
             // Buka tab baru SECARA LANGSUNG saat di-klik agar tidak diblokir oleh browser (Popup Blocker)
             const pdfWindow = window.open('about:blank', '_blank');
-            
+
             // Helper fungsion untuk isi tab
             const proceedDownload = (lat, lng) => {
                 const query = (lat && lng) ? '?lat=' + lat + '&lng=' + lng : '';
@@ -1713,8 +1913,10 @@
             const fetchIp = () => {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 1000);
-                
-                fetch('http://ip-api.com/json/', { signal: controller.signal })
+
+                fetch('http://ip-api.com/json/', {
+                        signal: controller.signal
+                    })
                     .then(res => res.json())
                     .then(data => {
                         clearTimeout(timeoutId);
@@ -1727,7 +1929,8 @@
             };
 
             // Jika di HTTP (bukan localhost), browser block HTML5 Geolocation. Kita pakai IP-API JS fallback.
-            if (navigator.geolocation && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+            if (navigator.geolocation && (window.location.protocol === 'https:' || window.location.hostname ===
+                    'localhost' || window.location.hostname === '127.0.0.1')) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         proceedDownload(position.coords.latitude.toFixed(6), position.coords.longitude.toFixed(6));
@@ -1735,16 +1938,16 @@
                     function(error) {
                         // Fallback ke IP Geoloc jika ditolak
                         fetchIp();
-                    },
-                    { timeout: 3000 } // kurangi timeout jadi 3 detik agar lebih responsif
+                    }, {
+                        timeout: 3000
+                    } // kurangi timeout jadi 3 detik agar lebih responsif
                 );
             } else {
                 // Gunakan IP Geolocation langsung jika HTTP network (seperti 192.168.x.x)
                 fetchIp();
             }
         }
-
-
     </script>
 </body>
+
 </html>
