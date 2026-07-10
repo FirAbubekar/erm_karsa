@@ -155,6 +155,8 @@ function resetForm() {
     document.querySelectorAll('input[name="antibiotik_jenis"]').forEach(r => r.checked = false);
     const hariKe = document.getElementById('field-hari-ke');
     if(hariKe) hariKe.value = '';
+    const antiReview = document.getElementById('field-antibiotik-direview');
+    if (antiReview) antiReview.value = '';
 
     // Reset Parameter Klinis
     ['field-td', 'field-suhu', 'field-rr', 'field-spo2', 'field-gcs', 'field-suhu-celcius', 'field-spo2-persen'].forEach(id => {
@@ -307,6 +309,7 @@ document.getElementById('btn-save-reviu').addEventListener('click', async () => 
         diagnosis: getVal('field-diagnosis'),
         // Regimen
         tipe_antibiotik: getRadio('antibiotik_jenis'),
+        antibiotik_direview: getVal('field-antibiotik-direview'),
         hari_ke: getVal('field-hari-ke'),
         // Parameter Klinis
         klinis_td: getVal('field-td'),
@@ -434,6 +437,7 @@ function populateForm(data) {
     setVal('field-tgl-reviu', data.tanggal_reviu);
     setVal('field-diagnosis', data.diagnosis);
     setRadio('antibiotik_jenis', data.tipe_antibiotik);
+    setVal('field-antibiotik-direview', data.antibiotik_direview);
     setVal('field-hari-ke', data.hari_ke);
     setVal('field-td', data.klinis_td);
     setVal('field-suhu', data.klinis_suhu);

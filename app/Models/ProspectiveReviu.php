@@ -44,6 +44,7 @@ class ProspectiveReviu extends Model
         'ttd_perawat',
         'ttd_dpjp',
         'ttd_kpra',
+        'antibiotik_direview',
     ];
 
     protected $casts = [

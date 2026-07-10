@@ -251,7 +251,7 @@
                     &nbsp;&nbsp;<span class="checkbox">{!! $review->tipe_antibiotik == 'Definitif' ? 'V' : '&nbsp;' !!}</span> Definitif
                     &nbsp;&nbsp;<span class="checkbox">{!! $review->tipe_antibiotik == 'Profilaksis' ? 'V' : '&nbsp;' !!}</span> Profilaksis
                 </td>
-                <td>{{ $review->nama_antibiotik }}</td>
+                <td>{{ $review->antibiotik_direview }}</td>
             </tr>
             <tr>
                 <td>Hari ke-</td>
