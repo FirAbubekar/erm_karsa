@@ -226,14 +226,14 @@ class PdfService
         $pdfOutput = $pdf->output();
 
         $safeNoRawat = str_replace('/', '', $review->no_rawat);
-        $shortUuid = substr(str_replace('-', '', $review->id_uuid), 0, 8);
-        $filenameOri = "ProspReviu_" . $safeNoRawat . "_" . $shortUuid . ".pdf";
+        $timestamp = now()->format('Ymd_His_v');
+        $filenameOri = "ProspReviu_" . $safeNoRawat . "_" . $timestamp . ".pdf";
 
         try {
             $response = \Illuminate\Support\Facades\Http::attach(
                 'pdf', $pdfOutput, $filenameOri
             )->post('http://192.168.30.24/webapps/berkasrawat/pages/upload_pdf.php', [
-                'no_surat' => "ProspReviu_" . $safeNoRawat . "_" . $shortUuid,
+                'no_surat' => "ProspReviu_" . $safeNoRawat . "_" . $timestamp,
             ]);
 
             \Illuminate\Support\Facades\Log::info("Respon dari server .24 (Prospective Reviu): " . $response->body());

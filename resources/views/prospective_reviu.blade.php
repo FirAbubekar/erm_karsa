@@ -146,6 +146,7 @@
                             <label><input type="radio" name="antibiotik_jenis" value="Profilaksis">
                                 Profilaksis</label>
                         </div>
+                        <input type="text" id="field-antibiotik-direview" class="form-control" placeholder="Tulis Antibiotik..." style="margin-top: 8px;">
                     </div>
                     <div class="form-group">
                         <label>Hari ke-</label>

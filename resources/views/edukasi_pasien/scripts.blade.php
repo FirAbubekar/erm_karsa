@@ -583,7 +583,8 @@
         <td>
             <div style="margin-bottom:6px">
                 <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Mulai:</label>
-                <div class="text-start" style="font-size:11px;font-weight:600;color:var(--text-main);padding:4px 2px">(Otomatis saat disimpan)</div>
+                <input type="datetime-local" class="form-control input-start"
+                    style="font-size:11px;padding:4px 6px" value="${nowDt}">
             </div>
             <div>
                 <label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">Selesai:</label>
@@ -752,7 +753,9 @@
         if (!namaTopik) return showError('Topik edukasi tidak boleh kosong.');
 
         // Datetime
+        const dtInputStart = row.querySelector('.input-start');
         const dtInputEnd = row.querySelector('.input-end');
+        const tglMulai = dtInputStart ? dtInputStart.value : null;
         const tglSelesai = dtInputEnd ? dtInputEnd.value : null;
 
         // Verifikasi inputs
@@ -792,6 +795,7 @@
             verifikasi: verifikasi,
             ttd_pasien: (ttdPasienData && ttdPasienData !== 'existing') ? ttdPasienData : null,
             tgl_reedukasi: tglReedukasi || null,
+            tgl_edukasi: tglMulai || null,
             tgl_akhir_edukasi: tglSelesai || null,
         };
 
