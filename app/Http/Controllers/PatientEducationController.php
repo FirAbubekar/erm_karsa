@@ -400,6 +400,8 @@ class PatientEducationController extends Controller
                 // Process TTD Edukator
                 $ttdEdukatorPath = Session::get('user_id');
 
+                \Illuminate\Support\Facades\Log::info('Store Implementation Payload:', $request->all());
+
                 // Save / Update Implementation row
                 $impl = PatientEducationImplementation::updateOrCreate(
                     [
@@ -417,6 +419,7 @@ class PatientEducationController extends Controller
                         'ip_address_submit' => $request->ip(),
                         'tgl_reedukasi'     => $request->tgl_reedukasi,
                         'tgl_akhir_edukasi' => $request->tgl_akhir_edukasi,
+                        'created_at'        => $request->tgl_edukasi ?? now(),
                     ]
                 );
 
