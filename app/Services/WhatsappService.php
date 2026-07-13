@@ -33,52 +33,34 @@ class WhatsappService
     {
         $target = $this->formatNumber($noTelp);
 
-        // Check if custom WA gateway is configured
         $waUrl = env('WA_URL');
         $deviceId = env('WA_DEVICE_ID');
 
         try {
-            if ($waUrl && $deviceId) {
-                // Use custom gateway
-                $response = Http::timeout(10)
-                    ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!')
-                    ->withHeaders([
-                        'X-Device-Id' => $deviceId,
-                    ])
-                    ->post($waUrl . '/send/message', [
-                        'phone'   => $target,
-                        'message' => $message,
-                ]);
-
-                if ($response->successful()) {
-                    return true;
-                }
-
-                Log::warning('WA Gateway Error details, falling back to Fonnte:', [
-                    'url' => $waUrl,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'device_id' => $deviceId
-                ]);
+            if (!$waUrl || !$deviceId) {
+                Log::error('WhatsappService: WA_URL or WA_DEVICE_ID not configured');
+                return false;
             }
 
-            // Fallback to Fonnte
-            $token = config('services.fonnte.token');
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->post('https://api.fonnte.com/send', [
-                'target' => $target,
-                'message' => $message,
-                'countryCode' => '62',
-            ]);
+            $response = Http::timeout(10)
+                ->withBasicAuth('rskh-wa-gw', 'Y0ndaktaukoktanyasay4@1113!')
+                ->withHeaders([
+                    'X-Device-Id' => $deviceId,
+                ])
+                ->post($waUrl . '/send/message', [
+                    'phone'   => $target,
+                    'message' => $message,
+                ]);
 
             if ($response->successful()) {
                 return true;
             }
 
-            Log::error('Fonnte Gateway Error details:', [
+            Log::error('WA Gateway Error:', [
+                'url' => $waUrl,
                 'status' => $response->status(),
                 'body' => $response->body(),
+                'device_id' => $deviceId
             ]);
             return false;
         } catch (\Exception $e) {
@@ -100,141 +82,88 @@ class WhatsappService
         $target = $this->formatNumber($noTelp);
         $message = $customMessage ?: $this->getDefaultFileMessage();
 
-        // Check if custom WA gateway is configured
         $waUrl = env('WA_URL');
         $deviceId = env('WA_DEVICE_ID');
 
         try {
+            if (!$waUrl || !$deviceId) {
+                Log::error('WhatsappService: WA_URL or WA_DEVICE_ID not configured');
+                return false;
+            }
+
             $fileContent = null;
             $fileName = '';
 
-            if ($waUrl && $deviceId) {
-                // Use custom gateway - First try JSON if URL
-                $customGatewaySuccess = false;
-                
-                if (str_starts_with($relativeStoragePath, 'http')) {
-                    $response = Http::timeout(30)
-                        ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!')
-                        ->withHeaders([
-                            'X-Device-Id' => $deviceId,
-                        ])
-                        ->post($waUrl . '/send/file', [
-                            'phone'   => $target,
-                            'file'    => $relativeStoragePath,
-                            'caption' => $message,
-                            'message' => $message,
-                        ]);
-                    
-                    if ($response->successful()) {
-                        return true;
-                    }
-                    
-                    Log::warning('WA Gateway JSON File URL failed, falling back to download and attach method. Error details:', [
-                        'status' => $response->status(),
-                        'body' => $response->body()
+            if (str_starts_with($relativeStoragePath, 'http')) {
+                $response = Http::timeout(30)
+                    ->withBasicAuth('rskh-wa-gw', 'Y0ndaktaukoktanyasay4@1113!')
+                    ->withHeaders([
+                        'X-Device-Id' => $deviceId,
+                    ])
+                    ->post($waUrl . '/send/file', [
+                        'phone'   => $target,
+                        'file'    => $relativeStoragePath,
+                        'caption' => $message,
+                        'message' => $message,
                     ]);
+
+                if ($response->successful()) {
+                    return true;
                 }
 
-                // Download content for multipart (Custom gateway fallback or Fonnte)
+                Log::warning('WA Gateway JSON File URL failed, trying multipart upload. Error details:', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+            }
+
+            if (str_starts_with($relativeStoragePath, 'http')) {
+                $fileName = basename(parse_url($relativeStoragePath, PHP_URL_PATH));
+                try {
+                    $dlResponse = Http::timeout(10)->get($relativeStoragePath);
+                    if ($dlResponse->successful()) {
+                        $fileContent = $dlResponse->body();
+                    }
+                } catch (\Exception $urlEx) {
+                    Log::warning("WhatsappService: Failed to download from URL: " . $urlEx->getMessage());
+                }
+
                 if (empty($fileContent)) {
-                    if (str_starts_with($relativeStoragePath, 'http')) {
-                        $fileName = basename(parse_url($relativeStoragePath, PHP_URL_PATH));
-                        try {
-                            $response = Http::timeout(10)->get($relativeStoragePath);
-                            if ($response->successful()) {
-                                $fileContent = $response->body();
-                            }
-                        } catch (\Exception $urlEx) {
-                            Log::warning("WhatsappService: Failed to download from URL: " . $urlEx->getMessage());
-                        }
-
-                        if (empty($fileContent)) {
-                            $localPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload\\" . $fileName;
-                            if (file_exists($localPath)) {
-                                $fileContent = file_get_contents($localPath);
-                            }
-                        }
-                    } else {
-                        if (Storage::exists($relativeStoragePath)) {
-                            $absolutePath = Storage::path($relativeStoragePath);
-                            $fileContent = Storage::get($relativeStoragePath);
-                            $fileName = basename($absolutePath);
-                        }
+                    $localPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload\\" . $fileName;
+                    if (file_exists($localPath)) {
+                        $fileContent = file_get_contents($localPath);
                     }
                 }
-
-                // If file content is successfully loaded, try custom gateway multipart
-                if (!empty($fileContent)) {
-                    $response = Http::timeout(30)
-                        ->withBasicAuth('admin', 'Y0ndaktaukoktanyasay4@1113!')
-                        ->withHeaders([
-                            'X-Device-Id' => $deviceId,
-                        ])
-                        ->attach('file', $fileContent, $fileName)
-                        ->attach('phone', $target)
-                        ->attach('message', $message)
-                        ->attach('caption', $message)
-                        ->post($waUrl . '/send/file');
-                        
-                    if ($response->successful()) {
-                        return true;
-                    }
-
-                    Log::warning('WA Gateway File Error details, falling back to Fonnte:', [
-                        'url' => $waUrl,
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
+            } else {
+                if (Storage::exists($relativeStoragePath)) {
+                    $absolutePath = Storage::path($relativeStoragePath);
+                    $fileContent = Storage::get($relativeStoragePath);
+                    $fileName = basename($absolutePath);
                 }
             }
 
-            // Fallback to Fonnte
             if (empty($fileContent)) {
-                if (str_starts_with($relativeStoragePath, 'http')) {
-                    $fileName = basename(parse_url($relativeStoragePath, PHP_URL_PATH));
-                    try {
-                        $response = Http::timeout(10)->get($relativeStoragePath);
-                        if ($response->successful()) {
-                            $fileContent = $response->body();
-                        }
-                    } catch (\Exception $e) {}
-                    
-                    if (empty($fileContent)) {
-                        $localPath = "D:\\xampp\\htdocs\\webapps\\berkasrawat\\pages\\upload\\" . $fileName;
-                        if (file_exists($localPath)) {
-                            $fileContent = file_get_contents($localPath);
-                        }
-                    }
-                } else {
-                    if (Storage::exists($relativeStoragePath)) {
-                        $fileContent = Storage::get($relativeStoragePath);
-                        $fileName = basename(Storage::path($relativeStoragePath));
-                    }
-                }
-            }
-            
-            if (empty($fileContent)) {
-                Log::error("WhatsappService: Could not load file content for Fonnte fallback. Path: {$relativeStoragePath}");
+                Log::error("WhatsappService: Could not load file content. Path: {$relativeStoragePath}");
                 return false;
             }
-            
-            $token = config('services.fonnte.token');
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])
-            ->attach('file', $fileContent, $fileName)
-            ->post('https://api.fonnte.com/send', [
-                'target' => $target,
-                'message' => $message,
-                'caption' => $message,
-                'countryCode' => '62',
-            ]);
+
+            $response = Http::timeout(30)
+                ->withBasicAuth('rskh-wa-gw', 'Y0ndaktaukoktanyasay4@1113!')
+                ->withHeaders([
+                    'X-Device-Id' => $deviceId,
+                ])
+                ->attach('file', $fileContent, $fileName)
+                ->attach('phone', $target)
+                ->attach('message', $message)
+                ->attach('caption', $message)
+                ->post($waUrl . '/send/file');
 
             if ($response->successful()) {
                 return true;
             }
 
-            Log::error('Fonnte Gateway File Error details:', [
+            Log::error('WA Gateway File Error:', [
+                'url' => $waUrl,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
