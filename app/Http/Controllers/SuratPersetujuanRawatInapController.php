@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SuratPersetujuanRawatInap;
 use App\Models\SignaturePasien;
+use App\Models\Bangsal;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -18,12 +19,9 @@ class SuratPersetujuanRawatInapController extends Controller
             return redirect('/');
         }
         
-        $kamarList = DB::table('kamar')
-            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
-            ->where('kamar.statusdata', '1')
-            ->select('kamar.kd_kamar', 'bangsal.nm_bangsal', 'kamar.kelas')
-            ->orderBy('bangsal.nm_bangsal')
-            ->orderBy('kamar.kelas')
+        $kamarList = Bangsal::where('status', '1')
+            ->orderBy('nm_bangsal', 'asc')
+            ->select('kd_bangsal', 'nm_bangsal')
             ->get();
 
         return view('surat_persetujuan_rawat_inap.index', compact('kamarList'));
@@ -44,7 +42,7 @@ class SuratPersetujuanRawatInapController extends Controller
             'no_rm' => 'required|string',
             'tanggal' => 'required|date',
             'hak_kelas' => 'required|in:Kelas I,Kelas II,Kelas III',
-            'kd_kamar' => 'required|string',
+            'kd_bangsal' => 'required|string|exists:bangsal,kd_bangsal',
             'pj_biaya' => 'required|string',
             'nama_asuransi' => 'nullable|string',
             'pj_nama' => 'required|string',
@@ -52,7 +50,7 @@ class SuratPersetujuanRawatInapController extends Controller
             'pj_umur' => 'required|numeric',
             'pendidikan_pj' => 'required|string',
             'pj_jk' => 'required|in:Laki-Laki,Perempuan',
-            'pj_hubungan' => 'required|in:Diri Sendiri,Suami,Istri,Anak,Orang Tua,Wali / Kurator',
+            'pj_hubungan' => 'required|string',
             'pj_telp_prefix' => 'required|string',
             'pj_telp' => 'required|string',
             'pj_alamat' => 'required|string',
@@ -64,10 +62,10 @@ class SuratPersetujuanRawatInapController extends Controller
             try {
                 $isEdit = SuratPersetujuanRawatInap::where('no_surat', $request->no_surat)->exists();
 
-                // Fetch room/kamar from database
-                $kamar = DB::table('kamar')->where('kd_kamar', $request->kd_kamar)->first();
-                if (!$kamar) {
-                    throw new \Exception('Kamar tidak valid atau tidak ditemukan.');
+                // Fetch room/bangsal from database
+                $bangsal = Bangsal::where('kd_bangsal', $request->kd_bangsal)->first();
+                if (!$bangsal) {
+                    throw new \Exception('Ruangan tidak valid atau tidak ditemukan.');
                 }
 
                 // 1. Process and Save Signature conditionally (if new)
@@ -117,22 +115,23 @@ class SuratPersetujuanRawatInapController extends Controller
                     'VIP' => 'Kelas VIP',
                     'VVIP' => 'Kelas VVIP',
                 ];
-                $kelasDb = $kamar->kelas;
+                $firstKamar = DB::table('kamar')->where('kd_bangsal', $request->kd_bangsal)->first();
+                $kelasDb = $firstKamar ? $firstKamar->kelas : ($kelasMap[$request->hak_kelas] ?? '-');
                 $hakKelasDb = $kelasMap[$request->hak_kelas] ?? '-';
 
                 // 5. Map Hubungan Penanggung Jawab
-                $hubunganDb = 'Saudara'; // Default fallback
-                if ($request->pj_hubungan === 'Diri Sendiri') {
-                    $hubunganDb = 'Diri Saya';
-                } elseif ($request->pj_hubungan === 'Suami') {
-                    $hubunganDb = 'Suami';
-                } elseif ($request->pj_hubungan === 'Istri') {
-                    $hubunganDb = 'Istri';
-                } elseif ($request->pj_hubungan === 'Anak') {
-                    $hubunganDb = 'Anak';
-                } elseif ($request->pj_hubungan === 'Orang Tua') {
-                    $hubunganDb = ($request->pj_jk === 'Laki-Laki') ? 'Ayah' : 'Ibu';
-                }
+                $hubunganDb = $request->pj_hubungan; // Default fallback
+                // if ($request->pj_hubungan === 'Diri Sendiri') {
+                //     $hubunganDb = 'Diri Saya';
+                // } elseif ($request->pj_hubungan === 'Suami') {
+                //     $hubunganDb = 'Suami';
+                // } elseif ($request->pj_hubungan === 'Istri') {
+                //     $hubunganDb = 'Istri';
+                // } elseif ($request->pj_hubungan === 'Anak') {
+                //     $hubunganDb = 'Anak';
+                // } elseif ($request->pj_hubungan === 'Orang Tua') {
+                //     $hubunganDb = ($request->pj_jk === 'Laki-Laki') ? 'Ayah' : 'Ibu';
+                // }
 
                 // 6. Map Penanggung Jawab Biaya (bayar_secara)
                 $bayarSecara = $request->pj_biaya;
@@ -152,7 +151,7 @@ class SuratPersetujuanRawatInapController extends Controller
                         'pendidikan_pj' => $request->pendidikan_pj,
                         'alamatpj' => $alamatpj,
                         'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp, $request->pj_telp_prefix), 0, 30),
-                        'ruang' => substr($kamar->kd_kamar, 0, 40),
+                        'ruang' => substr($bangsal->kd_bangsal, 0, 40),
                         'kelas' => $kelasDb,
                         'hubungan' => $hubunganDb,
                         'hak_kelas' => $hakKelasDb,

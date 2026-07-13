@@ -50,6 +50,11 @@ Route::get('/surat-persetujuan-rawat-inap/download/{no_surat}', [SuratPersetujua
 Route::get('/surat-persetujuan-rawat-inap/wa-template/{no_surat}', [SuratPersetujuanRawatInapController::class, 'getWaTemplate'])->name('surat-persetujuan-rawat-inap.wa-template');
 Route::post('/surat-persetujuan-rawat-inap/send-wa', [SuratPersetujuanRawatInapController::class, 'sendWhatsappManual'])->name('surat-persetujuan-rawat-inap.send-wa');
 
+// Transfer Pasien Antar Ruangan
+use App\Http\Controllers\TransferPasienController;
+Route::get('/transfer-pasien', [TransferPasienController::class, 'index'])->name('transfer-pasien.index');
+Route::post('/transfer-pasien/store', [TransferPasienController::class, 'store'])->name('transfer-pasien.store');
+
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 

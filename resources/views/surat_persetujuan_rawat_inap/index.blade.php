@@ -428,12 +428,12 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="kd_kamar">Kelas Perawatan Yang Diinginkan</label>
-                                    <select class="form-control" id="kd_kamar" name="kd_kamar" required style="width: 100%;">
-                                        <option value="">Pilih Ruang & Kelas...</option>
+                                    <label for="kd_bangsal">Ruang Perawatan Yang Diinginkan</label>
+                                    <select class="form-control" id="kd_bangsal" name="kd_bangsal" required style="width: 100%;">
+                                        <option value="">Pilih Ruangan...</option>
                                         @foreach($kamarList as $k)
-                                            <option value="{{ $k->kd_kamar }}">
-                                                {{ $k->nm_bangsal }} ({{ $k->kelas }})
+                                            <option value="{{ $k->kd_bangsal }}">
+                                                {{ $k->nm_bangsal }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -514,7 +514,9 @@
                                             <option value="Nenek">Nenek</option>
                                             <option value="Kakak">Kakak</option>
                                             <option value="Adik">Adik</option>
+                                            <option value="Lainnya">Lainnya</option>
                                         </select>
+                                        <textarea class="form-control" id="field-pj-hubungan-text" placeholder="Masukkan hubungan dengan pasien..." style="display: none; min-height: 80px;"></textarea>
                                     </div>
                                     <div class="form-group" style="margin-bottom: 0;">
                                         <label>No. HP / Telepon</label>
@@ -594,6 +596,7 @@
                                         <option value="PENOLAKAN">MEMBERIKAN PENOLAKAN</option>
                                     </select>
                                 </div>
+                                <p class="statement-text" style="font-size: 20px;font-weight: 800; text-align: center; padding-bottom: 60px;">Bersedia menanggung biaya perawatan apabila naik kelas atau menjadi pasien umum atau apabila syarat dan ketentuan tidak sesuai dengan ketentuan penjamin *)</p>   
                                 <p class="statement-text">Dengan ini menyatakan dengan sesungguhnya memberikan keputusan di atas untuk dilakukan rawat inap di RSUD Karsa Husada Batu serta setuju untuk :</p>
                                 <ul class="statement-list">
                                     <li>Memberikan keterangan tentang riwayat penyakit and kesehatannya;</li>
@@ -693,14 +696,14 @@
 
     <script>
         $(document).ready(function() {
-            $('#kd_kamar').select2({
-                placeholder: "Pilih Ruang & Kelas...",
+            $('#kd_bangsal').select2({
+                placeholder: "Pilih Ruangan...",
                 allowClear: true,
                 width: '100%'
             });
 
             // Auto focus on search box when opened
-            $('#kd_kamar').on('select2:open', function() {
+            $('#kd_bangsal').on('select2:open', function() {
                 setTimeout(function() {
                     const searchField = document.querySelector('.select2-container--open .select2-search__field');
                     if (searchField) {
@@ -821,6 +824,29 @@
             }
         });
 
+        // Toggle textarea when "Lainnya" is selected on hubungan
+        function toggleHubunganLainnya() {
+            const select = document.getElementById('field-pj-hubungan');
+            const textarea = document.getElementById('field-pj-hubungan-text');
+            if (select.value === 'Lainnya') {
+                select.style.display = 'none';
+                select.removeAttribute('name');
+                select.removeAttribute('required');
+                textarea.style.display = 'block';
+                textarea.setAttribute('name', 'pj_hubungan');
+                textarea.setAttribute('required', 'required');
+                textarea.focus();
+            } else {
+                textarea.style.display = 'none';
+                textarea.removeAttribute('name');
+                textarea.removeAttribute('required');
+                select.style.display = 'block';
+                select.setAttribute('name', 'pj_hubungan');
+                select.setAttribute('required', 'required');
+            }
+        }
+        document.getElementById('field-pj-hubungan').addEventListener('change', toggleHubunganLainnya);
+
         // Copy patient address checkbox handler
         document.getElementById('copy-alamat-pasien').addEventListener('change', (e) => {
             const pjAlamatInput = document.getElementById('field-pj-alamat');
@@ -915,6 +941,13 @@
                     document.getElementById('copy-alamat-pasien').checked = false;
                     document.getElementById('field-pj-alamat').value = '';
                     document.getElementById('field-pj-hubungan').value = '';
+                    document.getElementById('field-pj-hubungan-text').value = '';
+                    document.getElementById('field-pj-hubungan').style.display = 'block';
+                    document.getElementById('field-pj-hubungan').setAttribute('name', 'pj_hubungan');
+                    document.getElementById('field-pj-hubungan').setAttribute('required', 'required');
+                    document.getElementById('field-pj-hubungan-text').style.display = 'none';
+                    document.getElementById('field-pj-hubungan-text').removeAttribute('name');
+                    document.getElementById('field-pj-hubungan-text').removeAttribute('required');
 
                     // Parse Age
                     if (pasien.tgl_lahir) {
@@ -948,7 +981,7 @@
 
                             const selectRow = () => {
                                 document.getElementById('field-no-rawat').value = reg.no_rawat;
-                                document.getElementById('field-tanggal').value = reg.tgl_registrasi;
+                                // document.getElementById('field-tanggal').value = reg.tgl_registrasi;
                                 
                                 // Highlight Row
                                 Array.from(historyTableBody.children).forEach(r => r.style.background = '');
@@ -961,12 +994,12 @@
 
                         // Select the latest registration by default
                         document.getElementById('field-no-rawat').value = history[0].no_rawat;
-                        document.getElementById('field-tanggal').value = history[0].tgl_registrasi;
+                        // document.getElementById('field-tanggal').value = history[0].tgl_registrasi;
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
                         historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Pasien ditemukan, tapi tidak ada riwayat pendaftaran.</td></tr>';
                         document.getElementById('field-no-rawat').value = '';
-                        document.getElementById('field-tanggal').value = '';
+                        // document.getElementById('field-tanggal').value = '';
                     }
 
                 } else {
@@ -1301,12 +1334,16 @@
                                     }
                                     
                                     const hubunganSelect = document.getElementById('field-pj-hubungan');
+                                    const hubunganTextarea = document.getElementById('field-pj-hubungan-text');
                                     if (hubunganSelect) {
                                         const options = Array.from(hubunganSelect.options).map(opt => opt.value);
                                         if (options.includes(mappedHubungan)) {
                                             hubunganSelect.value = mappedHubungan;
+                                            toggleHubunganLainnya();
                                         } else {
-                                            hubunganSelect.value = 'Wali / Kurator';
+                                            hubunganSelect.value = 'Lainnya';
+                                            toggleHubunganLainnya();
+                                            hubunganTextarea.value = mappedHubungan;
                                         }
                                     }
 
@@ -1379,8 +1416,8 @@
                                         if (radioEl) radioEl.checked = true;
                                     }
 
-                                    // 9. Map and populate kd_kamar select (via Select2)
-                                    const kdKamarSelect = $('#kd_kamar');
+                                    // 9. Map and populate kd_bangsal select (via Select2)
+                                    const kdKamarSelect = $('#kd_bangsal');
                                     if (kdKamarSelect.length && consent.ruang) {
                                         kdKamarSelect.val(consent.ruang).trigger('change');
                                     }
