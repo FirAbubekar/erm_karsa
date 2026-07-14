@@ -53,7 +53,7 @@ $(document).ready(function() {
 });
 
 // ══════════ Utility Modals ══════════
-function showError(msg){document.getElementById('error-modal-message').textContent=msg;document.getElementById('error-modal').style.display='flex'}
+function showError(msg){document.getElementById('error-modal-message').innerHTML=msg;document.getElementById('error-modal').style.display='flex'}
 function hideError(){document.getElementById('error-modal').style.display='none'}
 function showSuccess(msg){document.getElementById('success-modal-message').textContent=msg;document.getElementById('success-modal').style.display='flex'}
 function hideSuccess(){document.getElementById('success-modal').style.display='none'}

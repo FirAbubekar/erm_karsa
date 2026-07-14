@@ -6,6 +6,8 @@ use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Models\ProspectiveReviu;
+use Illuminate\Support\Str;
+use App\Http\Requests\StoreProspectiveReviuRequest;
 
 class ProspectiveReviewController extends Controller
 {
@@ -47,7 +49,7 @@ class ProspectiveReviewController extends Controller
     /**
      * Simpan data prospective reviu.
      */
-    public function store(Request $request)
+    public function store(StoreProspectiveReviuRequest $request)
     {
         $data = $request->all();
 
@@ -69,19 +71,27 @@ class ProspectiveReviewController extends Controller
             $review = ProspectiveReviu::create($data);
         }
 
-        if ($review) {
-            try {
-                $pdfService = app(\App\Services\PdfService::class);
-                $pdfService->generateAndSaveProspectiveReviu($review);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Gagal generate PDF prospective reviu saat store: " . $e->getMessage());
+        try {
+            if ($review) {
+                try {
+                    $pdfService = app(\App\Services\PdfService::class);
+                    $pdfService->generateAndSaveProspectiveReviu($review);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Gagal generate PDF prospective reviu saat store: " . $e->getMessage());
+                }
             }
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal menyimpan data prospective reviu: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal menyimpan data: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function history(Request $request)
