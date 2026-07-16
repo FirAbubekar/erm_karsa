@@ -221,7 +221,7 @@ class PdfService
         $qrDpjp = $dpjpPegawai ? $dpjpPegawai->signature_base64 : null;
         $qrKpra = $kpraPegawai ? $kpraPegawai->signature_base64 : null;
 
-        $pdf = Pdf::loadView('prospective_reviu.pdf', compact('review', 'deviceInfo', 'qrApoteker', 'qrPerawat', 'qrDpjp', 'qrKpra'));
+        $pdf = Pdf::setOption('isPhpEnabled', true)->loadView('prospective_reviu.pdf', compact('review', 'deviceInfo', 'qrApoteker', 'qrPerawat', 'qrDpjp', 'qrKpra'));
         $pdf->setPaper('a4', 'portrait');
         $pdfOutput = $pdf->output();
 

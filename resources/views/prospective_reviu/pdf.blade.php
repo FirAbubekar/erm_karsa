@@ -52,7 +52,7 @@
         }
 
         .header-logo {
-            width: 55px;
+            width: 90px;
             text-align: center;
         }
 
@@ -91,7 +91,7 @@
         }
 
         .header-right-logo {
-            width: 55px;
+            width: 90px;
             text-align: center;
         }
 
@@ -200,6 +200,7 @@
                     <div class="email">Email : rsukhbatu@jatimprov.go.id</div>
                 </td>
                 <td class="header-right-logo">
+                    <div style="height: 20px;"></div>
                     @if (file_exists(public_path('images/logo-rs.png')))
                         <img src="{{ public_path('images/logo-rs.png') }}" alt="Logo RS">
                     @else
@@ -482,6 +483,24 @@
             </tr>
         </table>
     </main>
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "RM. 006E/{PAGE_NUM}-{PAGE_COUNT}/Rev0";
+            $dummy_text = "RM. 006E/9-9/Rev 0"; // Used for width calculation to avoid {PAGE_NUM} string length inflation
+            $font = $fontMetrics->get_font("Arial", "bold");
+            $size = 8;
+            $width = $fontMetrics->get_text_width($dummy_text, $font, $size);
+            
+            // X: Align to the right margin
+            // Page width: 595.28pt. Margin right: 15mm (42.52pt) for this template
+            $x = $pdf->get_width() - 42.52 - $width;
+            
+            // Y: At the very top of the header area
+            $y = 16;
+            
+            $pdf->page_text($x, $y, $text, $font, $size, [0,0,0]);
+        }
+    </script>
 </body>
 
 </html>
