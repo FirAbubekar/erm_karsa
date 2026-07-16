@@ -39,7 +39,7 @@
 
         .header-table { width: 100%; border-collapse: collapse; }
         .header-table td { vertical-align: middle; padding: 0; }
-        .header-logo { width: 55px; text-align: center; }
+        .header-logo { width: 90px; text-align: center; }
         .header-logo img { width: 50px; height: auto; }
         .header-center { text-align: center; padding: 0 5px; }
         .header-center .gov { font-size: 10pt; font-weight: bold; }
@@ -47,8 +47,10 @@
         .header-center .accreditation { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5px; }
         .header-center .address { font-size: 8pt; }
         .header-center .email { font-size: 8pt; }
-        .header-right-logo { width: 55px; text-align: center; }
+        .header-right-logo { width: 90px; text-align: center; }
         .header-right-logo img { width: 45px; height: auto; }
+        
+        
         
         .header-line { border: none; border-top: 2.5px solid #000; margin: 3px 0 1px 0; }
         .header-line-thin { border: none; border-top: 0.5px solid #000; margin: 0 0 0 0; }
@@ -106,10 +108,11 @@
                     <div class="email">Email : rsukhbatu@jatimprov.go.id</div>
                 </td>
                 <td class="header-right-logo">
+                    <div style="height: 20px;"></div>
                     @if(file_exists(public_path('images/logo-rs.png')))
                         <img src="{{ public_path('images/logo-rs.png') }}" alt="Logo RS">
                     @else
-                        <div style="width:45px; height:45px; border:1px solid #ccc; text-align:center; line-height:45px; font-size:7pt; color:#999;">Logo</div>
+                        <div style="width:45px; height:45px; border:1px solid #ccc; text-align:center; line-height:45px; font-size:7pt; color:#999; margin: 0 auto;">Logo</div>
                     @endif
                 </td>
             </tr>
@@ -503,5 +506,24 @@
             </tbody>
         </table>
     </main>
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "RM. 010A/{PAGE_NUM}-{PAGE_COUNT}/Rev 1";
+            $dummy_text = "RM. 010A/9-9/Rev 1"; // Used for width calculation to avoid {PAGE_NUM} string length inflation
+            $font = $fontMetrics->get_font("Arial", "bold");
+            $size = 8;
+            $width = $fontMetrics->get_text_width($dummy_text, $font, $size);
+            
+            // X: Align to the right margin
+            // Page width: 595.28pt. Margin right: 10mm (28.35pt)
+            $x = $pdf->get_width() - 28.35 - $width;
+            
+            // Y: At the very top of the header area
+            // Header top is 14.17pt
+            $y = 16;
+            
+            $pdf->page_text($x, $y, $text, $font, $size, [0,0,0]);
+        }
+    </script>
 </body>
 </html>

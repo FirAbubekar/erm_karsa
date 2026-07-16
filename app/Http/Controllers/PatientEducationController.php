@@ -577,7 +577,7 @@ class PatientEducationController extends Controller
             'downloaded_at' => now()->format('d/m/Y H:i:s'),
         ];
         
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('edukasi_pasien.pdf', [
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::setOption('isPhpEnabled', true)->loadView('edukasi_pasien.pdf', [
             'assessment' => $assessment, 
             'implementations' => $mergedImplementations, 
             'deviceInfo' => $deviceInfo
