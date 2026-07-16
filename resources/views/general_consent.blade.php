@@ -382,7 +382,7 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Tanggal Periksa</label>
-                                <input type="date" id="field-tgl-periksa" class="form-control">
+                                <input type="date" id="field-tgl-periksa" class="form-control" value="{{ date('Y-m-d') }}" readonly required>
                             </div>
                             <div class="form-group">
                                 <label>Petugas</label>
@@ -416,7 +416,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Hubungan</label>
-                            <select id="field-pj-hubungan" class="form-control">
+                             <select id="field-pj-hubungan" class="form-control">
                                 <option value="Suami">Suami</option>
                                 <option value="Istri">Istri</option>
                                 <option value="Anak">Anak</option>
@@ -430,7 +430,9 @@
                                 <option value="Nenek">Nenek</option>
                                 <option value="Kakak">Kakak</option>
                                 <option value="Adik">Adik</option>
+                                <option value="Lainnya">Lainnya</option>
                             </select>
+                            <input type="text" id="field-pj-hubungan-text" class="form-control" placeholder="Masukkan hubungan dengan pasien..." style="display: none;">
                         </div>
                         <div class="form-group">
                             <label>Jenis Kelamin</label>
@@ -924,7 +926,7 @@
                                 if (e.target.tagName === 'BUTTON') return;
                                 
                                 document.getElementById('field-no-rawat').value = reg.no_rawat;
-                                document.getElementById('field-tgl-periksa').value = reg.tgl_registrasi;
+                                // document.getElementById('field-tgl-periksa').value = reg.tgl_registrasi;
                                 // Highlight selected row
                                 Array.from(historyTableBody.children).forEach(r => r.style.background = '');
                                 row.style.background = 'var(--primary-light)';
@@ -937,7 +939,7 @@
 
                         // Automatically select latest registration
                         document.getElementById('field-no-rawat').value = history[0].no_rawat;
-                        document.getElementById('field-tgl-periksa').value = history[0].tgl_registrasi;
+                        // document.getElementById('field-tgl-periksa').value = history[0].tgl_registrasi;
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
                         historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Pasien ditemukan, tapi tidak ada riwayat rawat.</td></tr>';
@@ -1052,7 +1054,7 @@
             document.getElementById('modal-pj-info').textContent = `- / ${jk}`;
             document.getElementById('modal-pj-ktp').textContent = '-';
             document.getElementById('modal-pj-telp').textContent = document.getElementById('field-pj-telp').value || '-';
-            document.getElementById('modal-pj-hubungan').textContent = document.getElementById('field-pj-hubungan').value || '-';
+            document.getElementById('modal-pj-hubungan').textContent = getHubunganValue() || '-';
             // document.getElementById('modal-pj-hubungan-lite').textContent = document.getElementById('field-pj-hubungan').value || '-';
             // document.getElementById('modal-pj-kepercayaan').value = document.getElementById('field-pj-kepercayaan').value || '';
 
@@ -1163,13 +1165,13 @@
                 no_rawat: document.getElementById('field-no-rawat').value,
                 no_rm: document.getElementById('field-no-rm').value,
                 tanggal: document.getElementById('field-tgl-periksa').value,
-                pengobatan_kepada: document.getElementById('field-pj-hubungan').value,
+                pengobatan_kepada: getHubunganValue(),
                 nilai_kepercayaan: '-',
                 nama_pj: document.getElementById('field-pj-nama').value,
                 umur_pj: '-',
                 no_ktppj: '-',
                 jkpj: document.getElementById('field-pj-jk').value,
-                bertindak_atas: document.getElementById('field-pj-hubungan').value,
+                bertindak_atas: getHubunganValue(),
                 no_telp_prefix: document.getElementById('field-pj-telp-prefix').value,
                 no_telp: document.getElementById('field-pj-telp').value,
                 signature: signatureData,
@@ -1361,9 +1363,15 @@
         const fieldAuthName1 = document.getElementById('field-auth-name-1');
         const fieldAuthTelp1 = document.getElementById('field-auth-telp-1');
 
+        function getHubunganValue() {
+            const select = document.getElementById('field-pj-hubungan');
+            const text = document.getElementById('field-pj-hubungan-text');
+            return select.value === 'Lainnya' ? text.value.trim() : select.value;
+        }
+
         function syncAuth1() {
             const nama = fieldPjNama.value.trim();
-            const hubungan = fieldPjHubungan.value;
+            const hubungan = getHubunganValue();
             const telp = fieldPjTelp.value.trim();
             
             if (nama && hubungan) {
@@ -1425,8 +1433,24 @@
             });
         }
 
+        // Toggle text input when "Lainnya" is selected on hubungan
+        function toggleHubunganLainnya() {
+            const select = document.getElementById('field-pj-hubungan');
+            const text = document.getElementById('field-pj-hubungan-text');
+            if (select.value === 'Lainnya') {
+                select.style.display = 'none';
+                text.style.display = 'block';
+                text.focus();
+            } else {
+                text.style.display = 'none';
+                select.style.display = 'block';
+            }
+        }
+
         // Auto Fill Penanggung Jawab Hubungan "Diri Sendiri" option trigger for convenience
         document.getElementById('field-pj-hubungan').addEventListener('change', (e) => {
+            toggleHubunganLainnya();
+            syncAuth1();
             if (!activePatientData) return;
             if (e.target.value === 'Diri Sendiri') {
                 document.getElementById('field-pj-nama').value = activePatientData.nm_pasien || '';
@@ -1473,6 +1497,9 @@
             }
         });
 
+        // Sync auth when typing in "Lainnya" text field
+        document.getElementById('field-pj-hubungan-text').addEventListener('input', syncAuth1);
+
         // Check for edit query parameters on load
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1508,7 +1535,17 @@
                                     // Update form fields
                                     document.getElementById('field-pj-nama').value = consent.nama_pj || '';
                                     document.getElementById('field-pj-jk').value = consent.jkpj || 'L';
-                                    document.getElementById('field-pj-hubungan').value = consent.bertindak_atas || 'Diri Sendiri';
+                                    const hubunganSelect = document.getElementById('field-pj-hubungan');
+                                    const hubunganText = document.getElementById('field-pj-hubungan-text');
+                                    const hubunganVal = consent.bertindak_atas || 'Diri Sendiri';
+                                    const options = Array.from(hubunganSelect.options).map(opt => opt.value);
+                                    if (options.includes(hubunganVal)) {
+                                        hubunganSelect.value = hubunganVal;
+                                    } else {
+                                        hubunganSelect.value = 'Lainnya';
+                                        hubunganText.value = hubunganVal;
+                                    }
+                                    toggleHubunganLainnya();
                                     
                                     // Parse phone prefix and phone number
                                     let phoneVal = consent.no_telp || '';

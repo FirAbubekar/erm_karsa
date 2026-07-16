@@ -41,6 +41,32 @@
             Dashboard
         </a>
 
+        <div class="nav-dropdown {{ Route::is('wa-gateway.*') ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                        </path>
+                    </svg>
+                    WhatsApp Gateway
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="nav-dropdown-content">
+                <a href="{{ route('wa-gateway.check') }}"
+                    class="nav-dropdown-item {{ Route::is('wa-gateway.check') ? 'active' : '' }}">
+                    Cek Koneksi
+                </a>
+                <a href="{{ route('wa-gateway.history') }}"
+                    class="nav-dropdown-item {{ Route::is('wa-gateway.history') ? 'active' : '' }}">
+                    History WA
+                </a>
+            </div>
+        </div>
+
         @if (hasPermission('gc.create') ||
                 hasPermission('gc.view') ||
                 hasPermission('ranap.create') ||
@@ -94,7 +120,8 @@
                         RM 02 Surat Persetujuan Rawat Inap
                     </div>
                     <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                        </path>
                     </svg>
                 </div>
                 <div class="nav-dropdown-content">
@@ -113,6 +140,15 @@
                 </div>
             </div>
         @endif
+
+        <a href="{{ route('transfer-pasien.index') }}"
+            class="nav-item {{ Route::is('transfer-pasien.*') ? 'active' : '' }}">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+            Transfer Pasien Antar Ruangan
+        </a>
 
         @if (hasPermission('ep.create') || hasPermission('ep.view'))
             <div class="nav-dropdown {{ Route::is('edukasi-pasien.*') ? 'active' : '' }}">

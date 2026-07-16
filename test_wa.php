@@ -1,0 +1,1 @@
+<?php echo Illuminate\Support\Facades\Http::withBasicAuth('rskh-wa-gw', 'Y0ndaktaukoktanyasay4@1113!')->withHeaders(['X-Device-Id'=>'ca4f762d-c630-4faa-8be8-dbefd77c7e51'])->post('http://192.168.200.182:3004/send/message', ['phone'=>'6281334555468', 'message'=>'test'])->body();
