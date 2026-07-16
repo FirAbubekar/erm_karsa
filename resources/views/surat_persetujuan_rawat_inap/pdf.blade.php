@@ -312,7 +312,7 @@
     @endphp
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Document Header Code -->
-    <div class="doc-code">RM. 001B/1-1/ Rev. 1</div>
+    <div class="doc-code">RM. 001B.Rev1</div>
     
     <!-- Hospital Header -->
     <table class="header-table">

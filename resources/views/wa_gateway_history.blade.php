@@ -10,33 +10,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
             --sidebar-width: 280px;
-            --primary: #10B981;
-            --primary-dark: #059669;
-            --primary-light: rgba(16, 185, 129, 0.1);
-            --primary-glow: rgba(16, 185, 129, 0.2);
-            --bg-main: #F0FDF4;
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: rgba(5, 150, 105, 0.08);
+            --primary-glow: rgba(5, 150, 105, 0.15);
+            --primary-surface: #ECFDF5;
+            --bg-main: #F1F5F9;
             --card-bg: #FFFFFF;
-            --text-main: #1E293B;
+            --text-main: #0F172A;
             --text-muted: #64748B;
+            --text-subtle: #94A3B8;
             --border: #E2E8F0;
+            --border-light: #F1F5F9;
             --success: #10B981;
             --success-bg: #D1FAE5;
             --success-text: #065F46;
             --error: #EF4444;
-            --error-bg: #FEE2E2;
+            --error-bg: #FEF2F2;
             --error-text: #991B1B;
-            --warning-bg: #FEF3C7;
+            --warning: #F59E0B;
+            --warning-bg: #FFFBEB;
             --warning-text: #92400E;
+            --info: #3B82F6;
+            --info-bg: #EFF6FF;
+            --info-text: #1E40AF;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 50%, #F8FAFC 100%);
+            background: var(--bg-main);
             color: var(--text-main);
             display: flex;
             min-height: 100vh;
@@ -45,7 +59,7 @@
 
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.98);
             backdrop-filter: blur(10px);
             border-right: 1px solid var(--border);
             display: flex;
@@ -87,132 +101,314 @@
             font-size: 14px; font-weight: 500; transition: all 0.2s; margin-bottom: 4px;
         }
 
-        .nav-item:hover { background: var(--bg-main); color: var(--text-main); }
+        .nav-item:hover { background: var(--primary-surface); color: var(--text-main); }
         .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
         .nav-item svg { width: 20px; height: 20px; }
 
-        .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 32px; }
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 28px 32px;
+            max-width: calc(100vw - var(--sidebar-width));
+        }
 
         header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
+            align-items: flex-start;
+            margin-bottom: 24px;
         }
 
         .header-title h1 {
-            font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
-            background: linear-gradient(135deg, var(--text-main), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-main);
         }
 
-        .header-title p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-subtle);
+            margin-bottom: 6px;
+        }
+
+        .breadcrumb i { font-size: 10px; color: var(--text-subtle); }
+        .breadcrumb span { color: var(--text-muted); }
 
         .user-profile {
-            display: flex; align-items: center; gap: 12px;
-            padding: 8px 16px; background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(10px); border: 1px solid var(--border);
-            border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 14px 6px 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
 
         .avatar {
-            width: 32px; height: 32px; background: linear-gradient(135deg, #E2E8F0, #CBD5E1);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 12px; color: var(--text-muted);
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 12px; color: white;
         }
 
-        .user-info span { font-size: 13px; font-weight: 600; display: block; }
+        .user-info span { font-size: 13px; font-weight: 500; display: block; }
+
+        .date-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .date-summary i { color: var(--primary); font-size: 14px; }
+        .date-summary strong { color: var(--text-main); font-weight: 600; }
 
         .stats-row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            padding: 20px 24px;
-            border-radius: 16px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
         }
 
-        .stat-card .stat-value { font-size: 28px; font-weight: 800; line-height: 1; }
-        .stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
-        .stat-card.total .stat-value { color: var(--text-main); }
-        .stat-card.pending .stat-value { color: #F59E0B; }
-        .stat-card.processing .stat-value { color: #3B82F6; }
-        .stat-card.sent .stat-value { color: var(--success); }
-        .stat-card.failed .stat-value { color: var(--error); }
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.total { background: var(--primary-light); color: var(--primary); }
+        .stat-icon.pending { background: var(--warning-bg); color: var(--warning); }
+        .stat-icon.processing { background: var(--info-bg); color: var(--info); }
+        .stat-icon.sent { background: var(--success-bg); color: var(--success); }
+        .stat-icon.failed { background: var(--error-bg); color: var(--error); }
+
+        .stat-body { flex-grow: 1; }
+        .stat-body .stat-value { font-size: 22px; font-weight: 700; line-height: 1.2; }
+        .stat-body .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+        .filter-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-section .filter-label i { font-size: 13px; }
+
+        .filter-section input[type="date"] {
+            padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: var(--card-bg);
+            color: var(--text-main);
+            min-width: 140px;
+        }
+
+        .filter-section input[type="date"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .filter-separator {
+            color: var(--text-subtle);
+            font-size: 13px;
+        }
+
+        .btn-filter {
+            padding: 7px 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-filter:hover { background: var(--primary-dark); }
+
+        .btn-reset {
+            padding: 7px 16px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-reset:hover {
+            background: var(--bg-main);
+            border-color: var(--text-subtle);
+            color: var(--text-main);
+        }
 
         .card {
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
-            padding: 20px;
         }
 
-        .table-wrap { overflow-x: auto; }
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-left i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .card-header-left h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .card-header .badge-count {
+            padding: 3px 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .table-wrap { overflow-x: auto; padding: 0; }
 
         table { width: 100% !important; border-collapse: collapse; font-size: 13px; }
 
         thead { background: var(--bg-main); }
 
         th {
-            padding: 14px 16px !important;
+            padding: 12px 14px !important;
             text-align: left !important;
             font-weight: 600 !important;
-            font-size: 12px !important;
+            font-size: 11px !important;
             text-transform: uppercase !important;
             color: var(--text-muted) !important;
-            letter-spacing: 0.03em !important;
+            letter-spacing: 0.04em !important;
             white-space: nowrap !important;
             border-bottom: 1px solid var(--border) !important;
         }
 
         td {
-            padding: 14px 16px !important;
-            border-bottom: 1px solid var(--border) !important;
+            padding: 12px 14px !important;
+            border-bottom: 1px solid var(--border-light) !important;
             vertical-align: middle !important;
         }
 
-        tr:hover td { background: rgba(16, 185, 129, 0.02); }
+        tr:last-child td { border-bottom: none !important; }
+        tr:hover td { background: rgba(5, 150, 105, 0.02); }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 100px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
 
-        .status-badge.pending { background: #FEF3C7; color: #92400E; }
-        .status-badge.processing { background: #DBEAFE; color: #1E40AF; }
+        .status-badge.pending { background: var(--warning-bg); color: var(--warning-text); }
+        .status-badge.processing { background: var(--info-bg); color: var(--info-text); }
         .status-badge.sent { background: var(--success-bg); color: var(--success-text); }
         .status-badge.failed { background: var(--error-bg); color: var(--error-text); }
 
         .status-dot {
-            width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+            width: 6px; height: 6px; border-radius: 50%; display: inline-block;
         }
 
-        .status-dot.pending { background: #F59E0B; }
-        .status-dot.processing { background: #3B82F6; animation: pulse 1.5s infinite; }
+        .status-dot.pending { background: var(--warning); }
+        .status-dot.processing { background: var(--info); animation: pulse 1.5s infinite; }
         .status-dot.sent { background: var(--success); }
         .status-dot.failed { background: var(--error); }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .status-dot.sent { background: var(--success); }
 
         .msg-preview {
-            max-width: 300px;
+            max-width: 280px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -221,19 +417,46 @@
             line-height: 1.5;
             color: var(--text-muted);
             font-size: 12px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .msg-preview:hover { color: var(--text-main); }
+
+        .msg-expanded {
+            -webkit-line-clamp: unset;
+            max-width: 400px;
+            white-space: pre-wrap;
         }
 
         .error-msg {
-            color: var(--error);
+            color: var(--error-text);
             font-size: 11px;
             max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            cursor: default;
         }
 
-        .text-mono { font-family: 'Courier New', monospace; font-size: 12px; }
+        .text-mono {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
         .text-muted { color: var(--text-muted); font-size: 12px; }
+        .text-subtle { color: var(--text-subtle); font-size: 11px; }
+
+        .time-cell {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .time-cell .date { font-weight: 500; color: var(--text-main); }
+        .time-cell .time { color: var(--text-subtle); font-size: 11px; }
+        .time-cell .relative { font-size: 10px; color: var(--text-subtle); display: block; margin-top: 1px; }
 
         .sidebar-footer {
             padding: 16px;
@@ -245,108 +468,172 @@
             display: flex; align-items: center; justify-content: center; gap: 8px;
             padding: 10px; width: 100%;
             background: #FEF2F2; color: #EF4444;
-            border: 1px solid #FEE2E2; border-radius: 12px;
+            border: 1px solid #FEE2E2; border-radius: var(--radius-md);
             font-size: 14px; font-weight: 600; cursor: pointer;
             transition: all 0.2s ease; font-family: inherit;
         }
 
-        .btn-logout:hover { background: #FEE2E2; border-color: #FECACA; transform: translateY(-1px); }
-        .btn-logout svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .btn-logout:hover { background: #FEE2E2; border-color: #FECACA; }
+
+        .btn-copy {
+            padding: 2px 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--text-subtle);
+            transition: all 0.2s;
+            margin-left: 4px;
+        }
+
+        .btn-copy:hover {
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        .no-file { color: var(--text-subtle); font-size: 11px; }
+
+        .file-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .file-indicator i { font-size: 12px; }
 
         div.dataTables_wrapper div.dataTables_filter input {
-            padding: 8px 14px !important;
-            border: 2px solid var(--border) !important;
-            border-radius: 10px !important;
+            padding: 7px 12px !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius-sm) !important;
             font-size: 13px !important;
             font-family: inherit !important;
             outline: none !important;
-            margin-left: 8px !important;
-            width: 260px !important;
+            margin-left: 6px !important;
+            width: 220px !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
         }
 
         div.dataTables_wrapper div.dataTables_filter input:focus {
             border-color: var(--primary) !important;
-            box-shadow: 0 0 0 4px var(--primary-glow) !important;
+            box-shadow: 0 0 0 3px var(--primary-glow) !important;
         }
 
         div.dataTables_wrapper div.dataTables_length select {
-            padding: 6px 12px !important;
-            border: 2px solid var(--border) !important;
-            border-radius: 10px !important;
+            padding: 5px 10px !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius-sm) !important;
             font-size: 13px !important;
             font-family: inherit !important;
             outline: none !important;
-            margin: 0 6px !important;
+            margin: 0 4px !important;
+            background: var(--card-bg) !important;
         }
 
         div.dataTables_wrapper div.dataTables_info {
-            font-size: 13px !important;
+            font-size: 12px !important;
             color: var(--text-muted) !important;
-            padding: 16px 0 !important;
+            padding: 14px 0 !important;
         }
 
         div.dataTables_wrapper div.dataTables_paginate {
-            padding: 12px 0 !important;
+            padding: 10px 0 !important;
         }
 
         div.dataTables_wrapper div.dataTables_paginate a.paginate_button {
-            padding: 8px 14px !important;
-            border-radius: 10px !important;
-            font-size: 13px !important;
+            padding: 6px 12px !important;
+            border-radius: var(--radius-sm) !important;
+            font-size: 12px !important;
             font-weight: 500 !important;
             text-decoration: none !important;
             transition: all 0.2s !important;
-            color: var(--text-main) !important;
-            background: var(--bg-main) !important;
-            border: 1px solid var(--border) !important;
-            margin: 0 2px !important;
+            color: var(--text-muted) !important;
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            margin: 0 1px !important;
         }
 
         div.dataTables_wrapper div.dataTables_paginate a.paginate_button:hover {
-            background: var(--primary-light) !important;
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
+            background: var(--bg-main) !important;
+            border-color: var(--border) !important;
+            color: var(--text-main) !important;
         }
 
         div.dataTables_wrapper div.dataTables_paginate a.paginate_button.current {
             background: var(--primary) !important;
             color: white !important;
-            border: 1px solid var(--primary) !important;
+            border-color: var(--primary) !important;
         }
 
         div.dataTables_wrapper div.dataTables_paginate a.paginate_button.disabled {
-            color: #CBD5E1 !important;
+            color: var(--text-subtle) !important;
             cursor: not-allowed !important;
             background: transparent !important;
             border-color: transparent !important;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 10px 18px;
+            background: var(--text-main);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         @media (max-width: 1024px) {
             :root { --sidebar-width: 280px; }
             .sidebar { transform: translateX(-100%); box-shadow: 20px 0 25px -5px rgba(0, 0, 0, 0.1); }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; padding-top: 80px; }
+            .main-content { margin-left: 0; padding: 20px; padding-top: 80px; max-width: 100vw; }
             .stats-row { grid-template-columns: repeat(3, 1fr); }
+            .stat-card { padding: 14px 16px; }
+            .stat-body .stat-value { font-size: 18px; }
 
             .mobile-header {
                 display: flex; position: fixed; top: 0; left: 0; right: 0; height: 64px;
-                background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+                background: rgba(255,255,255,0.98); backdrop-filter: blur(10px);
                 border-bottom: 1px solid var(--border); align-items: center;
                 padding: 0 20px; z-index: 40; justify-content: space-between;
             }
 
             .hamburger {
-                cursor: pointer; padding: 8px; border-radius: 8px;
+                cursor: pointer; padding: 8px; border-radius: var(--radius-sm);
                 background: var(--bg-main); border: none; color: var(--text-main);
             }
 
             .sidebar-overlay {
                 display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 45;
+                background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: 45;
             }
             .sidebar-overlay.active { display: block; }
-            header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            header { flex-direction: column; align-items: flex-start; gap: 16px; }
             .user-profile { width: 100%; justify-content: center; }
+            .filter-section { flex-direction: column; align-items: stretch; }
+            .filter-section input[type="date"] { flex-grow: 1; }
+        }
+
+        @media (max-width: 640px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (min-width: 1025px) { .mobile-header { display: none; } }
@@ -358,8 +645,12 @@
     <div class="main-content">
         <header>
             <div class="header-title">
-                <h1>History WA</h1>
-                <p>Riwayat pengiriman pesan WhatsApp.</p>
+                <div class="breadcrumb">
+                    <i class="fas fa-home"></i> Dashboard <i class="fas fa-chevron-right"></i>
+                    <span>History WA</span>
+                </div>
+                <h1>History WhatsApp</h1>
+                <p>Riwayat pengiriman pesan WhatsApp gateway.</p>
             </div>
             <div class="user-profile">
                 <div class="avatar">{{ substr(Session::get('user_id'), 0, 1) }}</div>
@@ -368,29 +659,67 @@
         </header>
 
         <div class="stats-row">
-            <div class="stat-card total">
-                <div class="stat-value">{{ $stats['total'] }}</div>
-                <div class="stat-label">Total Pesan</div>
+            <div class="stat-card">
+                <div class="stat-icon total"><i class="fas fa-envelope"></i></div>
+                <div class="stat-body">
+                    <div class="stat-value">{{ $stats['total'] }}</div>
+                    <div class="stat-label">Total Pesan</div>
+                </div>
             </div>
-            <div class="stat-card pending">
-                <div class="stat-value">{{ $stats['pending'] }}</div>
-                <div class="stat-label">Pending</div>
+            <div class="stat-card">
+                <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
+                <div class="stat-body">
+                    <div class="stat-value">{{ $stats['pending'] }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
             </div>
-            <div class="stat-card processing">
-                <div class="stat-value">{{ $stats['processing'] }}</div>
-                <div class="stat-label">Processing</div>
+            <div class="stat-card">
+                <div class="stat-icon processing"><i class="fas fa-sync-alt fa-spin"></i></div>
+                <div class="stat-body">
+                    <div class="stat-value">{{ $stats['processing'] }}</div>
+                    <div class="stat-label">Processing</div>
+                </div>
             </div>
-            <div class="stat-card sent">
-                <div class="stat-value">{{ $stats['sent'] }}</div>
-                <div class="stat-label">Terkirim</div>
+            <div class="stat-card">
+                <div class="stat-icon sent"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-body">
+                    <div class="stat-value">{{ $stats['sent'] }}</div>
+                    <div class="stat-label">Terkirim</div>
+                </div>
             </div>
-            <div class="stat-card failed">
-                <div class="stat-value">{{ $stats['failed'] }}</div>
-                <div class="stat-label">Gagal</div>
+            <div class="stat-card">
+                <div class="stat-icon failed"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="stat-body">
+                    <div class="stat-value">{{ $stats['failed'] }}</div>
+                    <div class="stat-label">Gagal</div>
+                </div>
             </div>
         </div>
 
+        <div class="date-summary">
+            <i class="fas fa-calendar-alt"></i>
+            Menampilkan data periode
+            <strong id="range-label">{{ \Carbon\Carbon::parse($today)->isoFormat('D MMMM YYYY') }}</strong>
+            <span id="range-to-label" style="display:none;"></span>
+        </div>
+
+        <div class="filter-section">
+            <span class="filter-label"><i class="fas fa-filter"></i> Filter Tanggal</span>
+            <input type="date" id="date_from" value="{{ $today }}">
+            <span class="filter-separator">—</span>
+            <input type="date" id="date_to" value="{{ $today }}">
+            <button id="btn-filter" class="btn-filter"><i class="fas fa-search"></i> Tampilkan</button>
+            <button id="btn-reset" class="btn-reset"><i class="fas fa-undo"></i> Hari Ini</button>
+        </div>
+
         <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <i class="fas fa-list"></i>
+                    <h3>Daftar Pengiriman Pesan</h3>
+                </div>
+                <span class="badge-count" id="row-count">0 data</span>
+            </div>
             <div class="table-wrap">
                 <table id="waHistoryTable" class="display" style="width:100%">
                     <thead>
@@ -411,21 +740,56 @@
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script>
+        function getTableData() {
+            return {
+                url: '{{ route("wa-gateway.history-data") }}',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                data: function (d) {
+                    d.date_from = $('#date_from').val();
+                    d.date_to = $('#date_to').val();
+                }
+            };
+        }
+
+        function showToast(msg) {
+            var t = $('#toast');
+            t.text(msg).addClass('show');
+            clearTimeout(t.data('timer'));
+            t.data('timer', setTimeout(function () { t.removeClass('show'); }, 1500));
+        }
+
+        function updateRangeLabel() {
+            var from = $('#date_from').val();
+            var to = $('#date_to').val();
+            if (from === to) {
+                var d = new Date(from + 'T00:00:00');
+                var opts = { day: 'numeric', month: 'long', year: 'numeric' };
+                $('#range-label').text(d.toLocaleDateString('id-ID', opts));
+                $('#range-to-label').hide();
+            } else {
+                var d1 = new Date(from + 'T00:00:00');
+                var d2 = new Date(to + 'T00:00:00');
+                var opts = { day: 'numeric', month: 'long', year: 'numeric' };
+                $('#range-label').text(d1.toLocaleDateString('id-ID', opts));
+                $('#range-to-label').show().text(' — ' + d2.toLocaleDateString('id-ID', opts));
+                $('#range-to-label').insertAfter('#range-label');
+            }
+        }
+
         $(document).ready(function () {
-            $('#waHistoryTable').DataTable({
+            var table = $('#waHistoryTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: {
-                    url: '{{ route("wa-gateway.history-data") }}',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                },
+                ajax: getTableData(),
                 columns: [
                     { data: 'id', name: 'id' },
                     { data: 'no_surat', name: 'no_surat' },
@@ -439,25 +803,63 @@
                 order: [[0, 'desc']],
                 pageLength: 20,
                 lengthMenu: [10, 20, 50, 100],
+                drawCallback: function (settings) {
+                    var info = this.api().page.info();
+                    $('#row-count').text(info.recordsDisplay + ' data');
+                },
                 language: {
-                    processing: 'Memuat data...',
-                    search: 'Cari:',
+                    processing: '<div style="padding:24px;text-align:center;color:var(--text-muted);"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Memuat data...</div>',
+                    search: '<i class="fas fa-search" style="color:var(--text-subtle);margin-right:4px;"></i>',
+                    searchPlaceholder: 'Cari no. surat, telepon, pesan...',
                     lengthMenu: 'Tampilkan _MENU_ data',
-                    info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                    info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
                     infoEmpty: 'Tidak ada data',
                     infoFiltered: '(difilter dari _MAX_ total data)',
                     loadingRecords: 'Memuat...',
-                    zeroRecords: 'Tidak ada data yang cocok',
-                    emptyTable: 'Tidak ada data',
+                    zeroRecords: '<div style="padding:40px;text-align:center;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:12px;color:var(--text-subtle);"></i>Tidak ada data yang cocok</div>',
+                    emptyTable: '<div style="padding:40px;text-align:center;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:12px;color:var(--text-subtle);"></i>Belum ada data</div>',
                     paginate: {
-                        first: 'Pertama',
-                        previous: 'Sebelumnya',
-                        next: 'Selanjutnya',
-                        last: 'Terakhir'
+                        first: '<i class="fas fa-angle-double-left"></i>',
+                        previous: '<i class="fas fa-chevron-left"></i>',
+                        next: '<i class="fas fa-chevron-right"></i>',
+                        last: '<i class="fas fa-angle-double-right"></i>'
                     }
                 },
                 responsive: true,
+                dom: '<"top"lf>rt<"bottom"ip>',
             });
+
+            $('#btn-filter').on('click', function () {
+                table.ajax.reload();
+                updateRangeLabel();
+            });
+
+            $('#date_from, #date_to').on('keypress', function (e) {
+                if (e.which === 13) {
+                    $('#btn-filter').click();
+                }
+            });
+
+            $('#btn-reset').on('click', function () {
+                var today = new Date().toISOString().split('T')[0];
+                $('#date_from').val(today);
+                $('#date_to').val(today);
+                updateRangeLabel();
+                table.ajax.reload();
+            });
+
+            $(document).on('click', '.msg-preview', function () {
+                $(this).toggleClass('msg-expanded');
+            });
+
+            $(document).on('click', '.btn-copy', function () {
+                var text = $(this).data('copy');
+                navigator.clipboard.writeText(text).then(function () {
+                    showToast('Disalin ke clipboard');
+                });
+            });
+
+            updateRangeLabel();
         });
     </script>
 </body>

@@ -203,15 +203,16 @@ Route::get('/wa-gateway/history', function () {
         return redirect('/');
     }
 
+    $today = date('Y-m-d');
     $stats = [
-        'total'   => DB::table('t_antrean_wa')->count(),
-        'pending' => DB::table('t_antrean_wa')->where('status', 'pending')->count(),
-        'sent'    => DB::table('t_antrean_wa')->where('status', 'sent')->count(),
-        'failed'  => DB::table('t_antrean_wa')->where('status', 'failed')->count(),
-        'processing' => DB::table('t_antrean_wa')->where('status', 'processing')->count(),
+        'total'   => DB::table('t_antrean_wa')->whereDate('created_at', $today)->count(),
+        'pending' => DB::table('t_antrean_wa')->whereDate('created_at', $today)->where('status', 'pending')->count(),
+        'sent'    => DB::table('t_antrean_wa')->whereDate('created_at', $today)->where('status', 'sent')->count(),
+        'failed'  => DB::table('t_antrean_wa')->whereDate('created_at', $today)->where('status', 'failed')->count(),
+        'processing' => DB::table('t_antrean_wa')->whereDate('created_at', $today)->where('status', 'processing')->count(),
     ];
 
-    return view('wa_gateway_history', compact('stats'));
+    return view('wa_gateway_history', compact('stats', 'today'));
 })->name('wa-gateway.history');
 
 Route::post('/wa-gateway/history-data', function () {
@@ -226,10 +227,13 @@ Route::post('/wa-gateway/history-data', function () {
     $orderCol = request('order.0.column', 0);
     $orderDir = request('order.0.dir', 'desc');
 
+    $dateFrom = request('date_from', date('Y-m-d'));
+    $dateTo   = request('date_to', date('Y-m-d'));
+
     $columns = ['id', 'no_surat', 'no_telp', 'pesan', 'file_path', 'status', 'error_message', 'sent_at', 'created_at'];
     $sortCol = $columns[$orderCol] ?? 'id';
 
-    $query = DB::table('t_antrean_wa');
+    $query = DB::table('t_antrean_wa')->whereDate('created_at', '>=', $dateFrom)->whereDate('created_at', '<=', $dateTo);
 
     $recordsTotal = $query->count();
 

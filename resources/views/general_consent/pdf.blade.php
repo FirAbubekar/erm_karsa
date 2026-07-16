@@ -67,7 +67,7 @@
 </head>
 <body>
     <!-- Document Code -->
-    <div class="doc-code">RM. 001C/2-2/ Rev. 1</div>
+    <div class="doc-code">RM. 001C/2-2/Rev. 2</div>
 
     <!-- Hospital Header -->
     <table class="header-table">
