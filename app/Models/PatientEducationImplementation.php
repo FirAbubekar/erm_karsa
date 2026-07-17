@@ -29,7 +29,8 @@ class PatientEducationImplementation extends Model
         'tgl_reedukasi',
         'created_at',
         'updated_at',
-        'tgl_akhir_edukasi'
+        'tgl_akhir_edukasi',
+        'nama_penerima_info'
     ];
 
     public function regPeriksa()

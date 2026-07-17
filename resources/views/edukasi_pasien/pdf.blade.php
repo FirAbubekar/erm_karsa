@@ -473,7 +473,7 @@
                     <td class="text-center" style="vertical-align: middle;">
                         @if($impl->ttd_pasien)
                             <img src="{{ public_path('storage/' . $impl->ttd_pasien) }}" style="max-height: 40px; max-width: 100%; object-fit: contain;">
-                            <div style="font-size: 6pt; margin-top: 2px;">({{ $assessment->nama_penerima_info ?? $assessment->nama_pasien_wali_ttd }})</div>
+                            <div style="font-size: 6pt; margin-top: 2px;">({{ $impl->nama_penerima_info ?? $assessment->nama_penerima_info ?? $assessment->nama_pasien_wali_ttd }})</div>
                         @endif
                     </td>
                     <td class="text-center" style="vertical-align: middle;">

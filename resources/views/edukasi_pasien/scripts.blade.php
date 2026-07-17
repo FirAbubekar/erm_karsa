@@ -356,7 +356,10 @@
                 }
             }
 
-
+            if (impl.nama_penerima_info) {
+                const namaInput = row.querySelector('.nama-penerima-input');
+                if (namaInput) namaInput.value = impl.nama_penerima_info;
+            }
 
             // Tgl Reedukasi
             if (impl.tgl_reedukasi) {
@@ -447,7 +450,9 @@
                 delete ttdPasienBox.dataset.signatureData;
             }
 
-
+            // Reset nama penerima per baris
+            const namaInput = row.querySelector('.nama-penerima-input');
+            if (namaInput) namaInput.value = '';
 
             // Reset tgl reedukasi date input
             const dateInput = row.querySelector('input[type="date"]');
@@ -771,12 +776,13 @@
             if (Object.keys(obj).length > 0) verifikasi = obj;
         }
 
-        // TTD Pasien
+        // TTD Pasien & Nama
         const ttdPasienBox = row.querySelector('[id^="ttd-pasien-"]');
         const ttdPasienData = ttdPasienBox && ttdPasienBox.dataset.signatureData ? ttdPasienBox.dataset
             .signatureData : null;
-
-
+            
+        const namaInput = row.querySelector('.nama-penerima-input');
+        const namaPenerimaInfo = namaInput ? namaInput.value.trim() : null;
 
         // Tgl Reedukasi
         const reEdukInput = row.querySelector('input[type="date"]');
@@ -794,6 +800,7 @@
             is_custom: isCustom,
             verifikasi: verifikasi,
             ttd_pasien: (ttdPasienData && ttdPasienData !== 'existing') ? ttdPasienData : null,
+            nama_penerima_info: namaPenerimaInfo || null,
             tgl_reedukasi: tglReedukasi || null,
             tgl_edukasi: tglMulai || null,
             tgl_akhir_edukasi: tglSelesai || null,

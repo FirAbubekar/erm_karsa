@@ -194,6 +194,7 @@ class PatientEducationController extends Controller
                     'verifikasi'    => json_decode($impl->verifikasi, true),
                     'ttd_pasien'    => $impl->ttd_pasien,
                     'ttd_edukator'  => $impl->ttd_edukator,
+                    'nama_penerima_info' => $impl->nama_penerima_info,
                     'tgl_reedukasi'     => $impl->tgl_reedukasi,
                     'created_at'        => $impl->created_at ? $impl->created_at->format('Y-m-d H:i:s') : null,
                     'tgl_akhir_edukasi' => $impl->tgl_akhir_edukasi ? \Carbon\Carbon::parse($impl->tgl_akhir_edukasi)->format('Y-m-d H:i:s') : null,
@@ -420,6 +421,7 @@ class PatientEducationController extends Controller
                         'tgl_reedukasi'     => $request->tgl_reedukasi,
                         'tgl_akhir_edukasi' => $request->tgl_akhir_edukasi,
                         'created_at'        => $request->tgl_edukasi ?? now(),
+                        'nama_penerima_info'=> $request->nama_penerima_info,
                     ]
                 );
 
