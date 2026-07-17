@@ -503,6 +503,12 @@
                                             <span class="ttd-placeholder"
                                                 style="font-size:9px;color:var(--text-muted)">TTD</span>
                                         </div>
+                                        <div style="margin-top: 4px;">
+                                            <input type="text" class="form-control nama-penerima-input"
+                                                placeholder="Nama pasien / wali"
+                                                style="font-size:10px; padding:2px 4px; text-align:center;"
+                                                {{ !$canEditRow ? 'disabled' : '' }}>
+                                        </div>
                                         <div style="margin-top:4px; text-align:center;display:none">
                                             <label
                                                 style="font-size:9px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
