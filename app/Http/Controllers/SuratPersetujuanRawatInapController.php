@@ -19,9 +19,13 @@ class SuratPersetujuanRawatInapController extends Controller
             return redirect('/');
         }
         
-        $kamarList = Bangsal::where('status', '1')
-            ->orderBy('nm_bangsal', 'asc')
-            ->select('kd_bangsal', 'nm_bangsal')
+        $kamarList = DB::table('kamar')
+            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+            ->where('bangsal.status', '1')
+            ->select('kamar.kd_bangsal', 'bangsal.nm_bangsal', 'kamar.kelas')
+            ->distinct()
+            ->orderBy('bangsal.nm_bangsal', 'asc')
+            ->orderBy('kamar.kelas', 'asc')
             ->get();
 
         return view('surat_persetujuan_rawat_inap.index', compact('kamarList'));
@@ -36,6 +40,14 @@ class SuratPersetujuanRawatInapController extends Controller
             ], 401);
         }
 
+        if ($request->has('kd_bangsal') && str_contains($request->kd_bangsal, '|')) {
+            $parts = explode('|', $request->kd_bangsal);
+            $request->merge([
+                'kd_bangsal' => $parts[0],
+                'kelas_kamar' => $parts[1] ?? null
+            ]);
+        }
+
         $request->validate([
             'no_surat' => 'required|string',
             'no_rawat' => 'required|string',
@@ -43,6 +55,7 @@ class SuratPersetujuanRawatInapController extends Controller
             'tanggal' => 'required|date',
             'hak_kelas' => 'required|in:Kelas I,Kelas II,Kelas III',
             'kd_bangsal' => 'required|string|exists:bangsal,kd_bangsal',
+            'kelas_kamar' => 'nullable|string',
             'pj_biaya' => 'required|string',
             'nama_asuransi' => 'nullable|string',
             'pj_nama' => 'required|string',
@@ -116,7 +129,7 @@ class SuratPersetujuanRawatInapController extends Controller
                     'VVIP' => 'Kelas VVIP',
                 ];
                 $firstKamar = DB::table('kamar')->where('kd_bangsal', $request->kd_bangsal)->first();
-                $kelasDb = $firstKamar ? $firstKamar->kelas : ($kelasMap[$request->hak_kelas] ?? '-');
+                $kelasDb = $request->kelas_kamar ?? ($firstKamar ? $firstKamar->kelas : ($kelasMap[$request->hak_kelas] ?? '-'));
                 $hakKelasDb = $kelasMap[$request->hak_kelas] ?? '-';
 
                 // 5. Map Hubungan Penanggung Jawab
@@ -151,7 +164,7 @@ class SuratPersetujuanRawatInapController extends Controller
                         'pendidikan_pj' => $request->pendidikan_pj,
                         'alamatpj' => $alamatpj,
                         'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp, $request->pj_telp_prefix), 0, 30),
-                        'ruang' => substr($bangsal->kd_bangsal, 0, 40),
+                        'ruang' => substr($bangsal->nm_bangsal, 0, 40),
                         'kelas' => $kelasDb,
                         'hubungan' => $hubunganDb,
                         'hak_kelas' => $hakKelasDb,
@@ -271,14 +284,7 @@ class SuratPersetujuanRawatInapController extends Controller
             return redirect('/');
         }
 
-        $query = SuratPersetujuanRawatInap::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai'])
-            ->leftJoin('kamar', 'surat_persetujuan_rawat_inap.ruang', '=', 'kamar.kd_kamar')
-            ->leftJoin('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
-            ->select(
-                'surat_persetujuan_rawat_inap.*',
-                'bangsal.nm_bangsal',
-                'kamar.kelas as kelas_kamar'
-            );
+        $query = SuratPersetujuanRawatInap::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
 
         // Default to today if no filters are provided
         $hasFilters = $request->filled('search') || $request->filled('no_rawat') || 
@@ -376,14 +382,22 @@ class SuratPersetujuanRawatInapController extends Controller
         // Fallback: If remote fetch fails or file not found, compile it locally as a backup
         $consent->load(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
 
-        // Fetch human-readable room name to replace kd_kamar for PDF
-        $kamarData = DB::table('kamar')
-            ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
-            ->where('kamar.kd_kamar', $consent->ruang)
-            ->select('bangsal.nm_bangsal')
-            ->first();
-        if ($kamarData) {
-            $consent->ruang = $kamarData->nm_bangsal;
+        // Resolve readable room name for old data (stored as kd_bangsal)
+        if ($consent->ruang && !DB::table('bangsal')->where('kd_bangsal', $consent->ruang)->exists()) {
+            $bangsal = DB::table('bangsal')->where('nm_bangsal', $consent->ruang)->first();
+            if (!$bangsal) {
+                $kamarData = DB::table('kamar')
+                    ->join('bangsal', 'kamar.kd_bangsal', '=', 'bangsal.kd_bangsal')
+                    ->where('kamar.kd_bangsal', $consent->ruang)
+                    ->select('bangsal.nm_bangsal', 'kamar.kelas')
+                    ->first();
+                if ($kamarData) {
+                    $consent->ruang = $kamarData->nm_bangsal;
+                    if (!$consent->kelas || $consent->kelas === '-') {
+                        $consent->kelas = $kamarData->kelas;
+                    }
+                }
+            }
         }
 
         $deviceInfo = [

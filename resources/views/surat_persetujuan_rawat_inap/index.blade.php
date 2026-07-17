@@ -432,8 +432,8 @@
                                     <select class="form-control" id="kd_bangsal" name="kd_bangsal" required style="width: 100%;">
                                         <option value="">Pilih Ruangan...</option>
                                         @foreach($kamarList as $k)
-                                            <option value="{{ $k->kd_bangsal }}">
-                                                {{ $k->nm_bangsal }}
+                                            <option value="{{ $k->kd_bangsal }}|{{ $k->kelas }}">
+                                                {{ $k->nm_bangsal }} - {{ $k->kelas }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -1419,7 +1419,23 @@
                                     // 9. Map and populate kd_bangsal select (via Select2)
                                     const kdKamarSelect = $('#kd_bangsal');
                                     if (kdKamarSelect.length && consent.ruang) {
-                                        kdKamarSelect.val(consent.ruang).trigger('change');
+                                        const targetText = (consent.ruang + ' - ' + (consent.kelas || '')).trim();
+                                        let matched = false;
+                                        kdKamarSelect.find('option').each(function () {
+                                            if ($(this).text().trim() === targetText) {
+                                                kdKamarSelect.val($(this).val()).trigger('change');
+                                                matched = true;
+                                                return false;
+                                            }
+                                        });
+                                        if (!matched) {
+                                            kdKamarSelect.find('option').each(function () {
+                                                if ($(this).text().startsWith(consent.ruang)) {
+                                                    kdKamarSelect.val($(this).val()).trigger('change');
+                                                    return false;
+                                                }
+                                            });
+                                        }
                                     }
 
                                     // 10. Map and populate pj_biaya & nama_asuransi

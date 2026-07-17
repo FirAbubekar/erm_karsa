@@ -404,7 +404,7 @@
         <!-- Second Section: Pernyataan Persetujuan -->
         <div class="padded-section section-divider">
             <div style="text-align: justify; line-height: 1.35; margin-bottom: 4px;">
-                Dengan ini menyatakan dengan sesungguhnya memberikan <strong>(PERSETUJUAN / PENOLAKAN)</strong> dilakukan rawat inap di RSUD Karsa Husada Batu serta setuju untuk :
+                Dengan ini menyatakan dengan sesungguhnya memberikan <strong>(PERSETUJUAN)</strong> dilakukan rawat inap di RSUD Karsa Husada Batu serta setuju untuk :
             </div>
             <ol class="statement-list">
                 <li>Memberikan keterangan tentang riwayat penyakit dan kesehatannya;</li>
