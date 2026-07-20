@@ -10,14 +10,26 @@ use Illuminate\Support\Facades\Session;
 
 class WebUserRoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Session::get('is_logged_in')) {
             return redirect('/');
         }
 
+        $query = WebUserRole::with('jabatan');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $matchingPegawaiNiks = DB::table('pegawai')->where('nama', 'like', "%{$search}%")->pluck('nik')->toArray();
+            $matchingDokterKds = DB::table('dokter')->where('nm_dokter', 'like', "%{$search}%")->pluck('kd_dokter')->toArray();
+            
+            $allMatchingNips = array_merge($matchingPegawaiNiks, $matchingDokterKds);
+            $query->whereIn('nip', $allMatchingNips);
+        }
+
         // Get paginated roles
-        $userRoles = WebUserRole::with('jabatan')->paginate(10);
+        $userRoles = $query->paginate(10);
+        $userRoles->appends(['search' => $request->search]);
 
         // Map names manually since it's from 2 different tables
         // To be efficient, we can fetch all needed IDs from pegawai and dokter
