@@ -115,7 +115,7 @@
         @endif
 
         @if (hasPermission('ep.create') || hasPermission('ep.view'))
-            <div class="nav-dropdown {{ Route::is('edukasi-pasien.*') ? 'active' : '' }}">
+            <div class="nav-dropdown {{ Route::is('edukasi-pasien.*') || Route::is('edukasi-pasien') ? 'active' : '' }}">
                 <div class="nav-dropdown-toggle">
                     <div class="nav-dropdown-label">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
