@@ -6,10 +6,16 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 Route::get('/', function () {
+    if (Session::get('is_logged_in')) {
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
 });
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::get('/login', function () {
+    return redirect('/');
+});
 
 Route::get('/dashboard', function () {
     if (!Session::get('is_logged_in')) {
