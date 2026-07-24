@@ -578,7 +578,7 @@
                 });
 
                 // Hide specific action buttons explicitly
-                const actionBtns = document.querySelectorAll('#btn-save-edukasi, #btn-add-topik');
+                const actionBtns = document.querySelectorAll('#btn-save-edukasi');
                 actionBtns.forEach(btn => {
                     if (btn) btn.style.display = 'none';
                 });
