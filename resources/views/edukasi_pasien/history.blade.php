@@ -521,8 +521,20 @@
 
         .filter-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .filter-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
         }
 
         .filter-group {
@@ -1468,7 +1480,7 @@
                     </div>
                 </div>
 
-                <form action="{{ route('edukasi-pasien.history') }}" method="GET">
+                <form id="filterForm" action="{{ route('edukasi-pasien.history') }}" method="GET">
                     <div class="filter-body">
                         <div class="filter-form">
                             <div class="filter-group">
@@ -1843,7 +1855,35 @@
         </div>
     </div>
 
+    @include('edukasi_pasien.modals')
+
     <script>
+        // ─── Filter Form Validation ───
+        function showError(msg) {
+            document.getElementById('error-modal-message').innerHTML = msg;
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        function hideError() {
+            document.getElementById('error-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-error-modal').addEventListener('click', hideError);
+        document.getElementById('btn-close-error').addEventListener('click', hideError);
+
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            const search = this.search.value.trim();
+            const noRawat = this.no_rawat.value.trim();
+            const person = this.person.value.trim();
+            const startDate = this.start_date.value.trim();
+            const endDate = this.end_date.value.trim();
+
+            if (!search && !noRawat && !person && !startDate && !endDate) {
+                e.preventDefault();
+                showError('Silakan isi minimal salah satu filter (Identitas, No. Rawat, Petugas, atau Periode) sebelum menekan tombol Terapkan Filter.');
+            }
+        });
+
         // ─── Detail Modal ───
         function openDetailModal(data) {
             document.getElementById('modalNoSurat').textContent = data.no_rawat;

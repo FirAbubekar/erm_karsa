@@ -52,6 +52,8 @@
     async function searchPatient() {
         const noRm = inputNoRm.value;
         if (!noRm) return showError('Silakan masukkan No. RM');
+        if (noRm.length < 5) return showError('No. RM harus minimal 5 karakter');
+        if (!/^\d+$/.test(noRm)) return showError('No. RM harus berupa angka');
         btnSearch.disabled = true;
         btnSearch.innerHTML = 'Mencari...';
         try {
@@ -691,15 +693,74 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
                 body: JSON.stringify(payload),
             });
             const result = await res.json();
+            // Clear existing errors
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
             if (res.ok && result.success) {
                 showSuccess(result.message);
             } else {
-                showError(result.error || 'Terjadi kesalahan saat menyimpan.');
+                if (res.status === 422 && result.errors) {
+                    let firstErrorEl = null;
+                    const fieldMap = {
+                        'no_rawat': 'field-no-rawat',
+                        'nama_penerima_info': 'field-nama-penerima-info',
+                        'hubungan_dgn_pasien': 'field-hubungan-dgn-pasien',
+                        'bahasa': 'bahasa[]',
+                        'perlu_penerjemah': 'perlu_penerjemah',
+                        'baca_dan_tulis': 'baca_dan_tulis',
+                        'pendidikan': 'pendidikan',
+                        'nilai_budaya': 'nilai_budaya',
+                        'gaya_pembelajaran': 'gaya_pembelajaran',
+                        'literasi_kesehatan': 'literasi_kesehatan',
+                        'hambatan_edukasi': 'hambatan_edukasi[]',
+                        'kesediaan_menerima': 'kesediaan_menerima',
+                        'rencana_kebutuhan': 'rencana_kebutuhan[]',
+                        'tanggal_edukasi': 'field-tgl-edukasi',
+                        'nama_pasien_wali_ttd': 'field-nama-wali-ttd',
+                        'signature': 'konfirmasi-signature-box'
+                    };
+
+                    for (const key in result.errors) {
+                        const errorMsg = result.errors[key][0];
+                        const targetName = fieldMap[key] || key;
+                        
+                        let el = document.getElementById(targetName);
+                        if (!el) {
+                            el = document.querySelector(`input[name="${targetName}"]`);
+                            if (el) el = el.closest('.form-group') || el.closest('.radio-group') || el.closest('.checkbox-group');
+                        }
+
+                        if (el) {
+                            el.classList.add('is-invalid');
+                            const feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            feedback.innerText = errorMsg;
+                            
+                            if (el.classList.contains('form-group') || el.classList.contains('radio-group') || el.classList.contains('checkbox-group')) {
+                                el.appendChild(feedback);
+                            } else {
+                                el.parentNode.insertBefore(feedback, el.nextSibling);
+                            }
+
+                            if (!firstErrorEl) firstErrorEl = el;
+                        } else {
+                            showError(errorMsg);
+                        }
+                    }
+
+                    if (firstErrorEl) {
+                        firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    showError(result.error || result.message || 'Terjadi kesalahan saat menyimpan.');
+                }
             }
         } catch (e) {
             console.error(e);
