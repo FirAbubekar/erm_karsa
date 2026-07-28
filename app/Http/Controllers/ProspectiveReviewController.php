@@ -118,7 +118,35 @@ class ProspectiveReviewController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('no_rawat', 'like', "%{$search}%");
+            $query->whereIn('no_rawat', function($q) use ($search) {
+                $q->select('reg_periksa.no_rawat')
+                  ->from('reg_periksa')
+                  ->join('pasien', 'reg_periksa.no_rkm_medis', '=', 'pasien.no_rkm_medis')
+                  ->where('pasien.nm_pasien', 'like', "%{$search}%")
+                  ->orWhere('pasien.no_rkm_medis', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('no_rawat')) {
+            $query->where('no_rawat', 'like', "%{$request->no_rawat}%");
+        }
+
+        if ($request->filled('person')) {
+            $person = $request->person;
+            $query->where(function($q) use ($person) {
+                $q->whereIn('ttd_dpjp', function($sub) use ($person) {
+                    $sub->select('kd_dokter')->from('dokter')->where('nm_dokter', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_perawat', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_apoteker_klinis', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_kpra', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                });
+            });
         }
 
         if ($request->filled('start_date')) {
