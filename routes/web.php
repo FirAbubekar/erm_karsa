@@ -46,6 +46,7 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::post('/edukasi-pasien/save-implementation', [App\Http\Controllers\PatientEducationController::class, 'storeImplementation'])->name('edukasi-pasien.store-implementation');
     Route::get('/riwayat-edukasi-pasien', [App\Http\Controllers\PatientEducationController::class, 'history'])->name('edukasi-pasien.history');
     Route::get('/edukasi-pasien/{id_uuid}/pdf', [App\Http\Controllers\PatientEducationController::class, 'downloadPDF'])->name('edukasi-pasien.download-pdf');
+    Route::get('/edukasi-pasien/signature/{filename}', [App\Http\Controllers\PatientEducationController::class, 'showSignature'])->name('edukasi-pasien.signature')->where('filename', '.*');
 
     // Prospective Reviu (Farmasi)
     Route::get('/prospective-reviu', function (\Illuminate\Http\Request $request) {

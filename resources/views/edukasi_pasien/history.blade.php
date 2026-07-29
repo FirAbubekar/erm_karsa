@@ -1694,7 +1694,7 @@
                                                     'tgl_periksa' => $assessment->tanggal_edukasi,
                                                     'nama_pj' => $assessment->nama_penerima_info,
                                                     'hubungan' => $assessment->hubungan_dgn_pasien,
-                                                    'signature' => $assessment->ttd_pasien_wali ? asset('storage/' . $assessment->ttd_pasien_wali) : null,
+                                                    'signature' => $assessment->ttd_pasien_wali ? route('edukasi-pasien.signature', ['filename' => $assessment->ttd_pasien_wali]) : null,
                                                 ]) }})">
                                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
