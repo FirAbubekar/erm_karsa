@@ -336,7 +336,7 @@
                     <div style="float: right; width: 40%; text-align: center;">
                         Tanda Tangan:<br>
                         @if($assessment->ttd_pasien_wali)
-                            <img src="{{ public_path('storage/' . $assessment->ttd_pasien_wali) }}" alt="ttd" class="signature-image" style="max-height: 40px; margin-top:5px;">
+                            <img src="{{ storage_path('app/private/' . $assessment->ttd_pasien_wali) }}" alt="ttd" class="signature-image" style="max-height: 40px; margin-top:5px;">
                             <div style="font-size: 8pt; margin-top: 2px;">({{ $assessment->nama_penerima_info ?? $assessment->nama_pasien_wali_ttd }})</div>
                         @else
                             <div class="sig-space" style="height: 40px;"></div>
@@ -472,7 +472,7 @@
                     </td>
                     <td class="text-center" style="vertical-align: middle;">
                         @if($impl->ttd_pasien)
-                            <img src="{{ public_path('storage/' . $impl->ttd_pasien) }}" style="max-height: 40px; max-width: 100%; object-fit: contain;">
+                            <img src="{{ storage_path('app/private/' . $impl->ttd_pasien) }}" style="max-height: 40px; max-width: 100%; object-fit: contain;">
                             <div style="font-size: 6pt; margin-top: 2px;">({{ $impl->nama_penerima_info ?? $assessment->nama_penerima_info ?? $assessment->nama_pasien_wali_ttd }})</div>
                         @endif
                     </td>

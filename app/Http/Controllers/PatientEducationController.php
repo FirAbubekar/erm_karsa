@@ -260,12 +260,12 @@ class PatientEducationController extends Controller
                     $filename = 'TTD_ASSESSMENT_' . time() . '.png';
                     $newSignaturePath = "{$directory}/{$filename}";
 
-                    Storage::disk('public')->put($newSignaturePath, $imageBinary);
+                    Storage::disk('local')->put($newSignaturePath, $imageBinary);
 
                     // Hapus file lama jika ada
                     if ($existing && $existing->ttd_pasien_wali && $existing->ttd_pasien_wali !== $newSignaturePath) {
-                        if (Storage::disk('public')->exists($existing->ttd_pasien_wali)) {
-                            Storage::disk('public')->delete($existing->ttd_pasien_wali);
+                        if (Storage::disk('local')->exists($existing->ttd_pasien_wali)) {
+                            Storage::disk('local')->delete($existing->ttd_pasien_wali);
                         }
                     }
                     $signaturePath = $newSignaturePath;
@@ -374,14 +374,14 @@ class PatientEducationController extends Controller
                         $imgData = str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->ttd_pasien);
                         $filename = 'TTD_PASIEN_' . $request->kode_topik . '_' . time() . '.png';
                         $newTtdPath = "{$directory}/{$filename}";
-                        Storage::disk('public')->put($newTtdPath, base64_decode($imgData));
-                    } elseif (str_starts_with($request->ttd_pasien, '/storage/')) {
+                        Storage::disk('local')->put($newTtdPath, base64_decode($imgData));
+                    } elseif (str_starts_with($request->ttd_pasien, '/edukasi-pasien/signature/')) {
                         // Salin file fisik dari Bagian B
-                        $sourcePath = str_replace('/storage/', '', $request->ttd_pasien);
-                        if (Storage::disk('public')->exists($sourcePath)) {
+                        $sourcePath = str_replace('/edukasi-pasien/signature/', '', $request->ttd_pasien);
+                        if (Storage::disk('local')->exists($sourcePath)) {
                             $filename = 'TTD_PASIEN_' . $request->kode_topik . '_COPIED_' . time() . '.png';
                             $newTtdPath = "{$directory}/{$filename}";
-                            Storage::disk('public')->copy($sourcePath, $newTtdPath);
+                            Storage::disk('local')->copy($sourcePath, $newTtdPath);
                         } else {
                             $newTtdPath = $sourcePath;
                         }
@@ -391,8 +391,8 @@ class PatientEducationController extends Controller
 
                     // Hapus file lama jika ada dan berbeda dengan yang baru
                     if ($newTtdPath && $existing && $existing->ttd_pasien && $existing->ttd_pasien !== $newTtdPath) {
-                        if (Storage::disk('public')->exists($existing->ttd_pasien)) {
-                            Storage::disk('public')->delete($existing->ttd_pasien);
+                        if (Storage::disk('local')->exists($existing->ttd_pasien)) {
+                            Storage::disk('local')->delete($existing->ttd_pasien);
                         }
                     }
                     $ttdPasienPath = $newTtdPath;
@@ -589,5 +589,17 @@ class PatientEducationController extends Controller
 
         return $pdf->stream();
         // return $pdf->download('Edukasi_Pasien_' . str_replace('/', '_', $assessment->no_rawat) . '.pdf');
+    }
+
+    /**
+     * Tampilkan Tanda Tangan dari storage private
+     */
+    public function showSignature($filename)
+    {
+        $path = storage_path('app/private/' . $filename);
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        return response()->file($path);
     }
 }

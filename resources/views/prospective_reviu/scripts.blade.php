@@ -74,6 +74,8 @@ inputNoRm.addEventListener('keydown', e => {
 async function searchPatient() {
     const noRm = inputNoRm.value;
     if(!noRm) return showError('Silakan masukkan No. RM');
+    if(noRm.length < 5) return showError('No. RM harus minimal 5 karakter');
+    if(!/^\d+$/.test(noRm)) return showError('No. RM harus berupa angka');
     btnSearch.disabled = true;
     btnSearch.innerHTML = 'Mencari...';
     try {
@@ -356,12 +358,81 @@ document.getElementById('btn-save-reviu').addEventListener('click', async () => 
             body: JSON.stringify(payload),
         });
         const result = await res.json();
+
+        // Clear existing errors
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
         if(res.ok && result.success) {
             showSuccess(result.message);
             resetForm();
             loadHistory(noRawat);
         } else {
-            showError(result.error || 'Terjadi kesalahan saat menyimpan.');
+            if (res.status === 422 && result.errors) {
+                let firstErrorEl = null;
+                const fieldMap = {
+                    'no_rawat': 'field-no-rawat',
+                    'tanggal_reviu': 'field-tgl-reviu',
+                    'diagnosis': 'field-diagnosis',
+                    'tipe_antibiotik': 'antibiotik_jenis',
+                    'antibiotik_direview': 'field-antibiotik-direview',
+                    'hari_ke': 'field-hari-ke',
+                    'klinis_td': 'field-td',
+                    'klinis_suhu': 'field-suhu',
+                    'klinis_rr': 'field-rr',
+                    'klinis_spo2': 'field-spo2',
+                    'klinis_gcs': 'field-gcs',
+                    'is_demam': 'demam',
+                    'lab_leukosit': 'field-leukosit',
+                    'lab_neutrofil_persen': 'field-neutrofil-persen',
+                    'lab_kreatinin': 'field-kreatinin',
+                    'lab_ureum': 'field-ureum',
+                    'kultur_status': 'hasil_kultur',
+                    'kultur_hasil_positif': 'field-kultur-hasil-positif',
+                    'kultur_rekomendasi_antibiotik': 'field-rekomendasi-antibiotik',
+                    'is_indikasi_tepat': 'indikasi',
+                    'is_jenis_tepat': 'jenis_antibiotik',
+                    'is_dosis_tepat': 'dosis_appropriateness',
+                    'is_durasi_sesuai': 'durasi',
+                    'rekomendasi_pga': 'rekomendasi_pga[]',
+                    'respon_dpjp': 'respon_dpjp'
+                };
+
+                for (const key in result.errors) {
+                    const errorMsg = result.errors[key][0];
+                    const targetName = fieldMap[key] || key;
+                    
+                    let el = document.getElementById(targetName);
+                    if (!el) {
+                        el = document.querySelector(`input[name="${targetName}"]`);
+                        if (el) el = el.closest('.form-group') || el.closest('.radio-group') || el.closest('.checkbox-group');
+                    }
+
+                    if (el) {
+                        el.classList.add('is-invalid');
+                        const feedback = document.createElement('div');
+                        feedback.className = 'invalid-feedback';
+                        feedback.innerText = errorMsg;
+                        
+                        if (el.classList.contains('form-group') || el.classList.contains('radio-group') || el.classList.contains('checkbox-group')) {
+                            el.appendChild(feedback);
+                        } else {
+                            el.parentNode.insertBefore(feedback, el.nextSibling);
+                        }
+
+                        if (!firstErrorEl) firstErrorEl = el;
+                    } else {
+                        // Fallback
+                        showError(errorMsg);
+                    }
+                }
+
+                if (firstErrorEl) {
+                    firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                showError(result.error || 'Terjadi kesalahan saat menyimpan.');
+            }
         }
     } catch(e) {
         console.error(e);
