@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\PatientEducationAssessment;
 use App\Models\PatientEducationImplementation;
 use App\Models\Pegawai;
+use App\Models\Bangsal;
 
 class PatientEducationController extends Controller
 {
@@ -454,11 +455,11 @@ class PatientEducationController extends Controller
      */
     public function history(Request $request)
     {
-        $query = PatientEducationAssessment::with('regPeriksa.pasien')
+        $query = PatientEducationAssessment::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien'])
             ->select('patient_education_assessments.*');
 
         $hasFilters = $request->filled('search') || $request->filled('no_rawat') ||
-            $request->filled('person') || $request->filled('start_date') ||
+            $request->filled('person') || $request->filled('bangsal') || $request->filled('start_date') ||
             $request->filled('end_date');
 
         if (!$hasFilters) {
@@ -485,6 +486,23 @@ class PatientEducationController extends Controller
             $query->where('patient_education_assessments.nama_penerima_info', 'like', "%$person%");
         }
 
+        if ($request->filled('bangsal')) {
+            $bangsalId = $request->bangsal;
+            if ($bangsalId === 'IGD') {
+                $query->whereIn('patient_education_assessments.no_rawat', function ($q) {
+                    $q->select('no_rawat')->from('reg_periksa')
+                      ->where('kd_poli', 'IGDK')
+                      ->where('status_lanjut', 'Ralan');
+                });
+            } else {
+                $query->whereIn('patient_education_assessments.no_rawat', function ($q) use ($bangsalId) {
+                    $q->select('no_rawat')->from('kamar_inap')->whereIn('kd_kamar', function ($q2) use ($bangsalId) {
+                        $q2->select('kd_kamar')->from('kamar')->where('kd_bangsal', $bangsalId);
+                    });
+                });
+            }
+        }
+
         if ($request->filled('start_date')) {
             $query->whereDate('patient_education_assessments.tanggal_edukasi', '>=', $request->start_date);
         }
@@ -504,7 +522,9 @@ class PatientEducationController extends Controller
                 ->whereYear('tanggal_edukasi', now()->year)->count(),
         ];
 
-        return view('edukasi_pasien.history', compact('assessments', 'stats'));
+        $bangsals = Bangsal::where('status', '1')->orderBy('nm_bangsal', 'ASC')->get();
+
+        return view('edukasi_pasien.history', compact('assessments', 'stats', 'bangsals'));
     }
 
     /**
