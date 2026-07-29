@@ -189,7 +189,7 @@
                     img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
                     sigBox.appendChild(img);
                 }
-                img.src = '/storage/' + data.ttd_pasien_wali;
+                img.src = '/edukasi-pasien/signature/' + data.ttd_pasien_wali;
                 img.style.display = 'block';
                 if (placeholder) placeholder.style.display = 'none';
                 sigBox.style.borderStyle = 'solid';
@@ -351,7 +351,7 @@
                         img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
                         ttdBox.appendChild(img);
                     }
-                    img.src = '/storage/' + impl.ttd_pasien;
+                    img.src = '/edukasi-pasien/signature/' + impl.ttd_pasien;
                     img.style.display = 'block';
                     if (placeholder) placeholder.style.display = 'none';
                     ttdBox.dataset.signatureData = 'existing';
