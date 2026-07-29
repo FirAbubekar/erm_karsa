@@ -496,9 +496,23 @@ class PatientEducationController extends Controller
                 });
             } else {
                 $query->whereIn('patient_education_assessments.no_rawat', function ($q) use ($bangsalId) {
-                    $q->select('no_rawat')->from('kamar_inap')->whereIn('kd_kamar', function ($q2) use ($bangsalId) {
-                        $q2->select('kd_kamar')->from('kamar')->where('kd_bangsal', $bangsalId);
-                    });
+                    $q->select('ki1.no_rawat')
+                        ->from('kamar_inap as ki1')
+                        ->whereIn('ki1.kd_kamar', function ($q2) use ($bangsalId) {
+                            $q2->select('kd_kamar')->from('kamar')->where('kd_bangsal', $bangsalId);
+                        })
+                        ->whereNotExists(function ($q3) {
+                            $q3->selectRaw('1')
+                                ->from('kamar_inap as ki2')
+                                ->whereColumn('ki1.no_rawat', 'ki2.no_rawat')
+                                ->where(function ($q4) {
+                                    $q4->whereColumn('ki2.tgl_masuk', '>', 'ki1.tgl_masuk')
+                                        ->orWhere(function ($q5) {
+                                            $q5->whereColumn('ki2.tgl_masuk', '=', 'ki1.tgl_masuk')
+                                                ->whereColumn('ki2.jam_masuk', '>', 'ki1.jam_masuk');
+                                        });
+                                });
+                        });
                 });
             }
         }
