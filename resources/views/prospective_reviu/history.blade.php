@@ -1433,6 +1433,12 @@
                                 Reset Pencarian
                             </a>
                         @endif
+
+                        <button type="button" id="btnExportExcel" class="btn-filter-reset" style="color: #10B981; border-color: #10B981; background: #ECFDF5;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Export Excel
+                        </button>
+
                         <button type="submit" class="btn-filter-submit">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             Terapkan Filter
@@ -1756,7 +1762,27 @@
             }
         }
 
+        // Export Excel logic
+        document.getElementById('btnExportExcel').addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = document.getElementById('filterForm');
+            const oldAction = form.action;
+            
+            // Ubah action form sementara ke endpoint export excel
+            form.action = "{{ route('prospective-reviu.export-excel') }}";
+            form.submit();
+            
+            // Kembalikan action form ke semula untuk pencarian biasa
+            setTimeout(() => {
+                form.action = oldAction;
+            }, 100);
+        });
 
+        @if(session('export_error'))
+        document.addEventListener('DOMContentLoaded', function() {
+            showError("{{ session('export_error') }}");
+        });
+        @endif
     </script>
 </body>
 </html>
