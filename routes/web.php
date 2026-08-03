@@ -59,6 +59,7 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::get('/prospective-reviu/history', [App\Http\Controllers\ProspectiveReviewController::class, 'history'])->name('prospective-reviu.history');
     Route::get('/prospective-reviu/pdf/{id_uuid}', [App\Http\Controllers\ProspectiveReviewController::class, 'downloadPdf'])->name('prospective-reviu.pdf');
     Route::get('/riwayat-prospective-reviu', [App\Http\Controllers\ProspectiveReviewController::class, 'historyPage'])->name('prospective-reviu.history-page');
+    Route::get('/prospective-reviu/export-excel', [App\Http\Controllers\ProspectiveReviewController::class, 'exportExcel'])->name('prospective-reviu.export-excel');
 
     // Hasil Lab
     Route::get('/hasil-lab', [App\Http\Controllers\HasilLabController::class, 'index'])->name('hasil-lab.index');

@@ -185,6 +185,146 @@ class ProspectiveReviewController extends Controller
         return view('prospective_reviu.history', compact('reviews', 'stats'));
     }
 
+    public function exportExcel(Request $request)
+    {
+        $query = ProspectiveReviu::orderBy('created_at', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereIn('no_rawat', function($q) use ($search) {
+                $q->select('reg_periksa.no_rawat')
+                  ->from('reg_periksa')
+                  ->join('pasien', 'reg_periksa.no_rkm_medis', '=', 'pasien.no_rkm_medis')
+                  ->where('pasien.nm_pasien', 'like', "%{$search}%")
+                  ->orWhere('pasien.no_rkm_medis', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('no_rawat')) {
+            $query->where('no_rawat', 'like', "%{$request->no_rawat}%");
+        }
+
+        if ($request->filled('person')) {
+            $person = $request->person;
+            $query->where(function($q) use ($person) {
+                $q->whereIn('ttd_dpjp', function($sub) use ($person) {
+                    $sub->select('kd_dokter')->from('dokter')->where('nm_dokter', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_perawat', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_apoteker_klinis', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                })
+                ->orWhereIn('ttd_kpra', function($sub) use ($person) {
+                    $sub->select('nik')->from('pegawai')->where('nama', 'like', "%{$person}%");
+                });
+            });
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_reviu', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_reviu', '<=', $request->end_date);
+        }
+
+        $reviews = $query->get();
+
+        if ($reviews->isEmpty()) {
+            return redirect()->back()->with('export_error', 'Tidak ada data untuk diekspor berdasarkan filter saat ini.');
+        }
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=Laporan_Prospective_Reviu.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = [
+            'Nama Pasien', 
+            'No RM', 
+            'No Rawat', 
+            'Tanggal Reviu',
+            'Hari Ke',
+            'Tipe Antibiotik', 
+            'Indikasi Tepat', 
+            'Jenis Tepat', 
+            'Dosis Tepat', 
+            'Durasi Sesuai', 
+            'Rekomendasi PGA',
+            'Respon DPJP'
+        ];
+
+        $callback = function() use($reviews, $columns) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for UTF-8 compatibility in Excel
+            fputs($file, "\xEF\xBB\xBF");
+            fputcsv($file, $columns, ';');
+
+            foreach ($reviews as $rev) {
+                $pasienData = \Illuminate\Support\Facades\DB::table('reg_periksa')
+                    ->join('pasien', 'reg_periksa.no_rkm_medis', '=', 'pasien.no_rkm_medis')
+                    ->where('reg_periksa.no_rawat', $rev->no_rawat)
+                    ->select('pasien.nm_pasien', 'pasien.no_rkm_medis')
+                    ->first();
+                
+                $nama_pasien = $pasienData ? $pasienData->nm_pasien : '-';
+                $no_rm = $pasienData ? $pasienData->no_rkm_medis : '-';
+
+                $is_indikasi = is_null($rev->is_indikasi_tepat) ? '' : ($rev->is_indikasi_tepat == 1 ? 'Tepat' : 'Tidak tepat');
+                $is_jenis = is_null($rev->is_jenis_tepat) ? '' : ($rev->is_jenis_tepat == 1 ? 'Tepat' : 'Tidak tepat');
+                $is_dosis = is_null($rev->is_dosis_tepat) ? '' : ($rev->is_dosis_tepat == 1 ? 'Tepat' : 'Tidak tepat');
+                $is_durasi = is_null($rev->is_durasi_sesuai) ? '' : ($rev->is_durasi_sesuai == 1 ? 'Sesuai' : 'Tidak sesuai');
+
+                $rekomendasi_pga_array = $rev->rekomendasi_pga;
+                $rekomendasi_pga = '';
+                if (is_array($rekomendasi_pga_array)) {
+                    $pga_list = [];
+                    foreach ($rekomendasi_pga_array as $pga) {
+                        if ($pga == 'Lainnya' && !empty($rev->rekomendasi_pga_lainnya)) {
+                            $pga_list[] = 'Lainnya (' . $rev->rekomendasi_pga_lainnya . ')';
+                        } else {
+                            $pga_list[] = $pga;
+                        }
+                    }
+                    $rekomendasi_pga = implode(', ', $pga_list);
+                } else {
+                    $rekomendasi_pga = (string) $rekomendasi_pga_array;
+                    if ($rekomendasi_pga == 'Lainnya' && !empty($rev->rekomendasi_pga_lainnya)) {
+                        $rekomendasi_pga .= ' (' . $rev->rekomendasi_pga_lainnya . ')';
+                    }
+                }
+
+                // Format tanggal reviu
+                $tgl_reviu = $rev->tanggal_reviu ? \Carbon\Carbon::parse($rev->tanggal_reviu)->format('Y-m-d') : '-';
+
+                fputcsv($file, [
+                    $nama_pasien,
+                    $no_rm,
+                    $rev->no_rawat,
+                    $tgl_reviu,
+                    $rev->hari_ke,
+                    $rev->tipe_antibiotik,
+                    $is_indikasi,
+                    $is_jenis,
+                    $is_dosis,
+                    $is_durasi,
+                    $rekomendasi_pga,
+                    $rev->respon_dpjp
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function searchDokter(Request $request)
     {
         $term = $request->get('q');
