@@ -44,6 +44,7 @@ class PatientController extends Controller
         // Get History of Registrations for this patient, including their General Consent and SPRI status
         $history = RegPeriksa::with(['generalConsent', 'signaturePasien', 'suratPersetujuanRawatInap'])
             ->where('no_rkm_medis', $noRm)
+            ->whereDate('tgl_registrasi', '<=', now()->toDateString())
             ->orderBy('tgl_registrasi', 'desc')
             ->limit(10)
             ->get();
