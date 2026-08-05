@@ -11,9 +11,6 @@ Route::get('/', function () {
     if (Session::get('is_logged_in')) {
         return redirect()->route('dashboard');
     }
-    if (Session::get('is_logged_in')) {
-        return redirect()->route('dashboard');
-    }
     return view('welcome');
 });
 
@@ -22,23 +19,14 @@ Route::get('/login', function () {
     return redirect('/');
 });
 
-Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(function () {
-Route::get('/login', function () {
-    return redirect('/');
-});
+
 
 Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(function () {
 
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
 
-    Route::get('/general-consent', function () {
-        return view('general_consent');
-    })->name('general-consent');
     Route::get('/general-consent', function () {
         return view('general_consent');
     })->name('general-consent');
@@ -53,9 +41,6 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::get('/general-consent/wa-template/{no_surat}', [App\Http\Controllers\GeneralConsentController::class, 'getWaTemplate'])->name('general-consent.wa-template');
     Route::get('/general-consent/check-wa', [GeneralConsentController::class, 'checkWa'])->name('general-consent.check-wa');
 
-    Route::get('/edukasi-pasien', function () {
-        return app(App\Http\Controllers\PatientEducationController::class)->index();
-    })->name('edukasi-pasien');
     Route::get('/edukasi-pasien', function () {
         return app(App\Http\Controllers\PatientEducationController::class)->index();
     })->name('edukasi-pasien');
