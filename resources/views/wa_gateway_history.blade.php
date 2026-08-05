@@ -204,6 +204,36 @@
             transform: translateY(-1px);
         }
 
+        .stat-card {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .stat-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .stat-card.active::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+
+        .stat-card .filter-hint {
+            position: absolute;
+            top: 10px; right: 12px;
+            font-size: 10px;
+            color: var(--text-subtle);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .stat-card:hover .filter-hint { opacity: 1; }
+
         .stat-icon {
             width: 40px; height: 40px;
             border-radius: var(--radius-sm);
@@ -354,14 +384,14 @@
             font-weight: 600;
         }
 
-        .table-wrap { overflow-x: auto; padding: 0; }
+        .table-wrap { overflow-x: auto; padding: 15px; }
 
         table { width: 100% !important; border-collapse: collapse; font-size: 13px; }
 
         thead { background: var(--bg-main); }
 
         th {
-            padding: 12px 14px !important;
+            padding: 14px 20px !important;
             text-align: left !important;
             font-weight: 600 !important;
             font-size: 11px !important;
@@ -373,7 +403,7 @@
         }
 
         td {
-            padding: 12px 14px !important;
+            padding: 16px 20px !important;
             border-bottom: 1px solid var(--border-light) !important;
             vertical-align: middle !important;
         }
@@ -408,7 +438,7 @@
         .status-dot.sent { background: var(--success); }
 
         .msg-preview {
-            max-width: 280px;
+            max-width: 300px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -417,17 +447,69 @@
             line-height: 1.5;
             color: var(--text-muted);
             font-size: 12px;
+            word-break: break-word;
+        }
+
+        .msg-cell { max-width: 320px; }
+
+        .msg-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 7px;
+        }
+
+        .btn-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-light);
+            border: none;
+            border-radius: 100px;
             cursor: pointer;
-            transition: color 0.2s;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        .msg-preview:hover { color: var(--text-main); }
-
-        .msg-expanded {
-            -webkit-line-clamp: unset;
-            max-width: 400px;
-            white-space: pre-wrap;
+        .btn-view:hover {
+            background: var(--primary);
+            color: #fff;
         }
+
+        .file-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10.5px;
+            color: var(--info-text);
+            background: var(--info-bg);
+            padding: 3px 9px;
+            border-radius: 100px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .doc-cell {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .doc-cell i { color: var(--primary); font-size: 12px; }
+
+        .telp-cell {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        .telp-cell i { color: #25D366; font-size: 13px; }
 
         .error-msg {
             color: var(--error-text);
@@ -437,6 +519,24 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             cursor: default;
+        }
+
+        .error-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 260px;
+        }
+
+        .btn-view-error {
+            color: var(--error-text);
+            background: var(--error-bg);
+            flex-shrink: 0;
+        }
+
+        .btn-view-error:hover {
+            background: var(--error);
+            color: #fff;
         }
 
         .text-mono {
@@ -474,23 +574,6 @@
         }
 
         .btn-logout:hover { background: #FEE2E2; border-color: #FECACA; }
-
-        .btn-copy {
-            padding: 2px 8px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10px;
-            color: var(--text-subtle);
-            transition: all 0.2s;
-            margin-left: 4px;
-        }
-
-        .btn-copy:hover {
-            background: var(--bg-main);
-            color: var(--text-main);
-        }
 
         .no-file { color: var(--text-subtle); font-size: 11px; }
 
@@ -600,6 +683,199 @@
             transform: translateY(0);
         }
 
+        /* Message detail modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .modal-header h3 { font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .modal-header p { font-size: 12px; color: var(--text-subtle); margin-top: 2px; }
+
+        .modal-close {
+            background: var(--bg-main);
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover { background: var(--border-light); color: var(--text-main); }
+
+        .modal-body {
+            padding: 22px;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            background: var(--primary-surface);
+            border: 1px solid rgba(5, 150, 105, 0.15);
+            border-radius: 14px 14px 14px 4px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+
+        .chat-bubble-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .chat-bubble-text {
+            font-size: 13.5px;
+            line-height: 1.65;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat-bubble-meta {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-subtle);
+        }
+
+        .chat-check { color: var(--success); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 16px;
+        }
+
+        .info-item {
+            background: var(--bg-main);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 10px 14px;
+            min-width: 0;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-subtle);
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .info-item span {
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .info-item span a { color: var(--info); text-decoration: none; }
+        .info-item span a:hover { text-decoration: underline; }
+
+        .error-panel {
+            margin-top: 14px;
+            background: var(--error-bg);
+            border: 1px solid #FEE2E2;
+            color: var(--error-text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .error-panel h4 {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .retry-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--error-text);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 100px;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-left: 2px;
+        }
+
+        .btn-copy-msg {
+            margin-top: 16px;
+            width: 100%;
+            padding: 11px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-copy-msg:hover { background: var(--primary-dark); }
+
+        @media (max-width: 640px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 1024px) {
             :root { --sidebar-width: 280px; }
             .sidebar { transform: translateX(-100%); box-shadow: 20px 0 25px -5px rgba(0, 0, 0, 0.1); }
@@ -658,41 +934,46 @@
             </div>
         </header>
 
-        <div class="stats-row">
-            <div class="stat-card">
+        <div class="stats-row" title="Klik kartu untuk memfilter data berdasarkan status">
+            <div class="stat-card" data-status="">
                 <div class="stat-icon total"><i class="fas fa-envelope"></i></div>
                 <div class="stat-body">
                     <div class="stat-value">{{ $stats['total'] }}</div>
                     <div class="stat-label">Total Pesan</div>
                 </div>
+                <span class="filter-hint"><i class="fas fa-filter"></i></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="pending">
                 <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
                 <div class="stat-body">
                     <div class="stat-value">{{ $stats['pending'] }}</div>
                     <div class="stat-label">Pending</div>
                 </div>
+                <span class="filter-hint"><i class="fas fa-filter"></i></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="processing">
                 <div class="stat-icon processing"><i class="fas fa-sync-alt fa-spin"></i></div>
                 <div class="stat-body">
                     <div class="stat-value">{{ $stats['processing'] }}</div>
                     <div class="stat-label">Processing</div>
                 </div>
+                <span class="filter-hint"><i class="fas fa-filter"></i></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="sent">
                 <div class="stat-icon sent"><i class="fas fa-check-circle"></i></div>
                 <div class="stat-body">
                     <div class="stat-value">{{ $stats['sent'] }}</div>
                     <div class="stat-label">Terkirim</div>
                 </div>
+                <span class="filter-hint"><i class="fas fa-filter"></i></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-status="failed">
                 <div class="stat-icon failed"><i class="fas fa-exclamation-circle"></i></div>
                 <div class="stat-body">
                     <div class="stat-value">{{ $stats['failed'] }}</div>
                     <div class="stat-label">Gagal</div>
                 </div>
+                <span class="filter-hint"><i class="fas fa-filter"></i></span>
             </div>
         </div>
 
@@ -710,6 +991,7 @@
             <input type="date" id="date_to" value="{{ $today }}">
             <button id="btn-filter" class="btn-filter"><i class="fas fa-search"></i> Tampilkan</button>
             <button id="btn-reset" class="btn-reset"><i class="fas fa-undo"></i> Hari Ini</button>
+            <input type="hidden" id="active-status" value="">
         </div>
 
         <div class="card">
@@ -740,12 +1022,70 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="msgModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-title">Detail Pesan WhatsApp</h3>
+                    <p id="modal-id-sub">ID Antrean #0</p>
+                </div>
+                <button type="button" class="modal-close" id="modal-close" aria-label="Tutup"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="chat-bubble">
+                    <div class="chat-bubble-header"><i class="fab fa-whatsapp"></i> Isi pesan terkirim</div>
+                    <div class="chat-bubble-text" id="modal-pesan"></div>
+                    <div class="chat-bubble-meta">
+                        <span id="modal-bubble-time"></span>
+                        <span class="chat-check" id="modal-check" style="display:none;"><i class="fas fa-check-double"></i></span>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label><i class="fas fa-file-alt"></i> No. Surat</label>
+                        <span id="modal-no-surat">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fab fa-whatsapp"></i> Penerima</label>
+                        <span id="modal-telp">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-tasks"></i> Status</label>
+                        <span id="modal-status">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-box"></i> Lampiran</label>
+                        <span id="modal-file">Tidak ada lampiran</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-hourglass-half"></i> Dibuat</label>
+                        <span id="modal-created">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-paper-plane"></i> Dikirim</label>
+                        <span id="modal-sent">Belum dikirim</span>
+                    </div>
+                </div>
+
+                <div class="error-panel" id="modal-error" style="display:none;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Detail Error <span class="retry-badge" id="modal-error-retry" style="display:none;"></span></h4>
+                    <div id="modal-error-text"></div>
+                </div>
+
+                <button type="button" class="btn-copy-msg" id="modal-copy"><i class="fas fa-copy"></i> Salin Isi Pesan</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script>
+        var waMessages = {};
+
         function getTableData() {
             return {
                 url: '{{ route("wa-gateway.history-data") }}',
@@ -756,6 +1096,14 @@
                 data: function (d) {
                     d.date_from = $('#date_from').val();
                     d.date_to = $('#date_to').val();
+                    d.status = $('#active-status').val() || '';
+                },
+                dataSrc: function (json) {
+                    waMessages = {};
+                    $.each(json.data, function (i, r) {
+                        waMessages[r.row_id] = r;
+                    });
+                    return json.data;
                 }
             };
         }
@@ -765,6 +1113,60 @@
             t.text(msg).addClass('show');
             clearTimeout(t.data('timer'));
             t.data('timer', setTimeout(function () { t.removeClass('show'); }, 1500));
+        }
+
+        function statusBadgeHtml(s) {
+            var labels = { pending: 'Pending', processing: 'Processing', sent: 'Terkirim', failed: 'Gagal' };
+            return '<span class="status-badge ' + s + '"><span class="status-dot ' + s + '"></span> ' + (labels[s] || s) + '</span>';
+        }
+
+        function openMessageModal(id) {
+            var r = waMessages[id];
+            if (!r) return;
+
+            $('#modal-id-sub').text('ID Antrean #' + r.row_id);
+            $('#modal-pesan').text(r.pesan_full || '(Tidak ada teks, hanya lampiran)');
+            $('#modal-no-surat').text(r.no_surat_raw || '-');
+            $('#modal-telp').text(r.no_telp_disp || r.no_telp_raw || '-');
+            $('#modal-status').html(statusBadgeHtml(r.status_raw));
+            $('#modal-created').text(r.created_at_raw || '-');
+            $('#modal-sent').text(r.sent_at_raw || 'Belum dikirim');
+            $('#modal-bubble-time').text(r.sent_at_raw || r.created_at_raw || '');
+
+            if (r.status_raw === 'sent') {
+                $('#modal-check').show();
+            } else {
+                $('#modal-check').hide();
+            }
+
+            if (r.file_name) {
+                if (r.file_path && /^https?:\/\//i.test(r.file_path)) {
+                    $('#modal-file').html('<a href="' + r.file_path + '" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> ' + r.file_name + '</a>');
+                } else {
+                    $('#modal-file').html('<span class="file-tag"><i class="fas fa-paperclip"></i> ' + r.file_name + '</span>');
+                }
+            } else {
+                $('#modal-file').text('Tidak ada lampiran');
+            }
+
+            if (r.error_full) {
+                $('#modal-error-text').text(r.error_full);
+
+                var retryMatch = r.error_full.match(/Retry (\d+)/);
+                if (retryMatch) {
+                    var maxRetry = r.error_full.indexOf('[Max RetriesReached]') !== -1;
+                    $('#modal-error-retry').text('Percobaan ke-' + retryMatch[1] + (maxRetry ? ' · Berhenti (batas maksimum)' : ''));
+                    $('#modal-error-retry').show();
+                } else {
+                    $('#modal-error-retry').hide();
+                }
+
+                $('#modal-error').show();
+            } else {
+                $('#modal-error').hide();
+            }
+
+            $('#msgModal').addClass('show');
         }
 
         function updateRangeLabel() {
@@ -844,18 +1246,55 @@
                 var today = new Date().toISOString().split('T')[0];
                 $('#date_from').val(today);
                 $('#date_to').val(today);
+                $('#active-status').val('');
+                $('.stat-card').removeClass('active');
                 updateRangeLabel();
                 table.ajax.reload();
             });
 
-            $(document).on('click', '.msg-preview', function () {
-                $(this).toggleClass('msg-expanded');
+            $('.stat-card').on('click', function () {
+                var status = $(this).data('status') || '';
+                $('.stat-card').removeClass('active');
+                if (status) {
+                    $(this).addClass('active');
+                    $('#active-status').val(status);
+                } else {
+                    $('#active-status').val('');
+                }
+                table.ajax.reload();
             });
 
-            $(document).on('click', '.btn-copy', function () {
-                var text = $(this).data('copy');
+            $(document).on('click', '.btn-view', function () {
+                openMessageModal($(this).data('id'));
+                if ($(this).data('error')) {
+                    var body = $('#msgModal .modal-body');
+                    setTimeout(function () { body.animate({ scrollTop: body[0].scrollHeight }, 300); }, 50);
+                }
+            });
+
+            $('#modal-close').on('click', function () {
+                $('#msgModal').removeClass('show');
+            });
+
+            $('#msgModal').on('click', function (e) {
+                if (e.target === this) {
+                    $('#msgModal').removeClass('show');
+                }
+            });
+
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    $('#msgModal').removeClass('show');
+                }
+            });
+
+            $('#modal-copy').on('click', function () {
+                var text = $('#modal-pesan').text();
+                if (!text) return;
                 navigator.clipboard.writeText(text).then(function () {
-                    showToast('Disalin ke clipboard');
+                    showToast('Isi pesan disalin ke clipboard');
+                }).catch(function () {
+                    showToast('Gagal menyalin pesan');
                 });
             });
 

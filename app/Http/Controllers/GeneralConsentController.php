@@ -305,6 +305,54 @@ class GeneralConsentController extends Controller
         });
     }
 
+    public function checkWa(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required'
+        ]);
+
+        $waUrl = env('WA_URL');
+        $deviceId = env('WA_DEVICE_ID');
+
+        if (!$waUrl || !$deviceId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'WhatsApp gateway tidak dikonfigurasi'
+            ], 500);
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $jid = '+62'.$phone . '@s.whatsapp.net';
+
+        try {
+            $response = Http::withHeaders([
+                'X-Device-Id' => $deviceId,
+            ])->get($waUrl . '/user/check', [
+                'phone' => $jid
+            ]);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gagal menghubungi server WhatsApp'
+                ], 500);
+            }
+
+            $data = $response->json();
+
+            return response()->json([
+                'status' => true,
+                'phone' => $phone,
+                'is_on_whatsapp' => $data['results']['is_on_whatsapp'] ?? false
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghubungi server WhatsApp'
+            ], 500);
+        }
+    }
+
     private function formatPhoneNumber($number, $prefix = '+62')
     {
         if (empty($number) || $number === '-') return $number;
@@ -377,7 +425,8 @@ class GeneralConsentController extends Controller
         if (!$consent) return response()->json(['error' => 'Data tidak ditemukan'], 404);
 
         return response()->json([
-            'template' => $whatsappService->getDefaultFileMessage()
+            'template' => $whatsappService->getDefaultFileMessage(),
+            'no_telp' => $consent->no_telp
         ]);
     }
 
