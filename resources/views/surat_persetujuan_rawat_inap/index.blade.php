@@ -259,6 +259,14 @@
             font-weight: 500 !important;
             color: var(--text-secondary) !important;
         }
+        /* ─── Toast Notification ─── */
+        #toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; max-width: 420px; background: #1E293B; color: white; border: 1px solid rgba(255,255,255,0.08); }
+        #toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        #toast i { font-size: 18px; }
+        #toast.success { background: #065F46; border-color: #10B981; }
+        #toast.success i { color: #6EE7B7; }
+        #toast.error { background: #7F1D1D; border-color: #EF4444; }
+        #toast.error i { color: #FCA5A5; }
     </style>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -295,7 +303,7 @@
                             Cari Data Pasien
                         </div>
                         <div class="search-container">
-                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis..." style="width: 100%;">
+                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis..." style="width: 100%;" oninput="var v=this.value.replace(/[^0-9\/]/g,'');var s=v.split('/');while(s.length>4)s.pop();this.value=s.join('/').slice(0,17)">
                             <button class="btn btn-primary" id="btn-search" style="white-space: nowrap;">
                                 Cari
                             </button>
@@ -359,7 +367,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Tanggal</label>
-                                    <input type="text" class="form-control" name="tanggal" id="field-tanggal" value="{{ date('Y-m-d') }}" readonly required>
+                                    <input type="date" class="form-control" name="tanggal" id="field-tanggal" value="{{ date('Y-m-d') }}" required>
                                 </div>
                             </div>
                             
@@ -539,7 +547,7 @@
                                                 </button>
                                             </div>
 
-                                            <input type="text" class="form-control telp-input" name="pj_telp" id="field-pj-telp" placeholder="8xxxxxxxxxx" required>
+                                            <input type="text" class="form-control telp-input" name="pj_telp" id="field-pj-telp" placeholder="8xxxxxxxxxx" required oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
                                         </div>
                                     </div>
                                 </div>
@@ -690,11 +698,23 @@
         </div>
     </div>
 
+    <div id="toast"></div>
+
     <!-- jQuery and Select2 JS CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        function showToast(msg, type) {
+            var t = document.getElementById('toast');
+            var icon = type === 'success' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : type === 'error' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' : '';
+            t.innerHTML = icon + msg;
+            t.className = type || '';
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(function () { t.classList.remove('show'); }, 4000);
+        }
+
         $(document).ready(function() {
             $('#kd_bangsal').select2({
                 placeholder: "Pilih Ruangan...",
@@ -715,14 +735,14 @@
 
         // Modal Control Helper
         function showError(message) {
-            document.getElementById('error-modal-message').textContent = message;
+            document.getElementById('error-modal-message').innerHTML = message.replace(/\n/g, '<br>');
             document.getElementById('error-modal').style.display = 'flex';
         }
         function hideError() {
             document.getElementById('error-modal').style.display = 'none';
         }
         function showSuccess(message) {
-            document.getElementById('success-modal-message').textContent = message;
+            document.getElementById('success-modal-message').innerHTML = message.replace(/\n/g, '<br>');
             document.getElementById('success-modal').style.display = 'flex';
         }
         function hideSuccess() {
@@ -901,7 +921,7 @@
 
         async function searchPatient() {
             const noRm = inputNoRm.value.trim();
-            if (!noRm) return showError('Silakan masukkan No. RM terlebih dahulu.');
+            if (!noRm) return showToast('Silakan masukkan No. RM terlebih dahulu.', 'error');
 
             btnSearch.disabled = true;
             btnSearch.innerHTML = 'Mencari...';
@@ -911,7 +931,7 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    const { pasien, history } = result;
+                    const { pasien, history, matched_no_rawat } = result;
                     activePatientData = pasien;
                     window.historyData = history;
 
@@ -992,8 +1012,8 @@
                             historyTableBody.appendChild(row);
                         });
 
-                        // Select the latest registration by default
-                        document.getElementById('field-no-rawat').value = history[0].no_rawat;
+                        // Select the latest registration by default, or the searched no_rawat if present
+                        document.getElementById('field-no-rawat').value = matched_no_rawat || history[0].no_rawat;
                         // document.getElementById('field-tanggal').value = history[0].tgl_registrasi;
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
@@ -1003,11 +1023,11 @@
                     }
 
                 } else {
-                    showError(result.error || 'Pasien tidak ditemukan.');
+                    showToast(result.error || 'Pasien tidak ditemukan.', 'error');
                 }
             } catch (error) {
                 console.error(error);
-                showError('Gagal menghubungi server untuk pencarian pasien.');
+                showToast('Gagal menghubungi server untuk pencarian pasien.', 'error');
             } finally {
                 btnSearch.disabled = false;
                 btnSearch.innerHTML = 'Cari';

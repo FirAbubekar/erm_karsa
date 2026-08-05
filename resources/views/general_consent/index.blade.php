@@ -877,16 +877,18 @@
         }
 
         .btn-edit {
-            background: rgba(59, 130, 246, 0.08);
-            color: var(--accent-blue);
-            border: 1px solid rgba(59, 130, 246, 0.15);
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-edit:hover {
-            background: var(--accent-blue);
+            background: var(--accent);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+            border-color: var(--accent);
         }
 
         .btn-pdf {
@@ -1352,9 +1354,11 @@
                         <div class="filter-title">
                             Pencarian Lanjutan
                             @php 
+                                $sd = request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->toDateString() : null;
+                                $ed = request('end_date') ? \Carbon\Carbon::parse(request('end_date'))->toDateString() : null;
                                 $isDefaultToday = !request('search') && !request('no_rawat') && !request('person') && 
-                                                 request('start_date') === now()->toDateString() && 
-                                                 request('end_date') === now()->toDateString();
+                                                 $sd === now()->toDateString() && 
+                                                 $ed === now()->toDateString();
                                 $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); 
                             @endphp
                             @if($isDefaultToday)
@@ -1414,13 +1418,13 @@
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
                                     Periode Pemeriksaan
                                 </label>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="filter-input" style="padding-left: 14px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="filter-input-wrapper" style="flex:1;">
+                                        <input type="date" name="start_date" id="dt-start" value="{{ request('start_date', date('Y-m-d')) }}" class="filter-input" style="padding-left:14px;">
                                     </div>
-                                    <span style="color: #94A3B8; font-size: 11px; font-weight: 700;">s/d</span>
-                                    <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="filter-input" style="padding-left: 14px;">
+                                    <span style="color:var(--text-muted);font-size:11px;font-weight:700;flex-shrink:0;">s/d</span>
+                                    <div class="filter-input-wrapper" style="flex:1;">
+                                        <input type="date" name="end_date" id="dt-end" value="{{ request('end_date', date('Y-m-d')) }}" class="filter-input" style="padding-left:14px;">
                                     </div>
                                 </div>
                             </div>
@@ -1551,7 +1555,7 @@
                                         </button>
                                         <button
                                             class="btn-action btn-wa"
-                                            onclick="sendWA('{{ $consent->no_surat }}', this, event)"
+                                            onclick="openWaModal('{{ $consent->no_surat }}', this, event)"
                                         >
                                             <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                                             WA
@@ -1691,6 +1695,40 @@
         </div>
     </div>
 
+    <!-- ─── WA Modal ─── -->
+    <div class="modal-overlay" id="waModal">
+        <div class="modal-panel" style="max-width:560px;">
+            <div class="modal-top">
+                <div>
+                    <h3>Kirim WhatsApp</h3>
+                    <p>Edit pesan sebelum dikirim ke nomor Penanggung Jawab</p>
+                </div>
+                <button class="modal-close" onclick="closeWaModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;">
+                <div style="margin-bottom:16px;padding:12px 16px;background:#F0FDF4;border-radius:12px;border:1px solid rgba(37,211,102,0.2);display:flex;align-items:center;gap:10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    <span style="font-size:13px;font-weight:500;color:#166534;" id="waTargetInfo">Mengirim ke nomor Penanggung Jawab</span>
+                </div>
+                <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">Pesan WhatsApp</label>
+                <textarea id="waMessageText" rows="8" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);resize:vertical;outline:none;line-height:1.6;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor=''"></textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                    <span style="font-size:11px;color:var(--text-muted);" id="waCharCount">0 karakter</span>
+                    <span style="font-size:11px;color:var(--text-muted);" id="waNoSuratInfo"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:flex-end;gap:8px;padding:16px 24px;">
+                <button class="btn-close-modal" onclick="closeWaModal()" style="background:var(--bg-main);color:var(--text-secondary);border:1.5px solid var(--border);padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Batal</button>
+                <button id="waSendBtn" onclick="confirmSendWA()" style="background:#25D366;color:white;border:none;padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(37,211,102,0.3)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='';this.style.transform=''">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Kirim WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ─── Detail Modal ───
         function openDetailModal(data) {
@@ -1817,53 +1855,91 @@
             }
         }
 
-        async function sendWA(noSurat, btn, event) {
+        // ─── WA Modal ───
+        var waNoSurat = null;
+        var waBtnRef = null;
+        var waBtnOrig = null;
+
+        function openWaModal(noSurat, btn, event) {
             if (event) event.preventDefault();
-            console.log('sendWA triggered for:', noSurat);
-            
-            const originalContent = btn.innerHTML;
+            waNoSurat = noSurat;
+            waBtnRef = btn;
+            waBtnOrig = btn.innerHTML;
+
             btn.disabled = true;
-            btn.innerHTML = '<span style="font-size:10px;">Loading...</span>';
-            
-            try {
-                // 1. Fetch template
-                const templateResponse = await fetch(`/general-consent/wa-template/${encodeURIComponent(noSurat)}`);
-                if (!templateResponse.ok) throw new Error('Gagal mengambil template');
-                const { template } = await templateResponse.json();
-                
-                // 2. Prompt user
-                const message = prompt('Edit pesan WhatsApp (klik OK untuk kirim, Cancel untuk batal):', template);
-                if (message === null) return; // User cancelled
-                
-                btn.innerHTML = '<span style="font-size:10px;">Sending...</span>';
-                
-                // 3. Send POST
-                const response = await fetch(`/general-consent/send-wa/${encodeURIComponent(noSurat)}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message })
+            btn.innerHTML = '<span style="font-size:10px;">Memuat...</span>';
+
+            fetch(`/general-consent/wa-template/${encodeURIComponent(noSurat)}`)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    document.getElementById('waMessageText').value = data.template || '';
+                    document.getElementById('waTargetInfo').innerHTML = 'No. Telepon: <strong>' + (data.no_telp || '-') + '</strong>';
+                    document.getElementById('waNoSuratInfo').textContent = noSurat;
+                    document.getElementById('waCharCount').textContent = (data.template || '').length + ' karakter';
+                    document.getElementById('waModal').classList.add('active');
+                    btn.disabled = false;
+                    btn.innerHTML = waBtnOrig;
+                })
+                .catch(function() {
+                    alert('Gagal mengambil template pesan');
+                    btn.disabled = false;
+                    btn.innerHTML = waBtnOrig;
                 });
-                // const result = await response.json();
-                // const text = await response.text();
-               
-                console.log('sendWA triggered for:', response);
-                // if (response.ok) {
-                //     alert(result.message);
-                // } else {
-                //     alert(result.error || 'Gagal mengirim WhatsApp');
-                // }
-            } catch (err) {
-                // console.log(noSurat);
-                alert('Terjadi kesalahan jaringan' + err);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-            }
         }
+
+        function closeWaModal() {
+            document.getElementById('waModal').classList.remove('active');
+            waNoSurat = null;
+        }
+
+        function confirmSendWA() {
+            var message = document.getElementById('waMessageText').value;
+            if (!message.trim()) {
+                document.getElementById('waMessageText').style.borderColor = 'var(--danger)';
+                return;
+            }
+
+            var btn = document.getElementById('waSendBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Mengirim...';
+
+            fetch(`/general-consent/send-wa/${encodeURIComponent(waNoSurat)}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success || result.message) {
+                    alert('WhatsApp berhasil dikirim!');
+                } else {
+                    alert(result.error || 'Gagal mengirim WhatsApp');
+                }
+                closeWaModal();
+            })
+            .catch(function(err) {
+                alert('Terjadi kesalahan jaringan: ' + err);
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382..."/></svg> Kirim WhatsApp';
+                if (waBtnRef) {
+                    waBtnRef.disabled = false;
+                    waBtnRef.innerHTML = waBtnOrig;
+                }
+            });
+        }
+
+        // Char counter
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('waMessageText').addEventListener('input', function() {
+                document.getElementById('waCharCount').textContent = this.value.length + ' karakter';
+            });
+        });
     </script>
 </body>
 </html>
