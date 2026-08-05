@@ -215,7 +215,6 @@
                                 <label><input type="radio" name="pendidikan" value="SD"> SD</label>
                                 <label><input type="radio" name="pendidikan" value="SLTP"> SLTP</label>
                                 <label><input type="radio" name="pendidikan" value="SLTA"> SLTA</label>
-                                <label><input type="radio" name="pendidikan" value="PT"> PT</label>
                                 <label><input type="radio" name="pendidikan" value="Lain-lain"
                                         data-toggle-other-radio="pendidikan-lainnya"> Lain-lain</label>
                             </div>
