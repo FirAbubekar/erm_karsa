@@ -401,9 +401,9 @@
                         <tr>
                             <td style="border: none;">Perlu Penerjemah</td>
                             <td style="border: none;">:
-                                <span class="checkbox">{!! $assessment->perlu_penerjemah == 'Ya' ? 'V' : '&nbsp;' !!}</span> Ya
+                                <span class="checkbox">{!! $assessment->perlu_penerjemah == '1' ? 'V' : '&nbsp;' !!}</span> Ya
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span class="checkbox">{!! $assessment->perlu_penerjemah == 'Tidak' ? 'V' : '&nbsp;' !!}</span> Tidak
+                                <span class="checkbox">{!! $assessment->perlu_penerjemah == '0' ? 'V' : '&nbsp;' !!}</span> Tidak
                             </td>
                         </tr>
                         <tr>
@@ -415,8 +415,12 @@
                                 &nbsp;
                                 <span class="checkbox">{!! $assessment->pendidikan == 'SLTA' ? 'V' : '&nbsp;' !!}</span> SLTA
                                 &nbsp;
-                                <span class="checkbox">{!! $assessment->pendidikan == 'Lain-lain' ? 'V' : '&nbsp;' !!}</span> Lain-lain:
-                                {{ $assessment->pendidikan == 'Lain-lain' ? $assessment->pendidikan_lainnya : '..........' }}
+                                @php
+                                    $isLainnya = !in_array($assessment->pendidikan, ['SD', 'SLTP', 'SLTA']) && !empty($assessment->pendidikan);
+                                    $teksLainnya = $assessment->pendidikan == 'Lain-lain' ? $assessment->pendidikan_lainnya : ($isLainnya ? $assessment->pendidikan : '..........');
+                                @endphp
+                                <span class="checkbox">{!! $isLainnya ? 'V' : '&nbsp;' !!}</span> Lain-lain:
+                                {{ $teksLainnya }}
                             </td>
                         </tr>
                         <tr>
@@ -499,9 +503,9 @@
                         <tr>
                             <td style="border: none;">Kesediaan Menerima</td>
                             <td style="border: none;">
-                                <span class="checkbox">{!! $assessment->kesediaan_menerima == 'Ya' ? 'V' : '&nbsp;' !!}</span> Ya
+                                <span class="checkbox">{!! $assessment->kesediaan_menerima == '1' ? 'V' : '&nbsp;' !!}</span> Ya
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span class="checkbox">{!! $assessment->kesediaan_menerima == 'Tidak' ? 'V' : '&nbsp;' !!}</span> Tidak
+                                <span class="checkbox">{!! $assessment->kesediaan_menerima == '0' ? 'V' : '&nbsp;' !!}</span> Tidak
                             </td>
                         </tr>
                     </table>
