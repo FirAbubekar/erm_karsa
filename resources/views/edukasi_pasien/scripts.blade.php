@@ -23,6 +23,27 @@
         document.getElementById('error-modal').style.display = 'none'
     }
 
+    function showConfirm(msg, onConfirm) {
+        document.getElementById('confirm-modal-message').textContent = msg;
+        document.getElementById('confirm-modal').style.display = 'flex';
+        
+        const okBtn = document.getElementById('btn-ok-confirm');
+        const cancelBtn = document.getElementById('btn-cancel-confirm');
+        const closeBtn = document.getElementById('close-confirm-modal');
+        
+        const newOkBtn = okBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        
+        const closeModals = () => { document.getElementById('confirm-modal').style.display = 'none'; };
+        cancelBtn.onclick = closeModals;
+        closeBtn.onclick = closeModals;
+        
+        newOkBtn.onclick = () => {
+            closeModals();
+            if (onConfirm) onConfirm();
+        };
+    }
+
     function showSuccess(msg) {
         document.getElementById('success-modal-message').textContent = msg;
         document.getElementById('success-modal').style.display = 'flex'
@@ -266,7 +287,7 @@
                     <button class="btn-icon btn-icon-save" title="Simpan baris" style="margin-right:4px">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     </button>
-                    <button class="btn-icon btn-icon-delete" onclick="this.closest('tr').remove()" title="Hapus baris">
+                    <button class="btn-icon btn-icon-delete" onclick="deleteCustomRow(this)" title="Hapus baris">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </td>
@@ -624,7 +645,7 @@
             <button class="btn-icon btn-icon-save" title="Simpan baris" style="margin-right:4px">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
             </button>
-            <button class="btn-icon btn-icon-delete" onclick="this.closest('tr').remove()" title="Hapus baris">
+            <button class="btn-icon btn-icon-delete" onclick="deleteCustomRow(this)" title="Hapus baris">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
         </td>
@@ -971,4 +992,59 @@
             }
         }
     });
+
+    // Delete custom row logic
+    async function deleteCustomRow(btn) {
+        try {
+            const row = btn.closest('tr');
+            if (!row) return;
+            
+            const kodeTopik = row.dataset.kode;
+            if (!kodeTopik) return;
+            
+            const noRawatEl = document.getElementById('field-no-rawat');
+            const noRawat = noRawatEl ? noRawatEl.value : null;
+
+            if (!noRawat) {
+                // Remove locally if no patient selected
+                row.remove();
+                return;
+            }
+
+            const msg = 'Apakah Anda yakin ingin menghapus baris pelaksanaan ini?';
+            showConfirm(msg, async () => {
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                    
+                    const res = await fetch("/edukasi-pasien/delete-implementation", {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            no_rawat: noRawat,
+                            kode_topik: kodeTopik
+                        })
+                    });
+                    
+                    const result = await res.json();
+                    if (result.success) {
+                        row.remove();
+                        showSuccess(result.message);
+                    } else {
+                        row.remove(); // Force remove if it wasn't in DB
+                        showError(result.error || 'Gagal menghapus data pelaksanaan.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showError('Terjadi kesalahan pada server saat menghapus.');
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            showError('Terjadi kesalahan pada server saat menghapus.');
+        }
+    }
 </script>

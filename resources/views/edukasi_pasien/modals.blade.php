@@ -55,3 +55,22 @@
         <button id="btn-close-success" style="width:100%;padding:14px 24px;background:#10B981;color:#fff;border:none;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;transition:all .2s;box-shadow:0 4px 6px -1px rgba(16,185,129,.2)">Selesai</button>
     </div>
 </div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal" style="z-index:1050;padding:20px;display:none;">
+    <div class="modal-content" style="max-width:380px;text-align:center;padding:40px 32px 32px;border-radius:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);border:1px solid rgba(245,158,11,.1);animation:modalBounce .4s cubic-bezier(.175,.885,.32,1.275);background:#fff;margin:auto">
+        <button id="close-confirm-modal" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94A3B8;cursor:pointer;padding:8px;border-radius:50%;display:flex;align-items:center;justify-content:center">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div style="width:72px;height:72px;background:#FFFBEB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;color:#F59E0B;position:relative">
+            <div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid #FCD34D;opacity:.5;animation:pulseRing 2s cubic-bezier(.215,.61,.355,1) infinite"></div>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:36px;height:36px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <h3 style="font-size:20px;font-weight:700;color:#1E293B;margin:0 0 12px">Konfirmasi</h3>
+        <p id="confirm-modal-message" style="font-size:14px;font-weight:500;color:#64748B;margin:0 0 28px;line-height:1.6"></p>
+        <div style="display:flex;gap:12px;width:100%;">
+            <button id="btn-cancel-confirm" style="flex:1;padding:12px;background:#F1F5F9;color:#475569;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;">Batal</button>
+            <button id="btn-ok-confirm" style="flex:1;padding:12px;background:#EF4444;color:#fff;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 4px 6px -1px rgba(239,68,68,.2)">Ya, Lanjutkan</button>
+        </div>
+    </div>
+</div>
