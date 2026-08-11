@@ -450,6 +450,55 @@ class PatientEducationController extends Controller
             }
         });
     }
+
+    /**
+     * Hapus baris pelaksanaan (implementation)
+     */
+    public function deleteImplementation(Request $request)
+    {
+        $request->validate([
+            'no_rawat' => 'required|string',
+            'kode_topik' => 'required|string',
+        ]);
+
+        try {
+            $assessment = PatientEducationAssessment::where('no_rawat', $request->no_rawat)->first();
+            if (!$assessment) {
+                return response()->json(['success' => false, 'error' => 'Data asesmen tidak ditemukan.'], 404);
+            }
+
+            $impl = PatientEducationImplementation::where('assessment_id', $assessment->id_uuid)
+                ->where('kode_topik', $request->kode_topik)
+                ->first();
+
+            if ($impl) {
+                // Hapus TTD jika ada
+                if ($impl->ttd_pasien && Storage::disk('local')->exists($impl->ttd_pasien)) {
+                    Storage::disk('local')->delete($impl->ttd_pasien);
+                }
+
+                $impl->delete();
+                PatientEducationImplementation::logActivity($impl, 'DELETE');
+                
+                try {
+                    $pdfService = app(\App\Services\PdfService::class);
+                    $pdfService->generateAndSaveEdukasiPasien($assessment);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Gagal generate PDF edukasi pasien saat delete implementation: " . $e->getMessage());
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pelaksanaan berhasil dihapus!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal menghapus: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * Tampilkan halaman riwayat edukasi pasien
      */
