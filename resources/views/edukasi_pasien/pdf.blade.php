@@ -372,7 +372,7 @@
                 </td>
             </tr>
             <tr class="section-title">
-                <td colspan="2">A. ASESMEN KEBUTUHAN PENDIDIKAN</td>
+                <td colspan="2">A. ASESMEN KEBUTUHAN EDUKASI</td>
             </tr>
             <tr>
                 <td colspan="2" style="padding: 4px 8px;">
@@ -416,8 +416,15 @@
                                 <span class="checkbox">{!! $assessment->pendidikan == 'SLTA' ? 'V' : '&nbsp;' !!}</span> SLTA
                                 &nbsp;
                                 @php
-                                    $isLainnya = !in_array($assessment->pendidikan, ['SD', 'SLTP', 'SLTA']) && !empty($assessment->pendidikan);
-                                    $teksLainnya = $assessment->pendidikan == 'Lain-lain' ? $assessment->pendidikan_lainnya : ($isLainnya ? $assessment->pendidikan : '..........');
+                                    $isLainnya =
+                                        !in_array($assessment->pendidikan, ['SD', 'SLTP', 'SLTA']) &&
+                                        !empty($assessment->pendidikan);
+                                    $teksLainnya =
+                                        $assessment->pendidikan == 'Lain-lain'
+                                            ? $assessment->pendidikan_lainnya
+                                            : ($isLainnya
+                                                ? $assessment->pendidikan
+                                                : '..........');
                                 @endphp
                                 <span class="checkbox">{!! $isLainnya ? 'V' : '&nbsp;' !!}</span> Lain-lain:
                                 {{ $teksLainnya }}
