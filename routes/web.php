@@ -248,4 +248,19 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
             'data'            => $data,
         ]);
     })->name('wa-gateway.history-data');
+
+    // Master Data Template Pernyataan (Persetujuan / Penolakan)
+    Route::group(['prefix' => 'master-template'], function () {
+        Route::get('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'index'])->name('master-template.index');
+        Route::post('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'store'])->name('master-template.store');
+        Route::put('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'update'])->name('master-template.update');
+        Route::delete('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroy'])->name('master-template.destroy');
+
+        Route::get('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'showDetails'])->name('master-template.details');
+        Route::post('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'storeDetail'])->name('master-template.details.store');
+        Route::put('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'updateDetail'])->name('master-template.details.update');
+        Route::delete('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroyDetail'])->name('master-template.details.destroy');
+        Route::post('/{id}/details/reorder', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'reorderDetail'])->name('master-template.details.reorder');
+    });
+
 });
