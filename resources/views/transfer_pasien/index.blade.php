@@ -191,7 +191,7 @@
                             Cari Data Pasien
                         </div>
                         <div class="search-container">
-                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis...">
+                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis..." oninput="var v=this.value.replace(/[^0-9\/]/g,'');var s=v.split('/');while(s.length>4)s.pop();this.value=s.join('/').slice(0,17)">
                             <button class="btn btn-primary" id="btn-search" style="white-space: nowrap;">
                                 Cari
                             </button>
@@ -288,7 +288,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Keterangan Indikasi</label>
-                                    <input type="text" class="form-control" name="ket_indikasi" id="field-ket-indikasi" placeholder="Keterangan tambahan (opsional)">
+                                    <input type="text" class="form-control" name="ket_indikasi" id="field-ket-indikasi" value="-" placeholder="Keterangan tambahan (opsional)">
                                 </div>
                             </div>
 
@@ -653,40 +653,17 @@
             });
         });
         
-        // Placeholder script for search functionality
-        document.getElementById('btn-search')?.addEventListener('click', function() {
-            const noRM = document.getElementById('search-no-rm').value.trim();
-            if (!noRM) {
-                alert('Masukkan No. Rekam Medis terlebih dahulu');
-                return;
-            }
-            // TODO: Implement AJAX search
-            console.log('Searching for:', noRM);
-        });
+        const btnSearch = document.getElementById('btn-search');
+        const inputNoRm = document.getElementById('search-no-rm');
+        const historyTableBody = document.getElementById('history-table-body');
 
         // Reset button
         document.getElementById('btn-reset')?.addEventListener('click', function() {
             document.getElementById('formTransferPasien').reset();
         });
 
-        // Save button placeholder
-        document.getElementById('btn-save-document')?.addEventListener('click', function() {
-            alert('Fitur simpan belum diimplementasikan. Ini hanya tampilan.');
-        });
-
-        // Enter key search
-        document.getElementById('search-no-rm')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('btn-search').click();
-            }
-        });
-
-        const btnSearch = document.getElementById('btn-search');
-        const inputNoRm = document.getElementById('search-no-rm');
-        const historyTableBody = document.getElementById('history-table-body');
-        
-                inputNoRm.addEventListener('keydown', (e) => {
+        // Enter key search (single handler)
+        inputNoRm.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchPatient();
@@ -695,10 +672,15 @@
 
         btnSearch.addEventListener('click', searchPatient);
  
+        var isSearching = false;
+
         async function searchPatient() {
+            if (isSearching) return;
+
             const noRm = inputNoRm.value;
             if (!noRm) return showError('Silakan masukkan No. RM');
 
+            isSearching = true;
             btnSearch.disabled = true;
             btnSearch.innerHTML = 'Mencari...';
 
@@ -707,8 +689,13 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    const { pasien, history, latest_auth_parties } = result;
+                    // Tutup modal error jika sebelumnya terbuka
+                    var errModal = document.getElementById('error-modal');
+                    if (errModal) { errModal.classList.remove('active'); errModal.style.display = 'none'; }
+
+                    const { pasien, history, latest_auth_parties, matched_no_rawat } = result;
                     activePatientData = pasien;
+                    window.matchedNoRawat = matched_no_rawat;
 
                     // Update Form Fields
                     document.getElementById('field-no-rm').value = pasien.no_rkm_medis;
@@ -716,6 +703,27 @@
                     document.getElementById('field-nama-pasien').value = pasien.nm_pasien;
                     document.getElementById('field-tgl-lahir').value = pasien.tgl_lahir;
                     document.getElementById('field-jk').value = pasien.jk === 'L' ? 'Laki-laki' : 'Perempuan';                    
+
+                    // Auto-fill Pemberi Persetujuan from pasien.namakeluarga / keluarga
+                    var namaKeluarga = pasien.namakeluarga || '';
+                    var keluargaDb = (pasien.keluarga || '').trim().toUpperCase();
+                    var hubunganMap2 = {
+                        'AYAH': 'Ayah',
+                        'IBU': 'Ibu',
+                        'ISTRI': 'Istri',
+                        'SUAMI': 'Suami',
+                        'SAUDARA': 'Saudara',
+                        'ANAK': 'Anak',
+                        'LAIN-LAIN': 'Lainnya'
+                    };
+                    if (namaKeluarga) {
+                        document.getElementById('field-nama-pj').value = namaKeluarga;
+                    }
+                    if (keluargaDb && hubunganMap2[keluargaDb]) {
+                        var hj = document.getElementById('field-hubungan-pj');
+                        var optExists = Array.from(hj.options).some(function(o) { return o.value === hubunganMap2[keluargaDb]; });
+                        hj.value = optExists ? hubunganMap2[keluargaDb] : 'Lainnya';
+                    }
 
                     // // Clear and Populate Authorized Parties
                     // for (let i = 1; i <= 4; i++) {
@@ -775,14 +783,14 @@
                         // Cache history data for detail modal
                         window.historyData = history;
 
-                        // Automatically select latest registration
-                        document.getElementById('field-no-rawat').value = history[0].no_rawat;
-                        document.getElementById('field-tgl-periksa').value = history[0].tgl_registrasi;
+                        // Automatically select latest registration, or the searched no_rawat if present
+                        document.getElementById('field-no-rawat').value = window.matchedNoRawat || history[0].no_rawat;
+                        //document.getElementById('field-tgl-periksa').value = history[0].tgl_registrasi;
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
                         historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Pasien ditemukan, tapi tidak ada riwayat rawat.</td></tr>';
                         document.getElementById('field-no-rawat').value = '';
-                        document.getElementById('field-tgl-periksa').value = '';
+                        // document.getElementById('field-tgl-periksa').value = '';
                     }
                 } else {
                     showError(result.error || 'Terjadi kesalahan');
@@ -791,6 +799,7 @@
                 console.error('Search error:', error);
                 showError('Gagal menghubungi server');
             } finally {
+                isSearching = false;
                 btnSearch.disabled = false;
                 btnSearch.innerHTML = 'Cari';
             }
@@ -821,31 +830,44 @@
             });
         }
 
-        // Fungsi untuk menampilkan error
+        function hideModal(id) {
+            var m = document.getElementById(id);
+            if (m) { m.classList.remove('active'); m.style.display = 'none'; }
+        }
+
+        // Fungsi untuk menampilkan modal error
         function showError(message) {
             const modal = document.getElementById('error-modal');
             const messageEl = document.getElementById('error-message');
             if (modal && messageEl) {
                 messageEl.textContent = message;
-                modal.classList.add('active');
                 modal.style.display = 'flex';
             } else {
                 alert(message);
             }
         }
 
-        // Fungsi untuk menampilkan success
+        // Fungsi untuk menampilkan modal success
         function showSuccess(message) {
             const modal = document.getElementById('success-modal');
             const messageEl = document.getElementById('success-message');
             if (modal && messageEl) {
                 messageEl.textContent = message;
-                modal.classList.add('active');
                 modal.style.display = 'flex';
             } else {
                 alert(message);
             }
         }
+
+        // Close modal on overlay click & button click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+            }
+        });
+        document.getElementById('close-error-modal')?.addEventListener('click', function() {
+            hideModal('error-modal');
+        });
 
         // Event listener untuk tombol simpan
         const btnSaveDocument = document.getElementById('btn-save-document');
@@ -1012,5 +1034,82 @@
 
         btnSearch.addEventListener('click', searchPatient);
     </script>
+
+    {{-- Success Modal --}}
+    <div id="success-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card success-card">
+            <div class="modal-icon success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h3 class="modal-title">Berhasil</h3>
+            <p class="modal-message" id="success-message"></p>
+            <div class="modal-actions">
+                <button id="btn-close-success" class="btn btn-success">OK</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Error Modal --}}
+    <div id="error-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card error-card">
+            <div class="modal-icon error-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Gagal</h3>
+            <p class="modal-message" id="error-message"></p>
+            <div class="modal-actions">
+                <button id="close-error-modal" class="btn btn-error">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-card {
+            background: #fff; border-radius: 20px; padding: 40px 32px 28px;
+            width: 400px; max-width: 90vw; text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-icon { margin-bottom: 16px; }
+        .modal-title {
+            font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 8px;
+        }
+        .modal-message {
+            font-size: 15px; color: #64748b; margin: 0 0 24px; line-height: 1.5;
+        }
+        .modal-actions { display: flex; justify-content: center; gap: 12px; }
+        .modal-actions .btn {
+            padding: 10px 36px; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff; box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.4); }
+        .btn-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff; box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+        }
+        .btn-error:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.4); }
+        .success-icon svg { filter: drop-shadow(0 4px 8px rgba(16,185,129,0.3)); }
+        .error-icon svg { filter: drop-shadow(0 4px 8px rgba(220,38,38,0.3)); }
+    </style>
 </body>
 </html>

@@ -12,6 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         :root {
             --sidebar-width: 280px;
@@ -521,8 +524,20 @@
 
         .filter-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .filter-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
         }
 
         .filter-group {
@@ -1343,6 +1358,59 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ─── Select2 Custom Styling ─── */
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            background-color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #334155;
+            padding-left: 36px; /* Space for the icon */
+            padding-right: 12px;
+            line-height: normal;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            right: 4px;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        .select2-dropdown {
+            border-color: #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--primary);
+            color: white;
+        }
+        .select2-container--default .select2-results__option {
+            padding: 8px 12px;
+            color: #334155;
+        }
     </style>
 </head>
 
@@ -1444,11 +1512,12 @@
                                     !request('search') &&
                                     !request('no_rawat') &&
                                     !request('person') &&
+                                    !request('bangsal') &&
                                     request('start_date') === now()->toDateString() &&
                                     request('end_date') === now()->toDateString();
                                 $activeFilters = count(
                                     array_filter(
-                                        request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']),
+                                        request()->only(['search', 'no_rawat', 'person', 'bangsal', 'start_date', 'end_date']),
                                     ),
                                 );
                             @endphp
@@ -1468,7 +1537,7 @@
                     </div>
                 </div>
 
-                <form action="{{ route('edukasi-pasien.history') }}" method="GET">
+                <form id="filterForm" action="{{ route('edukasi-pasien.history') }}" method="GET">
                     <div class="filter-body">
                         <div class="filter-form">
                             <div class="filter-group">
@@ -1524,6 +1593,30 @@
                                     </svg>
                                     <input type="text" name="person" value="{{ request('person') }}"
                                         class="filter-input" placeholder="Cari nama PJ atau Petugas">
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        style="width:14px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    Kamar / Bangsal
+                                </label>
+                                <div class="filter-input-wrapper">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: #94A3B8; z-index: 1;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <select name="bangsal" class="filter-input select2-bangsal" style="width: 100%;">
+                                        <option value="">Semua Kamar / Bangsal</option>
+                                        <option value="IGD" {{ request('bangsal') === 'IGD' ? 'selected' : '' }}>IGD (Instalasi Gawat Darurat)</option>
+                                        @foreach($bangsals as $b)
+                                            <option value="{{ $b->kd_bangsal }}" {{ request('bangsal') == $b->kd_bangsal ? 'selected' : '' }}>
+                                                {{ $b->nm_bangsal }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
 
@@ -1682,7 +1775,7 @@
                                                     'tgl_periksa' => $assessment->tanggal_edukasi,
                                                     'nama_pj' => $assessment->nama_penerima_info,
                                                     'hubungan' => $assessment->hubungan_dgn_pasien,
-                                                    'signature' => $assessment->ttd_pasien_wali ? asset('storage/' . $assessment->ttd_pasien_wali) : null,
+                                                    'signature' => $assessment->ttd_pasien_wali ? route('edukasi-pasien.signature', ['filename' => $assessment->ttd_pasien_wali]) : null,
                                                 ]) }})">
                                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1843,7 +1936,36 @@
         </div>
     </div>
 
+    @include('edukasi_pasien.modals')
+
     <script>
+        // ─── Filter Form Validation ───
+        function showError(msg) {
+            document.getElementById('error-modal-message').innerHTML = msg;
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        function hideError() {
+            document.getElementById('error-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-error-modal').addEventListener('click', hideError);
+        document.getElementById('btn-close-error').addEventListener('click', hideError);
+
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            const search = this.search.value.trim();
+            const noRawat = this.no_rawat.value.trim();
+            const person = this.person.value.trim();
+            const bangsal = this.bangsal ? this.bangsal.value.trim() : '';
+            const startDate = this.start_date.value.trim();
+            const endDate = this.end_date.value.trim();
+
+            if (!search && !noRawat && !person && !bangsal && !startDate && !endDate) {
+                e.preventDefault();
+                showError('Silakan isi minimal salah satu filter (Identitas, No. Rawat, Petugas, Bangsal, atau Periode) sebelum menekan tombol Terapkan Filter.');
+            }
+        });
+
         // ─── Detail Modal ───
         function openDetailModal(data) {
             document.getElementById('modalNoSurat').textContent = data.no_rawat;
@@ -1947,6 +2069,26 @@
                 fetchIp();
             }
         }
+    </script>
+
+    <!-- jQuery and Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2-bangsal').select2({
+                placeholder: "Semua Kamar / Bangsal",
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Fix search focus on Select2 dropdown
+            $('.select2-bangsal').on('select2:open', function() {
+                setTimeout(function() {
+                    document.querySelector('.select2-container--open .select2-search__field').focus();
+                }, 10);
+            });
+        });
     </script>
 </body>
 

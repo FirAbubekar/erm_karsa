@@ -56,7 +56,7 @@
                         </div>
                         <div class="search-container">
                             <input type="text" id="search-no-rm" class="form-control"
-                                placeholder="Masukkan No. Rekam Medis..." style="width:100%">
+                                placeholder="Masukkan No. Rekam Medis..." style="width:100%" oninput="var v=this.value.replace(/[^0-9\/]/g,'');var s=v.split('/');while(s.length>4)s.pop();this.value=s.join('/').slice(0,17)">
                             <button class="btn btn-primary" id="btn-search" style="white-space:nowrap">Cari</button>
                         </div>
                         <div class="table-scroll-wrapper">
@@ -215,7 +215,6 @@
                                 <label><input type="radio" name="pendidikan" value="SD"> SD</label>
                                 <label><input type="radio" name="pendidikan" value="SLTP"> SLTP</label>
                                 <label><input type="radio" name="pendidikan" value="SLTA"> SLTA</label>
-                                <label><input type="radio" name="pendidikan" value="PT"> PT</label>
                                 <label><input type="radio" name="pendidikan" value="Lain-lain"
                                         data-toggle-other-radio="pendidikan-lainnya"> Lain-lain</label>
                             </div>
@@ -578,7 +577,7 @@
                 });
 
                 // Hide specific action buttons explicitly
-                const actionBtns = document.querySelectorAll('#btn-save-edukasi, #btn-add-topik');
+                const actionBtns = document.querySelectorAll('#btn-save-edukasi');
                 actionBtns.forEach(btn => {
                     if (btn) btn.style.display = 'none';
                 });

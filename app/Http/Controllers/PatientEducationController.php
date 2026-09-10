@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\PatientEducationAssessment;
 use App\Models\PatientEducationImplementation;
 use App\Models\Pegawai;
+use App\Models\Bangsal;
 
 class PatientEducationController extends Controller
 {
@@ -60,7 +61,7 @@ class PatientEducationController extends Controller
             [
                 'kode'      => 'TE_INFORMED_CONSENT',
                 'no_urut'   => 4,
-                'poli_unit' => 'Pendaftaran',
+                'poli_unit' => 'Rawat Inap',
                 'topik'     => 'Proses Pemberian Informed Consent (sebutkan)',
                 'is_custom' => false,
             ],
@@ -260,12 +261,12 @@ class PatientEducationController extends Controller
                     $filename = 'TTD_ASSESSMENT_' . time() . '.png';
                     $newSignaturePath = "{$directory}/{$filename}";
 
-                    Storage::disk('public')->put($newSignaturePath, $imageBinary);
-                    
+                    Storage::disk('local')->put($newSignaturePath, $imageBinary);
+
                     // Hapus file lama jika ada
                     if ($existing && $existing->ttd_pasien_wali && $existing->ttd_pasien_wali !== $newSignaturePath) {
-                        if (Storage::disk('public')->exists($existing->ttd_pasien_wali)) {
-                            Storage::disk('public')->delete($existing->ttd_pasien_wali);
+                        if (Storage::disk('local')->exists($existing->ttd_pasien_wali)) {
+                            Storage::disk('local')->delete($existing->ttd_pasien_wali);
                         }
                     }
                     $signaturePath = $newSignaturePath;
@@ -374,14 +375,14 @@ class PatientEducationController extends Controller
                         $imgData = str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->ttd_pasien);
                         $filename = 'TTD_PASIEN_' . $request->kode_topik . '_' . time() . '.png';
                         $newTtdPath = "{$directory}/{$filename}";
-                        Storage::disk('public')->put($newTtdPath, base64_decode($imgData));
-                    } elseif (str_starts_with($request->ttd_pasien, '/storage/')) {
+                        Storage::disk('local')->put($newTtdPath, base64_decode($imgData));
+                    } elseif (str_starts_with($request->ttd_pasien, '/edukasi-pasien/signature/')) {
                         // Salin file fisik dari Bagian B
-                        $sourcePath = str_replace('/storage/', '', $request->ttd_pasien);
-                        if (Storage::disk('public')->exists($sourcePath)) {
+                        $sourcePath = str_replace('/edukasi-pasien/signature/', '', $request->ttd_pasien);
+                        if (Storage::disk('local')->exists($sourcePath)) {
                             $filename = 'TTD_PASIEN_' . $request->kode_topik . '_COPIED_' . time() . '.png';
                             $newTtdPath = "{$directory}/{$filename}";
-                            Storage::disk('public')->copy($sourcePath, $newTtdPath);
+                            Storage::disk('local')->copy($sourcePath, $newTtdPath);
                         } else {
                             $newTtdPath = $sourcePath;
                         }
@@ -391,8 +392,8 @@ class PatientEducationController extends Controller
 
                     // Hapus file lama jika ada dan berbeda dengan yang baru
                     if ($newTtdPath && $existing && $existing->ttd_pasien && $existing->ttd_pasien !== $newTtdPath) {
-                        if (Storage::disk('public')->exists($existing->ttd_pasien)) {
-                            Storage::disk('public')->delete($existing->ttd_pasien);
+                        if (Storage::disk('local')->exists($existing->ttd_pasien)) {
+                            Storage::disk('local')->delete($existing->ttd_pasien);
                         }
                     }
                     $ttdPasienPath = $newTtdPath;
@@ -421,7 +422,7 @@ class PatientEducationController extends Controller
                         'tgl_reedukasi'     => $request->tgl_reedukasi,
                         'tgl_akhir_edukasi' => $request->tgl_akhir_edukasi,
                         'created_at'        => $request->tgl_edukasi ?? now(),
-                        'nama_penerima_info'=> $request->nama_penerima_info,
+                        'nama_penerima_info' => $request->nama_penerima_info,
                     ]
                 );
 
@@ -449,18 +450,67 @@ class PatientEducationController extends Controller
             }
         });
     }
+
+    /**
+     * Hapus baris pelaksanaan (implementation)
+     */
+    public function deleteImplementation(Request $request)
+    {
+        $request->validate([
+            'no_rawat' => 'required|string',
+            'kode_topik' => 'required|string',
+        ]);
+
+        try {
+            $assessment = PatientEducationAssessment::where('no_rawat', $request->no_rawat)->first();
+            if (!$assessment) {
+                return response()->json(['success' => false, 'error' => 'Data asesmen tidak ditemukan.'], 404);
+            }
+
+            $impl = PatientEducationImplementation::where('assessment_id', $assessment->id_uuid)
+                ->where('kode_topik', $request->kode_topik)
+                ->first();
+
+            if ($impl) {
+                // Hapus TTD jika ada
+                if ($impl->ttd_pasien && Storage::disk('local')->exists($impl->ttd_pasien)) {
+                    Storage::disk('local')->delete($impl->ttd_pasien);
+                }
+
+                $impl->delete();
+                PatientEducationImplementation::logActivity($impl, 'DELETE');
+                
+                try {
+                    $pdfService = app(\App\Services\PdfService::class);
+                    $pdfService->generateAndSaveEdukasiPasien($assessment);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Gagal generate PDF edukasi pasien saat delete implementation: " . $e->getMessage());
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pelaksanaan berhasil dihapus!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal menghapus: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * Tampilkan halaman riwayat edukasi pasien
      */
     public function history(Request $request)
     {
-        $query = PatientEducationAssessment::with('regPeriksa.pasien')
+        $query = PatientEducationAssessment::with(['regPeriksa.pasien', 'regPeriksa.signaturePasien'])
             ->select('patient_education_assessments.*');
 
-        $hasFilters = $request->filled('search') || $request->filled('no_rawat') || 
-                      $request->filled('person') || $request->filled('start_date') || 
-                      $request->filled('end_date');
-        
+        $hasFilters = $request->filled('search') || $request->filled('no_rawat') ||
+            $request->filled('person') || $request->filled('bangsal') || $request->filled('start_date') ||
+            $request->filled('end_date');
+
         if (!$hasFilters) {
             $today = now()->toDateString();
             $request->merge(['start_date' => $today, 'end_date' => $today]);
@@ -468,10 +518,10 @@ class PatientEducationController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->whereHas('regPeriksa.pasien', function($qp) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('regPeriksa.pasien', function ($qp) use ($search) {
                     $qp->where('nm_pasien', 'like', "%$search%")
-                       ->orWhere('no_rkm_medis', 'like', "%$search%");
+                        ->orWhere('no_rkm_medis', 'like', "%$search%");
                 });
             });
         }
@@ -483,6 +533,37 @@ class PatientEducationController extends Controller
         if ($request->filled('person')) {
             $person = $request->person;
             $query->where('patient_education_assessments.nama_penerima_info', 'like', "%$person%");
+        }
+
+        if ($request->filled('bangsal')) {
+            $bangsalId = $request->bangsal;
+            if ($bangsalId === 'IGD') {
+                $query->whereIn('patient_education_assessments.no_rawat', function ($q) {
+                    $q->select('no_rawat')->from('reg_periksa')
+                      ->where('kd_poli', 'IGDK')
+                      ->where('status_lanjut', 'Ralan');
+                });
+            } else {
+                $query->whereIn('patient_education_assessments.no_rawat', function ($q) use ($bangsalId) {
+                    $q->select('ki1.no_rawat')
+                        ->from('kamar_inap as ki1')
+                        ->whereIn('ki1.kd_kamar', function ($q2) use ($bangsalId) {
+                            $q2->select('kd_kamar')->from('kamar')->where('kd_bangsal', $bangsalId);
+                        })
+                        ->whereNotExists(function ($q3) {
+                            $q3->selectRaw('1')
+                                ->from('kamar_inap as ki2')
+                                ->whereColumn('ki1.no_rawat', 'ki2.no_rawat')
+                                ->where(function ($q4) {
+                                    $q4->whereColumn('ki2.tgl_masuk', '>', 'ki1.tgl_masuk')
+                                        ->orWhere(function ($q5) {
+                                            $q5->whereColumn('ki2.tgl_masuk', '=', 'ki1.tgl_masuk')
+                                                ->whereColumn('ki2.jam_masuk', '>', 'ki1.jam_masuk');
+                                        });
+                                });
+                        });
+                });
+            }
         }
 
         if ($request->filled('start_date')) {
@@ -501,41 +582,43 @@ class PatientEducationController extends Controller
             'total' => PatientEducationAssessment::count(),
             'today' => PatientEducationAssessment::whereDate('tanggal_edukasi', now()->toDateString())->count(),
             'month' => PatientEducationAssessment::whereMonth('tanggal_edukasi', now()->month)
-                                                 ->whereYear('tanggal_edukasi', now()->year)->count(),
+                ->whereYear('tanggal_edukasi', now()->year)->count(),
         ];
 
-        return view('edukasi_pasien.history', compact('assessments', 'stats'));
+        $bangsals = Bangsal::where('status', '1')->orderBy('nm_bangsal', 'ASC')->get();
+
+        return view('edukasi_pasien.history', compact('assessments', 'stats', 'bangsals'));
     }
 
     /**
      * Download laporan PDF riwayat edukasi pasien
      */
-        public function downloadPDF(Request $request, $id_uuid)
+    public function downloadPDF(Request $request, $id_uuid)
     {
         $assessment = PatientEducationAssessment::with(['regPeriksa.pasien'])
             ->where('id_uuid', $id_uuid)
             ->firstOrFail();
-            
+
         $implementations = PatientEducationImplementation::where('assessment_id', $assessment->id_uuid)
             ->orderBy('no_urut')
             ->get();
 
         $topikEdukasi = [
-            [ 'kode' => 'TE_HAK_PARTISIPASI', 'poli_unit' => 'Pendaftaran', 'topik' => "Hak untuk Berpartisipasi Pada Proses Pelayanan", 'is_custom' => false ],
-            [ 'kode' => 'TE_KONDISI', 'poli_unit' => 'Dokter', 'topik' => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa", 'is_custom' => false ],
-            [ 'kode' => 'TE_PROSEDUR_PENUNJANG', 'poli_unit' => 'Rawat Inap', 'topik' => 'Prosedur Pemeriksaan Penunjang (sebutkan)', 'is_custom' => false ],
-            [ 'kode' => 'TE_INFORMED_CONSENT', 'poli_unit' => 'Pendaftaran', 'topik' => 'Proses Pemberian Informed Consent (sebutkan)', 'is_custom' => false ],
-            [ 'kode' => 'TE_DIET_NUTRISI', 'poli_unit' => 'Gizi', 'topik' => 'Diet dan Nutrisi (sebutkan)', 'is_custom' => false ],
-            [ 'kode' => 'TE_OBAT', 'poli_unit' => 'Farmasi', 'topik' => "1. Manfaat Obat yang Diberikan\n2. Efek Samping Obat-obatan yang Diberi\n3. Interaksi Obat dan Makanan", 'is_custom' => false ],
-            [ 'kode' => 'TE_ALAT_MEDIS', 'poli_unit' => 'Rawat Inap', 'topik' => 'Penggunaan Alat Medis yang Aman (Sebutkan)', 'is_custom' => false ],
-            [ 'kode' => 'TE_MANAJEMEN_NYERI', 'poli_unit' => 'Rawat Inap', 'topik' => 'Manajemen Nyeri', 'is_custom' => false ],
-            [ 'kode' => 'TE_REHABILITASI', 'poli_unit' => 'Rawat Inap', 'topik' => 'Teknik Rehabilitasi', 'is_custom' => false ],
-            [ 'kode' => 'TE_CUCI_TANGAN', 'poli_unit' => 'Rawat Inap', 'topik' => 'Cuci Tangan yang Benar', 'is_custom' => false ],
-            [ 'kode' => 'TE_BAHAYA_ROKOK', 'poli_unit' => 'Rawat Inap', 'topik' => 'Bahaya Merokok', 'is_custom' => false ],
-            [ 'kode' => 'TE_EDUKASI_PULANG', 'poli_unit' => 'Rawat Inap', 'topik' => 'Edukasi Pasien Pulang', 'is_custom' => false ],
-            [ 'kode' => 'TE_RUJUKAN', 'poli_unit' => 'Rawat Inap', 'topik' => 'Rujukan Internal', 'is_custom' => false ],
-            [ 'kode' => 'TE_EDUKASI_UMUM', 'poli_unit' => 'Pendaftaran', 'topik' => "Edukasi Pasien Umum\nBersedia membayar seluruh biaya perawatan pada kelas perawatan dari awal sampai selesai perawatan.\nTelah diberikan edukasi oleh petugas pendaftaran.\nMenandatangani tanpa paksaan dengan kesadaran penuh.", 'is_custom' => false ],
-            [ 'kode' => 'TE_SESUAI_KEBUTUHAN', 'poli_unit' => '', 'topik' => 'Edukasi Sesuai Kebutuhan Pasien, sesuai PPA yang merawat', 'is_custom' => false ],
+            ['kode' => 'TE_HAK_PARTISIPASI', 'poli_unit' => 'Pendaftaran', 'topik' => "Hak untuk Berpartisipasi Pada Proses Pelayanan", 'is_custom' => false],
+            ['kode' => 'TE_KONDISI', 'poli_unit' => 'Dokter', 'topik' => "1. Diagnosis\n2. Tanda dan Gejala Penyakit\n3. Penatalaksanaan/ Terapi\n4. Komplikasi yang mungkin terjadi\n5. Prognosa", 'is_custom' => false],
+            ['kode' => 'TE_PROSEDUR_PENUNJANG', 'poli_unit' => 'Rawat Inap', 'topik' => 'Prosedur Pemeriksaan Penunjang (sebutkan)', 'is_custom' => false],
+            ['kode' => 'TE_INFORMED_CONSENT', 'poli_unit' => 'Pendaftaran', 'topik' => 'Proses Pemberian Informed Consent (sebutkan)', 'is_custom' => false],
+            ['kode' => 'TE_DIET_NUTRISI', 'poli_unit' => 'Gizi', 'topik' => 'Diet dan Nutrisi (sebutkan)', 'is_custom' => false],
+            ['kode' => 'TE_OBAT', 'poli_unit' => 'Farmasi', 'topik' => "1. Manfaat Obat yang Diberikan\n2. Efek Samping Obat-obatan yang Diberi\n3. Interaksi Obat dan Makanan", 'is_custom' => false],
+            ['kode' => 'TE_ALAT_MEDIS', 'poli_unit' => 'Rawat Inap', 'topik' => 'Penggunaan Alat Medis yang Aman (Sebutkan)', 'is_custom' => false],
+            ['kode' => 'TE_MANAJEMEN_NYERI', 'poli_unit' => 'Rawat Inap', 'topik' => 'Manajemen Nyeri', 'is_custom' => false],
+            ['kode' => 'TE_REHABILITASI', 'poli_unit' => 'Rawat Inap', 'topik' => 'Teknik Rehabilitasi', 'is_custom' => false],
+            ['kode' => 'TE_CUCI_TANGAN', 'poli_unit' => 'Rawat Inap', 'topik' => 'Cuci Tangan yang Benar', 'is_custom' => false],
+            ['kode' => 'TE_BAHAYA_ROKOK', 'poli_unit' => 'Rawat Inap', 'topik' => 'Bahaya Merokok', 'is_custom' => false],
+            ['kode' => 'TE_EDUKASI_PULANG', 'poli_unit' => 'Rawat Inap', 'topik' => 'Edukasi Pasien Pulang', 'is_custom' => false],
+            ['kode' => 'TE_RUJUKAN', 'poli_unit' => 'Rawat Inap', 'topik' => 'Rujukan Internal', 'is_custom' => false],
+            ['kode' => 'TE_EDUKASI_UMUM', 'poli_unit' => 'Pendaftaran', 'topik' => "Edukasi Pasien Umum\nBersedia membayar seluruh biaya perawatan pada kelas perawatan dari awal sampai selesai perawatan.\nTelah diberikan edukasi oleh petugas pendaftaran.\nMenandatangani tanpa paksaan dengan kesadaran penuh.", 'is_custom' => false],
+            ['kode' => 'TE_SESUAI_KEBUTUHAN', 'poli_unit' => '', 'topik' => 'Edukasi Sesuai Kebutuhan Pasien, sesuai PPA yang merawat', 'is_custom' => false],
         ];
 
         $mergedImplementations = [];
@@ -578,16 +661,28 @@ class PatientEducationController extends Controller
             'lng' => $request->query('lng', '-'),
             'downloaded_at' => now()->format('d/m/Y H:i:s'),
         ];
-        
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::setOption('isPhpEnabled', true)->loadView('edukasi_pasien.pdf', [
-            'assessment' => $assessment, 
-            'implementations' => $mergedImplementations, 
+            'assessment' => $assessment,
+            'implementations' => $mergedImplementations,
             'deviceInfo' => $deviceInfo
         ]);
-        
+
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream();
         // return $pdf->download('Edukasi_Pasien_' . str_replace('/', '_', $assessment->no_rawat) . '.pdf');
+    }
+
+    /**
+     * Tampilkan Tanda Tangan dari storage private
+     */
+    public function showSignature($filename)
+    {
+        $path = storage_path('app/private/' . $filename);
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        return response()->file($path);
     }
 }

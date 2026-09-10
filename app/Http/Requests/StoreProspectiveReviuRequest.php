@@ -100,7 +100,7 @@ class StoreProspectiveReviuRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json([
             'success' => false,
-            'error' => implode('<br>', $validator->errors()->all())
+            'errors' => $validator->errors()
         ], 422));
     }
 }

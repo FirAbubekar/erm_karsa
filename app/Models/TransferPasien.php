@@ -75,6 +75,11 @@ class TransferPasien extends Model
         return $this->belongsTo(Pegawai::class, 'nip_menerima', 'nik');
     }
 
+    public function regPeriksa()
+    {
+        return $this->belongsTo(RegPeriksa::class, 'no_rawat', 'no_rawat');
+    }
+
     public function scopeDateBetween($query, $start, $end)
     {
         return $query->whereBetween('tanggal_pindah', [$start, $end]);
