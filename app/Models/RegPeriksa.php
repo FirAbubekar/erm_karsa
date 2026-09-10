@@ -29,6 +29,6 @@ class RegPeriksa extends Model
 
     public function suratPersetujuanRawatInap()
     {
-        return $this->hasOne(SuratPersetujuanRawatInap::class, 'no_rawat', 'no_rawat');
+        return $this->hasOne(SuratPersetujuanRawatInap::class, 'no_rawat', 'no_rawat')->latestOfMany('no_surat');
     }
 }

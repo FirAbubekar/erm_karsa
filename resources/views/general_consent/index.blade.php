@@ -1548,9 +1548,10 @@
                                         </a>
                                         <button
                                             class="btn-action btn-pdf"
-                                            onclick="downloadPDF('{{ route('general-consent.download', $consent->no_surat) }}')"
+                                            onclick="openPdfPreviewModal('{{ $consent->no_surat }}')"
+                                            title="Lihat / Unduh Bentuk PDF"
                                         >
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             PDF
                                         </button>
                                         <button
@@ -1689,8 +1690,45 @@
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <button class="btn-close-modal" onclick="closeDetailModal()">Tutup</button>
+            <div class="modal-footer" style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-action btn-pdf" id="modalBtnPdf" onclick="" style="padding: 10px 20px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat PDF
+                </button>
+                <button class="btn-close-modal" onclick="closeDetailModal()" style="margin-left: auto;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- PDF PREVIEW MODAL --}}
+    <div class="modal-overlay" id="pdfPreviewModal" style="z-index: 1060; padding: 16px; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);">
+        <div class="modal-content" style="max-width: 950px; width: 95%; height: 90vh; display: flex; flex-direction: column; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); margin: auto;">
+            <div style="padding: 14px 20px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; color: #3B82F6; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1E293B;">Pratinjau General Consent (Persetujuan Umum)</h4>
+                        <span id="previewNoSuratBadge" style="font-size: 12px; color: #64748B; font-family: monospace;">-</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a id="btnPreviewNewTab" href="#" target="_blank" class="btn" style="background: #F1F5F9; color: #475569; padding: 7px 12px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Tab Baru
+                    </a>
+                    <a id="btnPreviewDownload" href="#" class="btn" style="background: #10B981; color: white; padding: 7px 14px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Unduh PDF
+                    </a>
+                    <button type="button" onclick="closePdfPreviewModal()" style="background: none; border: none; color: #94A3B8; cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div style="flex: 1; position: relative; background: #525659;">
+                <iframe id="pdfPreviewIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </div>
@@ -1794,6 +1832,14 @@
                 emptyEl.style.display = 'block';
             }
 
+            // Bind action buttons in the detail modal dynamically
+            const modalBtnPdf = document.getElementById('modalBtnPdf');
+            if (modalBtnPdf) {
+                modalBtnPdf.onclick = function() {
+                    openPdfPreviewModal(data.no_surat);
+                };
+            }
+
             document.getElementById('detailModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1803,14 +1849,52 @@
             document.body.style.overflow = '';
         }
 
+        // ─── PDF Preview Modal ───
+        function openPdfPreviewModal(noSurat) {
+            if (!noSurat) return;
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            const badge = document.getElementById('previewNoSuratBadge');
+            const btnNewTab = document.getElementById('btnPreviewNewTab');
+            const btnDownload = document.getElementById('btnPreviewDownload');
+
+            const inlineUrl = `/general-consent/download/${encodeURIComponent(noSurat)}`;
+            const downloadUrl = `/general-consent/download/${encodeURIComponent(noSurat)}?download=1`;
+
+            badge.textContent = noSurat;
+            iframe.src = inlineUrl;
+            btnNewTab.href = inlineUrl;
+            btnDownload.href = downloadUrl;
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePdfPreviewModal() {
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            if (iframe) iframe.src = '';
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        window.openPdfPreviewModal = openPdfPreviewModal;
+        window.closePdfPreviewModal = closePdfPreviewModal;
+
         // Close on overlay click
         document.getElementById('detailModal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeDetailModal();
         });
+        document.getElementById('pdfPreviewModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closePdfPreviewModal();
+        });
 
         // Close on Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDetailModal();
+            if (e.key === 'Escape') {
+                closeDetailModal();
+                if (typeof closeWaModal === 'function') closeWaModal();
+                closePdfPreviewModal();
+            }
         });
 
         // ─── Client-side table search ───
