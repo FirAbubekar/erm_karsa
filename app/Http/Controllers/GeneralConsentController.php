@@ -421,29 +421,50 @@ class GeneralConsentController extends Controller
         // Regenerate and upload latest PDF layout
         $this->pdfService->generateAndSave($consent);
 
-        if ($request->has('stream')) {
-            $consent->load(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
-            $pelepasanInformasi = PelepasanInformasi::where('no_surat', $consent->no_surat)->get();
-            if ($pelepasanInformasi->isEmpty() && isset($consent->regPeriksa->pasien->no_rkm_medis)) {
-                $pelepasanInformasi = PelepasanInformasi::where('no_rekamedis', $consent->regPeriksa->pasien->no_rkm_medis)
-                    ->where('status', 'aktif')
-                    ->get();
-            }
-            $deviceInfo = [
-                'ip' => request()->ip(),
-                'lat' => '-',
-                'lng' => '-',
-                'downloaded_at' => now()->format('d/m/Y H:i:s'),
-            ];
-            $pdf = Pdf::loadView('general_consent.pdf', compact('consent', 'pelepasanInformasi', 'deviceInfo'));
-            $pdf->setPaper('a4', 'portrait');
-            return $pdf->stream(str_replace('/', '_', $consent->no_surat) . '.pdf');
-        }
-
         $safeNoSurat = str_replace('/', '_', $consent->no_surat);
         $namaFile = $safeNoSurat . '.pdf';
+        $remoteUrl = 'http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile;
 
-        return redirect('http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile);
+        $isDownload = $request->boolean('download') || $request->get('action') === 'download';
+        $disposition = $isDownload ? 'attachment' : 'inline';
+
+        try {
+            // Fetch PDF from remote server .24
+            $response = \Illuminate\Support\Facades\Http::get($remoteUrl);
+            
+            if ($response->successful()) {
+                $fileContent = $response->body();
+                return response($fileContent, 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => $disposition . '; filename="General_Consent_' . $namaFile . '"',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal mendownload PDF General Consent dari remote server .24: " . $e->getMessage());
+        }
+
+        // Fallback: If remote fetch fails or file not found, compile it locally as a backup
+        $consent->load(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
+        $pelepasanInformasi = PelepasanInformasi::where('no_surat', $consent->no_surat)->get();
+        if ($pelepasanInformasi->isEmpty() && isset($consent->regPeriksa->pasien->no_rkm_medis)) {
+            $pelepasanInformasi = PelepasanInformasi::where('no_rekamedis', $consent->regPeriksa->pasien->no_rkm_medis)
+                ->where('status', 'aktif')
+                ->get();
+        }
+        $deviceInfo = [
+            'ip' => $request->ip(),
+            'lat' => $request->input('lat') ?? $request->query('lat') ?? '-',
+            'lng' => $request->input('lng') ?? $request->query('lng') ?? '-',
+            'downloaded_at' => now()->format('d/m/Y H:i:s'),
+        ];
+        $pdf = Pdf::loadView('general_consent.pdf', compact('consent', 'pelepasanInformasi', 'deviceInfo'));
+        $pdf->setPaper('a4', 'portrait');
+
+        if ($isDownload) {
+            return $pdf->download('General_Consent_' . $namaFile);
+        }
+
+        return $pdf->stream('General_Consent_' . $namaFile);
     }
 
     public function getPelepasanInformasi($no_surat)
