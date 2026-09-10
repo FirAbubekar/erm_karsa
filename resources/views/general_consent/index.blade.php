@@ -877,16 +877,18 @@
         }
 
         .btn-edit {
-            background: rgba(59, 130, 246, 0.08);
-            color: var(--accent-blue);
-            border: 1px solid rgba(59, 130, 246, 0.15);
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-edit:hover {
-            background: var(--accent-blue);
+            background: var(--accent);
             color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+            border-color: var(--accent);
         }
 
         .btn-pdf {
@@ -1352,9 +1354,11 @@
                         <div class="filter-title">
                             Pencarian Lanjutan
                             @php 
+                                $sd = request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->toDateString() : null;
+                                $ed = request('end_date') ? \Carbon\Carbon::parse(request('end_date'))->toDateString() : null;
                                 $isDefaultToday = !request('search') && !request('no_rawat') && !request('person') && 
-                                                 request('start_date') === now()->toDateString() && 
-                                                 request('end_date') === now()->toDateString();
+                                                 $sd === now()->toDateString() && 
+                                                 $ed === now()->toDateString();
                                 $activeFilters = count(array_filter(request()->only(['search', 'no_rawat', 'person', 'start_date', 'end_date']))); 
                             @endphp
                             @if($isDefaultToday)
@@ -1414,13 +1418,13 @@
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"/></svg>
                                     Periode Pemeriksaan
                                 </label>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="filter-input" style="padding-left: 14px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="filter-input-wrapper" style="flex:1;">
+                                        <input type="date" name="start_date" id="dt-start" value="{{ request('start_date', date('Y-m-d')) }}" class="filter-input" style="padding-left:14px;">
                                     </div>
-                                    <span style="color: #94A3B8; font-size: 11px; font-weight: 700;">s/d</span>
-                                    <div class="filter-input-wrapper" style="flex: 1;">
-                                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="filter-input" style="padding-left: 14px;">
+                                    <span style="color:var(--text-muted);font-size:11px;font-weight:700;flex-shrink:0;">s/d</span>
+                                    <div class="filter-input-wrapper" style="flex:1;">
+                                        <input type="date" name="end_date" id="dt-end" value="{{ request('end_date', date('Y-m-d')) }}" class="filter-input" style="padding-left:14px;">
                                     </div>
                                 </div>
                             </div>
@@ -1544,14 +1548,15 @@
                                         </a>
                                         <button
                                             class="btn-action btn-pdf"
-                                            onclick="downloadPDF('{{ route('general-consent.download', $consent->no_surat) }}')"
+                                            onclick="openPdfPreviewModal('{{ $consent->no_surat }}')"
+                                            title="Lihat / Unduh Bentuk PDF"
                                         >
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             PDF
                                         </button>
                                         <button
                                             class="btn-action btn-wa"
-                                            onclick="sendWA('{{ $consent->no_surat }}', this, event)"
+                                            onclick="openWaModal('{{ $consent->no_surat }}', this, event)"
                                         >
                                             <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                                             WA
@@ -1685,8 +1690,79 @@
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <button class="btn-close-modal" onclick="closeDetailModal()">Tutup</button>
+            <div class="modal-footer" style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-action btn-pdf" id="modalBtnPdf" onclick="" style="padding: 10px 20px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; flex-shrink: 0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat PDF
+                </button>
+                <button class="btn-close-modal" onclick="closeDetailModal()" style="margin-left: auto;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- PDF PREVIEW MODAL --}}
+    <div class="modal-overlay" id="pdfPreviewModal" style="z-index: 1060; padding: 16px; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);">
+        <div class="modal-content" style="max-width: 950px; width: 95%; height: 90vh; display: flex; flex-direction: column; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); margin: auto;">
+            <div style="padding: 14px 20px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; color: #3B82F6; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1E293B;">Pratinjau General Consent (Persetujuan Umum)</h4>
+                        <span id="previewNoSuratBadge" style="font-size: 12px; color: #64748B; font-family: monospace;">-</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a id="btnPreviewNewTab" href="#" target="_blank" class="btn" style="background: #F1F5F9; color: #475569; padding: 7px 12px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Tab Baru
+                    </a>
+                    <a id="btnPreviewDownload" href="#" class="btn" style="background: #10B981; color: white; padding: 7px 14px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Unduh PDF
+                    </a>
+                    <button type="button" onclick="closePdfPreviewModal()" style="background: none; border: none; color: #94A3B8; cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div style="flex: 1; position: relative; background: #525659;">
+                <iframe id="pdfPreviewIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── WA Modal ─── -->
+    <div class="modal-overlay" id="waModal">
+        <div class="modal-panel" style="max-width:560px;">
+            <div class="modal-top">
+                <div>
+                    <h3>Kirim WhatsApp</h3>
+                    <p>Edit pesan sebelum dikirim ke nomor Penanggung Jawab</p>
+                </div>
+                <button class="modal-close" onclick="closeWaModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;">
+                <div style="margin-bottom:16px;padding:12px 16px;background:#F0FDF4;border-radius:12px;border:1px solid rgba(37,211,102,0.2);display:flex;align-items:center;gap:10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    <span style="font-size:13px;font-weight:500;color:#166534;" id="waTargetInfo">Mengirim ke nomor Penanggung Jawab</span>
+                </div>
+                <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">Pesan WhatsApp</label>
+                <textarea id="waMessageText" rows="8" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);resize:vertical;outline:none;line-height:1.6;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor=''"></textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+                    <span style="font-size:11px;color:var(--text-muted);" id="waCharCount">0 karakter</span>
+                    <span style="font-size:11px;color:var(--text-muted);" id="waNoSuratInfo"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:flex-end;gap:8px;padding:16px 24px;">
+                <button class="btn-close-modal" onclick="closeWaModal()" style="background:var(--bg-main);color:var(--text-secondary);border:1.5px solid var(--border);padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Batal</button>
+                <button id="waSendBtn" onclick="confirmSendWA()" style="background:#25D366;color:white;border:none;padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(37,211,102,0.3)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='';this.style.transform=''">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    Kirim WhatsApp
+                </button>
             </div>
         </div>
     </div>
@@ -1756,6 +1832,14 @@
                 emptyEl.style.display = 'block';
             }
 
+            // Bind action buttons in the detail modal dynamically
+            const modalBtnPdf = document.getElementById('modalBtnPdf');
+            if (modalBtnPdf) {
+                modalBtnPdf.onclick = function() {
+                    openPdfPreviewModal(data.no_surat);
+                };
+            }
+
             document.getElementById('detailModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1765,14 +1849,52 @@
             document.body.style.overflow = '';
         }
 
+        // ─── PDF Preview Modal ───
+        function openPdfPreviewModal(noSurat) {
+            if (!noSurat) return;
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            const badge = document.getElementById('previewNoSuratBadge');
+            const btnNewTab = document.getElementById('btnPreviewNewTab');
+            const btnDownload = document.getElementById('btnPreviewDownload');
+
+            const inlineUrl = `/general-consent/download/${encodeURIComponent(noSurat)}`;
+            const downloadUrl = `/general-consent/download/${encodeURIComponent(noSurat)}?download=1`;
+
+            badge.textContent = noSurat;
+            iframe.src = inlineUrl;
+            btnNewTab.href = inlineUrl;
+            btnDownload.href = downloadUrl;
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePdfPreviewModal() {
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            if (iframe) iframe.src = '';
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        window.openPdfPreviewModal = openPdfPreviewModal;
+        window.closePdfPreviewModal = closePdfPreviewModal;
+
         // Close on overlay click
         document.getElementById('detailModal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeDetailModal();
         });
+        document.getElementById('pdfPreviewModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closePdfPreviewModal();
+        });
 
         // Close on Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDetailModal();
+            if (e.key === 'Escape') {
+                closeDetailModal();
+                if (typeof closeWaModal === 'function') closeWaModal();
+                closePdfPreviewModal();
+            }
         });
 
         // ─── Client-side table search ───
@@ -1817,53 +1939,91 @@
             }
         }
 
-        async function sendWA(noSurat, btn, event) {
+        // ─── WA Modal ───
+        var waNoSurat = null;
+        var waBtnRef = null;
+        var waBtnOrig = null;
+
+        function openWaModal(noSurat, btn, event) {
             if (event) event.preventDefault();
-            console.log('sendWA triggered for:', noSurat);
-            
-            const originalContent = btn.innerHTML;
+            waNoSurat = noSurat;
+            waBtnRef = btn;
+            waBtnOrig = btn.innerHTML;
+
             btn.disabled = true;
-            btn.innerHTML = '<span style="font-size:10px;">Loading...</span>';
-            
-            try {
-                // 1. Fetch template
-                const templateResponse = await fetch(`/general-consent/wa-template/${encodeURIComponent(noSurat)}`);
-                if (!templateResponse.ok) throw new Error('Gagal mengambil template');
-                const { template } = await templateResponse.json();
-                
-                // 2. Prompt user
-                const message = prompt('Edit pesan WhatsApp (klik OK untuk kirim, Cancel untuk batal):', template);
-                if (message === null) return; // User cancelled
-                
-                btn.innerHTML = '<span style="font-size:10px;">Sending...</span>';
-                
-                // 3. Send POST
-                const response = await fetch(`/general-consent/send-wa/${encodeURIComponent(noSurat)}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message })
+            btn.innerHTML = '<span style="font-size:10px;">Memuat...</span>';
+
+            fetch(`/general-consent/wa-template/${encodeURIComponent(noSurat)}`)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    document.getElementById('waMessageText').value = data.template || '';
+                    document.getElementById('waTargetInfo').innerHTML = 'No. Telepon: <strong>' + (data.no_telp || '-') + '</strong>';
+                    document.getElementById('waNoSuratInfo').textContent = noSurat;
+                    document.getElementById('waCharCount').textContent = (data.template || '').length + ' karakter';
+                    document.getElementById('waModal').classList.add('active');
+                    btn.disabled = false;
+                    btn.innerHTML = waBtnOrig;
+                })
+                .catch(function() {
+                    alert('Gagal mengambil template pesan');
+                    btn.disabled = false;
+                    btn.innerHTML = waBtnOrig;
                 });
-                // const result = await response.json();
-                // const text = await response.text();
-               
-                console.log('sendWA triggered for:', response);
-                // if (response.ok) {
-                //     alert(result.message);
-                // } else {
-                //     alert(result.error || 'Gagal mengirim WhatsApp');
-                // }
-            } catch (err) {
-                // console.log(noSurat);
-                alert('Terjadi kesalahan jaringan' + err);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-            }
         }
+
+        function closeWaModal() {
+            document.getElementById('waModal').classList.remove('active');
+            waNoSurat = null;
+        }
+
+        function confirmSendWA() {
+            var message = document.getElementById('waMessageText').value;
+            if (!message.trim()) {
+                document.getElementById('waMessageText').style.borderColor = 'var(--danger)';
+                return;
+            }
+
+            var btn = document.getElementById('waSendBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Mengirim...';
+
+            fetch(`/general-consent/send-wa/${encodeURIComponent(waNoSurat)}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(result) {
+                if (result.success || result.message) {
+                    alert('WhatsApp berhasil dikirim!');
+                } else {
+                    alert(result.error || 'Gagal mengirim WhatsApp');
+                }
+                closeWaModal();
+            })
+            .catch(function(err) {
+                alert('Terjadi kesalahan jaringan: ' + err);
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382..."/></svg> Kirim WhatsApp';
+                if (waBtnRef) {
+                    waBtnRef.disabled = false;
+                    waBtnRef.innerHTML = waBtnOrig;
+                }
+            });
+        }
+
+        // Char counter
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('waMessageText').addEventListener('input', function() {
+                document.getElementById('waCharCount').textContent = this.value.length + ' karakter';
+            });
+        });
     </script>
 </body>
 </html>

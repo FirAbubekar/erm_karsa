@@ -73,6 +73,91 @@
             </div>
         @endif
 
+        @if (hasPermission('bank-darah.rekomendasi') || hasPermission('bank-darah.validasi') || hasPermission('bank-darah.reaksi'))
+            <div class="nav-label" style="margin-top: 24px;">Bank Darah</div>
+
+            @if (hasPermission('bank-darah.rekomendasi'))
+                <div class="nav-dropdown {{ Route::is('bank-darah.rekomendasi') || Route::is('bank-darah.history') ? 'active' : '' }}">
+                    <div class="nav-dropdown-toggle">
+                        <div class="nav-dropdown-label">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </svg>
+                            Rekomendasi Dokter
+                        </div>
+                        <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="nav-dropdown-content">
+                        <a href="{{ route('bank-darah.rekomendasi') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.rekomendasi') ? 'active' : '' }}">
+                            Rekomendasi Dokter
+                        </a>
+                        <a href="{{ route('bank-darah.history') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.history') ? 'active' : '' }}">
+                            Riwayat Rekomendasi Dokter
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if (hasPermission('bank-darah.validasi'))
+                <div class="nav-dropdown {{ Route::is('bank-darah.validasi*') ? 'active' : '' }}">
+                    <div class="nav-dropdown-toggle">
+                        <div class="nav-dropdown-label">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </svg>
+                            Validasi Darah
+                        </div>
+                        <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="nav-dropdown-content">
+                        <a href="{{ route('bank-darah.validasi') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.validasi') ? 'active' : '' }}">
+                            Validasi Darah
+                        </a>
+                        <a href="{{ route('bank-darah.validasi.history') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.validasi.history') ? 'active' : '' }}">
+                            Riwayat Validasi Darah
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if (hasPermission('bank-darah.reaksi'))
+                <div class="nav-dropdown {{ Route::is('bank-darah.reaksi*') ? 'active' : '' }}">
+                    <div class="nav-dropdown-toggle">
+                        <div class="nav-dropdown-label">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z">
+                            </svg>
+                            Reaksi Transfusi
+                        </div>
+                        <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="nav-dropdown-content">
+                        <a href="{{ route('bank-darah.reaksi') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.reaksi') ? 'active' : '' }}">
+                            Reaksi Transfusi
+                        </a>
+                        <a href="{{ route('bank-darah.reaksi.history') }}"
+                            class="nav-dropdown-item {{ Route::is('bank-darah.reaksi.history') ? 'active' : '' }}">
+                            Riwayat Reaksi Transfusi
+                        </a>
+                    </div>
+                </div>
+            @endif
+        @endif
+
         @if (hasPermission('gc.create') ||
                 hasPermission('gc.view') ||
                 hasPermission('ranap.create') ||
@@ -123,7 +208,7 @@
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                             </path>
                         </svg>
-                        RM 02 Surat Persetujuan Rawat Inap
+                        RM 01 Surat Persetujuan Rawat Inap
                     </div>
                     <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
@@ -148,14 +233,30 @@
         @endif
 
         @if (hasPermission('transfer-pasien.view'))
-            <a href="{{ route('transfer-pasien.index') }}"
-                class="nav-item {{ Route::is('transfer-pasien.*') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                </svg>
-                Transfer Pasien Antar Ruangan
-            </a>
+            <div class="nav-dropdown {{ Route::is('transfer-pasien.*') ? 'active' : '' }}">
+                <div class="nav-dropdown-toggle">
+                    <div class="nav-dropdown-label">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        Transfer Pasien Antar Ruangan
+                    </div>
+                    <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="nav-dropdown-content">
+                    <a href="{{ route('transfer-pasien.index') }}"
+                        class="nav-dropdown-item {{ Route::is('transfer-pasien.index') ? 'active' : '' }}">
+                        Input Transfer Pasien
+                    </a>
+                    <a href="{{ route('transfer-pasien.riwayat') }}"
+                        class="nav-dropdown-item {{ Route::is('transfer-pasien.riwayat') ? 'active' : '' }}">
+                        Riwayat Transfer Pasien Antar Ruang
+                    </a>
+                </div>
+            </div>
         @endif
 
         @if (hasPermission('ep.create') || hasPermission('ep.view'))
@@ -450,14 +551,22 @@
         gap: 12px;
     }
 
+    /* Standard icon sizing — stable across all pages */
+    .nav-item svg,
     .nav-dropdown-label svg {
         width: 20px;
         height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+        flex-shrink: 0;
     }
 
     .chevron {
         width: 16px;
         height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        flex-shrink: 0;
         transition: transform 0.3s ease;
     }
 
@@ -476,7 +585,7 @@
     }
 
     .nav-dropdown.active .nav-dropdown-content {
-        max-height: 200px;
+        max-height: 350px;
         margin-top: 4px;
         margin-bottom: 8px;
     }

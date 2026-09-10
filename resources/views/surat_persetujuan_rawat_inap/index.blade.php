@@ -259,6 +259,14 @@
             font-weight: 500 !important;
             color: var(--text-secondary) !important;
         }
+        /* ─── Toast Notification ─── */
+        #toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); pointer-events: none; max-width: 420px; background: #1E293B; color: white; border: 1px solid rgba(255,255,255,0.08); }
+        #toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        #toast i { font-size: 18px; }
+        #toast.success { background: #065F46; border-color: #10B981; }
+        #toast.success i { color: #6EE7B7; }
+        #toast.error { background: #7F1D1D; border-color: #EF4444; }
+        #toast.error i { color: #FCA5A5; }
     </style>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -295,7 +303,7 @@
                             Cari Data Pasien
                         </div>
                         <div class="search-container">
-                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis..." style="width: 100%;">
+                            <input type="text" id="search-no-rm" class="form-control" placeholder="Masukkan No. Rekam Medis..." style="width: 100%;" oninput="var v=this.value.replace(/[^0-9\/]/g,'');var s=v.split('/');while(s.length>4)s.pop();this.value=s.join('/').slice(0,17)">
                             <button class="btn btn-primary" id="btn-search" style="white-space: nowrap;">
                                 Cari
                             </button>
@@ -359,7 +367,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Tanggal</label>
-                                    <input type="text" class="form-control" name="tanggal" id="field-tanggal" value="{{ date('Y-m-d') }}" readonly required>
+                                    <input type="date" class="form-control" name="tanggal" id="field-tanggal" value="{{ date('Y-m-d') }}" required>
                                 </div>
                             </div>
                             
@@ -539,7 +547,7 @@
                                                 </button>
                                             </div>
 
-                                            <input type="text" class="form-control telp-input" name="pj_telp" id="field-pj-telp" placeholder="8xxxxxxxxxx" required>
+                                            <input type="text" class="form-control telp-input" name="pj_telp" id="field-pj-telp" placeholder="8xxxxxxxxxx" required oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
                                         </div>
                                     </div>
                                 </div>
@@ -667,9 +675,48 @@
             </div>
             <h3 style="font-size: 20px; font-weight: 700; color: #1E293B; margin: 0 0 12px; letter-spacing: -0.02em;">Berhasil!</h3>
             <p id="success-modal-message" style="font-size: 14px; font-weight: 500; color: #64748B; margin: 0 0 28px; line-height: 1.6;"></p>
-            <button id="btn-close-success" style="width: 100%; padding: 14px 24px; background: #10B981; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1); outline: none;">
-                Selesai
-            </button>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="btn-view-pdf-success" type="button" style="flex: 1; padding: 13px 18px; background: #3B82F6; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);">
+                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat Bentuk PDF
+                </button>
+                <button id="btn-close-success" style="flex: 1; padding: 13px 18px; background: #10B981; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1); outline: none;">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- PDF PREVIEW MODAL --}}
+    <div class="modal-overlay" id="pdfPreviewModal" style="z-index: 1060; padding: 16px; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);">
+        <div class="modal-content" style="max-width: 950px; width: 95%; height: 90vh; display: flex; flex-direction: column; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); margin: auto;">
+            <div style="padding: 14px 20px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; color: #3B82F6; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1E293B;">Pratinjau Surat Persetujuan Rawat Inap (SPRI)</h4>
+                        <span id="previewNoSuratBadge" style="font-size: 12px; color: #64748B; font-family: monospace;">-</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a id="btnPreviewNewTab" href="#" target="_blank" class="btn" style="background: #F1F5F9; color: #475569; padding: 7px 12px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Tab Baru
+                    </a>
+                    <a id="btnPreviewDownload" href="#" class="btn" style="background: #10B981; color: white; padding: 7px 14px; font-size: 12px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Unduh PDF
+                    </a>
+                    <button type="button" onclick="closePdfPreviewModal()" style="background: none; border: none; color: #94A3B8; cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div style="flex: 1; position: relative; background: #525659;">
+                <iframe id="pdfPreviewIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
         </div>
     </div>
 
@@ -690,11 +737,23 @@
         </div>
     </div>
 
+    <div id="toast"></div>
+
     <!-- jQuery and Select2 JS CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        function showToast(msg, type) {
+            var t = document.getElementById('toast');
+            var icon = type === 'success' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : type === 'error' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' : '';
+            t.innerHTML = icon + msg;
+            t.className = type || '';
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(function () { t.classList.remove('show'); }, 4000);
+        }
+
         $(document).ready(function() {
             $('#kd_bangsal').select2({
                 placeholder: "Pilih Ruangan...",
@@ -715,19 +774,51 @@
 
         // Modal Control Helper
         function showError(message) {
-            document.getElementById('error-modal-message').textContent = message;
+            document.getElementById('error-modal-message').innerHTML = message.replace(/\n/g, '<br>');
             document.getElementById('error-modal').style.display = 'flex';
         }
         function hideError() {
             document.getElementById('error-modal').style.display = 'none';
         }
         function showSuccess(message) {
-            document.getElementById('success-modal-message').textContent = message;
+            document.getElementById('success-modal-message').innerHTML = message.replace(/\n/g, '<br>');
             document.getElementById('success-modal').style.display = 'flex';
         }
         function hideSuccess() {
             document.getElementById('success-modal').style.display = 'none';
+            const btnViewPdf = document.getElementById('btn-view-pdf-success');
+            if (btnViewPdf) btnViewPdf.style.display = 'none';
         }
+
+        function openPdfPreviewModal(noSurat) {
+            if (!noSurat) return;
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            const badge = document.getElementById('previewNoSuratBadge');
+            const btnNewTab = document.getElementById('btnPreviewNewTab');
+            const btnDownload = document.getElementById('btnPreviewDownload');
+
+            const inlineUrl = `/surat-persetujuan-rawat-inap/download/${encodeURIComponent(noSurat)}`;
+            const downloadUrl = `/surat-persetujuan-rawat-inap/download/${encodeURIComponent(noSurat)}?download=1`;
+
+            badge.textContent = noSurat;
+            iframe.src = inlineUrl;
+            btnNewTab.href = inlineUrl;
+            btnDownload.href = downloadUrl;
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePdfPreviewModal() {
+            const modal = document.getElementById('pdfPreviewModal');
+            const iframe = document.getElementById('pdfPreviewIframe');
+            if (iframe) iframe.src = '';
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        window.openPdfPreviewModal = openPdfPreviewModal;
+        window.closePdfPreviewModal = closePdfPreviewModal;
 
         document.getElementById('close-error-modal').addEventListener('click', hideError);
         document.getElementById('btn-close-error').addEventListener('click', hideError);
@@ -899,9 +990,33 @@
 
         btnSearch.addEventListener('click', searchPatient);
 
+        function generateNewNoSurat() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            return 'SPRI-' + now.getFullYear() +
+                   pad(now.getMonth() + 1) +
+                   pad(now.getDate()) +
+                   pad(now.getHours()) +
+                   pad(now.getMinutes()) +
+                   pad(now.getSeconds());
+        }
+
+        function selectRegistration(reg) {
+            if (!reg) return;
+            document.getElementById('field-no-rawat').value = reg.no_rawat;
+            const noSuratEl = document.getElementById('field-no-surat');
+            if (noSuratEl) {
+                if (reg.surat_persetujuan_rawat_inap && reg.surat_persetujuan_rawat_inap.no_surat) {
+                    noSuratEl.value = reg.surat_persetujuan_rawat_inap.no_surat;
+                } else {
+                    noSuratEl.value = generateNewNoSurat();
+                }
+            }
+        }
+
         async function searchPatient() {
             const noRm = inputNoRm.value.trim();
-            if (!noRm) return showError('Silakan masukkan No. RM terlebih dahulu.');
+            if (!noRm) return showToast('Silakan masukkan No. RM terlebih dahulu.', 'error');
 
             btnSearch.disabled = true;
             btnSearch.innerHTML = 'Mencari...';
@@ -911,9 +1026,19 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    const { pasien, history } = result;
+                    const { pasien, history, matched_no_rawat } = result;
                     activePatientData = pasien;
                     window.historyData = history;
+
+                    // Reset signature preview and pad when searching a new patient
+                    if (signaturePreview && signaturePlaceholder && signaturePad) {
+                        signaturePreview.src = '';
+                        signaturePreview.style.display = 'none';
+                        signaturePlaceholder.style.display = 'flex';
+                        signaturePad.clear();
+                    }
+                    const inputSignature = document.getElementById('input-signature');
+                    if (inputSignature) inputSignature.value = '';
 
                     // Fill Patient Identity
                     document.getElementById('field-no-rm').value = pasien.no_rkm_medis || '';
@@ -970,44 +1095,57 @@
                             const row = document.createElement('tr');
                             row.style.cursor = 'pointer';
 
+                            const hasSpri = !!(reg.surat_persetujuan_rawat_inap && reg.surat_persetujuan_rawat_inap.no_surat);
+                            const spriNoSurat = hasSpri ? reg.surat_persetujuan_rawat_inap.no_surat : '';
+
                             row.innerHTML = `
                                 <td>${index + 1}</td>
                                 <td>${reg.tgl_registrasi}</td>
                                 <td>${reg.no_rawat}</td>
                                 <td>
-                                    <button type="button" class="btn" style="background: var(--primary-light); color: var(--primary); padding: 4px 10px; font-size: 11px; border-radius: 8px;">Pilih</button>
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <button type="button" class="btn btn-select-reg" style="background: var(--primary-light); color: var(--primary); padding: 4px 10px; font-size: 11px; border-radius: 8px;">Pilih</button>
+                                        ${hasSpri ? `<button type="button" class="btn btn-preview-spri" style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 4px 8px; font-size: 11px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;" title="Lihat Bentuk PDF"><svg style="width: 12px; height: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> PDF</button>` : ''}
+                                    </div>
                                 </td>
                             `;
 
                             const selectRow = () => {
-                                document.getElementById('field-no-rawat').value = reg.no_rawat;
-                                // document.getElementById('field-tanggal').value = reg.tgl_registrasi;
-                                
+                                selectRegistration(reg);
                                 // Highlight Row
                                 Array.from(historyTableBody.children).forEach(r => r.style.background = '');
                                 row.style.background = 'var(--primary-light)';
                             };
 
-                            row.addEventListener('click', selectRow);
+                            row.addEventListener('click', (e) => {
+                                if (e.target.closest('.btn-preview-spri')) {
+                                    e.stopPropagation();
+                                    openPdfPreviewModal(spriNoSurat);
+                                    return;
+                                }
+                                selectRow();
+                            });
                             historyTableBody.appendChild(row);
                         });
 
-                        // Select the latest registration by default
-                        document.getElementById('field-no-rawat').value = history[0].no_rawat;
-                        // document.getElementById('field-tanggal').value = history[0].tgl_registrasi;
+                        // Select the latest registration by default, or the searched no_rawat if present
+                        const targetRawat = matched_no_rawat || history[0].no_rawat;
+                        const targetReg = history.find(h => h.no_rawat === targetRawat) || history[0];
+                        selectRegistration(targetReg);
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
                         historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Pasien ditemukan, tapi tidak ada riwayat pendaftaran.</td></tr>';
                         document.getElementById('field-no-rawat').value = '';
-                        // document.getElementById('field-tanggal').value = '';
+                        const noSuratEl = document.getElementById('field-no-surat');
+                        if (noSuratEl) noSuratEl.value = generateNewNoSurat();
                     }
 
                 } else {
-                    showError(result.error || 'Pasien tidak ditemukan.');
+                    showToast(result.error || 'Pasien tidak ditemukan.', 'error');
                 }
             } catch (error) {
                 console.error(error);
-                showError('Gagal menghubungi server untuk pencarian pasien.');
+                showToast('Gagal menghubungi server untuk pencarian pasien.', 'error');
             } finally {
                 btnSearch.disabled = false;
                 btnSearch.innerHTML = 'Cari';
@@ -1093,6 +1231,16 @@
                 if (response.ok && result.success) {
                     showSuccess(result.message || 'Formulir Surat Persetujuan Rawat Inap (RM 02) berhasil disimpan!');
                     
+                    const savedNoSurat = (result.data && result.data.no_surat) || document.getElementById('field-no-surat').value;
+                    const btnViewPdf = document.getElementById('btn-view-pdf-success');
+                    if (btnViewPdf && savedNoSurat) {
+                        btnViewPdf.style.display = 'inline-flex';
+                        btnViewPdf.onclick = (e) => {
+                            e.preventDefault();
+                            openPdfPreviewModal(savedNoSurat);
+                        };
+                    }
+
                     // Reload page on close success
                     const reloadAction = () => {
                         window.location.reload();

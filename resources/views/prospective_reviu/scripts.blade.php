@@ -80,7 +80,7 @@ async function searchPatient() {
         const res = await fetch(`/pasien/search?no_rm=${noRm}`);
         const result = await res.json();
         if(res.ok) {
-            const { pasien, history } = result;
+            const { pasien, history, matched_no_rawat } = result;
             document.getElementById('field-no-rm').value = pasien.no_rkm_medis;
             document.getElementById('field-nm-pasien').value = pasien.nm_pasien;
             document.getElementById('field-tgl-lahir').value = pasien.tgl_lahir;
@@ -100,7 +100,7 @@ async function searchPatient() {
                     });
                     historyTableBody.appendChild(row);
                 });
-                document.getElementById('field-no-rawat').value = history[0].no_rawat;
+                document.getElementById('field-no-rawat').value = matched_no_rawat || history[0].no_rawat;
                 document.getElementById('field-tgl-registrasi').value = history[0].tgl_registrasi;
                 historyTableBody.children[0].style.background = 'rgba(139, 92, 246, 0.08)';
                 resetForm();
