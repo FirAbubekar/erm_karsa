@@ -127,7 +127,19 @@ class GeneralConsentController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
-                $consent = GeneralConsent::where('no_surat', $request->no_surat)->first() ?? new GeneralConsent();
+                // Lock and prioritize lookup by no_rawat to ensure 1 consent per rawat and prevent cross-patient overwrites
+                $consent = GeneralConsent::where('no_rawat', $request->no_rawat)->orderBy('no_surat', 'desc')->first();
+
+                if (!$consent) {
+                    // If no consent exists for this no_rawat yet, check if requested no_surat exists
+                    $existingBySurat = !empty($request->no_surat) ? GeneralConsent::where('no_surat', $request->no_surat)->first() : null;
+                    // Only reuse if it truly belongs to this exact no_rawat (never overwrite another patient's consent)
+                    if ($existingBySurat && $existingBySurat->no_rawat === $request->no_rawat) {
+                        $consent = $existingBySurat;
+                    } else {
+                        $consent = new GeneralConsent();
+                    }
+                }
                 $isEdit = $consent->exists;
 
                 // Capture old pelepasan_informasi and signature
@@ -147,9 +159,21 @@ class GeneralConsentController extends Controller
                     $consent->old_signature = null;
                 }
 
+                // Format nama_pj with (usia) if provided
+                $rawNamaPj = trim($request->nama_pj);
+                $rawUmurPj = trim($request->umur_pj);
+
+                $formattedNamaPj = $rawNamaPj;
+                if (!empty($rawUmurPj) && $rawUmurPj !== '-') {
+                    $umurLabel = is_numeric($rawUmurPj) ? $rawUmurPj . ' Th' : $rawUmurPj;
+                    if (!str_contains($rawNamaPj, '(')) {
+                        $formattedNamaPj = $rawNamaPj . ' (' . $umurLabel . ')';
+                    }
+                }
+
                 // Ensure auth_name_1 is synced with Penanggung Jawab data as requested
                 // Format: Nama / Hubungan
-                $pjNameWithHubungan = $request->nama_pj . ' / ' . $request->bertindak_atas;
+                $pjNameWithHubungan = $formattedNamaPj . ' / ' . $request->bertindak_atas;
                 $request->merge([
                     'auth_name_1' => $pjNameWithHubungan,
                     'auth_telp_1' => $request->no_telp
@@ -201,7 +225,7 @@ class GeneralConsentController extends Controller
                     'tanggal' => $request->tanggal,
                     'pengobatan_kepada' => $request->pengobatan_kepada,
                     'nilai_kepercayaan' => $request->nilai_kepercayaan,
-                    'nama_pj' => $request->nama_pj,
+                    'nama_pj' => $formattedNamaPj,
                     'umur_pj' => $request->umur_pj,
                     'no_ktppj' => $request->no_ktppj,
                     'jkpj' => $request->jkpj,
@@ -210,10 +234,20 @@ class GeneralConsentController extends Controller
                     'nip' => Session::get('user_id'),
                 ]);
 
+                $targetNoSurat = $request->no_surat;
                 if (!$isEdit) {
-                    $consent->no_surat = $request->no_surat;
+                    // Ensure targetNoSurat is truly unique and doesn't collide with another patient's existing surat
+                    if (empty($targetNoSurat) || GeneralConsent::where('no_surat', $targetNoSurat)->exists()) {
+                        $targetNoSurat = 'PPU' . date('YmdHis');
+                        while (GeneralConsent::where('no_surat', $targetNoSurat)->exists()) {
+                            $targetNoSurat = 'PPU' . date('YmdHis') . rand(10, 99);
+                        }
+                    }
+                    $consent->no_surat = $targetNoSurat;
                 }
                 $consent->save();
+
+                $activeNoSurat = $consent->no_surat;
 
                 // 2. Save or update signature_pasien only if a new signature was uploaded
                 if ($isNewSignature) {
@@ -227,8 +261,8 @@ class GeneralConsentController extends Controller
                     );
                 }
 
-                // 3. Delete existing pelepasan_informasi for this no_surat to prevent duplicates on edit/update
-                PelepasanInformasi::where('no_surat', $request->no_surat)->delete();
+                // 3. Delete existing pelepasan_informasi for this activeNoSurat to prevent duplicates on edit/update
+                PelepasanInformasi::where('no_surat', $activeNoSurat)->delete();
 
                 // 4. Save to pelepasan_informasi
                 for ($i = 1; $i <= 4; $i++) {
@@ -237,7 +271,7 @@ class GeneralConsentController extends Controller
 
                     if (!empty($name)) {
                         PelepasanInformasi::create([
-                            'no_surat' => $request->no_surat,
+                            'no_surat' => $activeNoSurat,
                             'no_rekamedis' => $request->no_rm,
                             'nama' => $name,
                             'no_telp' => $this->formatPhoneNumber($telp, $i == 1 ? $request->no_telp_prefix : '+62') ?? '-',
@@ -253,7 +287,7 @@ class GeneralConsentController extends Controller
                 }
 
                 // 5. Save to berkas_digital_perawatan
-                $safeNoSurat = str_replace('/', '_', $request->no_surat);
+                $safeNoSurat = str_replace('/', '_', $activeNoSurat);
                 DB::table('berkas_digital_perawatan')->updateOrInsert(
                     ['no_rawat' => $request->no_rawat, 'kode' => '28'],
                     ['lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf']
@@ -383,6 +417,29 @@ class GeneralConsentController extends Controller
     public function downloadPDF(Request $request, $no_surat)
     {
         $consent = GeneralConsent::where('no_surat', $no_surat)->firstOrFail();
+
+        // Regenerate and upload latest PDF layout
+        $this->pdfService->generateAndSave($consent);
+
+        if ($request->has('stream')) {
+            $consent->load(['regPeriksa.pasien', 'regPeriksa.signaturePasien', 'pegawai']);
+            $pelepasanInformasi = PelepasanInformasi::where('no_surat', $consent->no_surat)->get();
+            if ($pelepasanInformasi->isEmpty() && isset($consent->regPeriksa->pasien->no_rkm_medis)) {
+                $pelepasanInformasi = PelepasanInformasi::where('no_rekamedis', $consent->regPeriksa->pasien->no_rkm_medis)
+                    ->where('status', 'aktif')
+                    ->get();
+            }
+            $deviceInfo = [
+                'ip' => request()->ip(),
+                'lat' => '-',
+                'lng' => '-',
+                'downloaded_at' => now()->format('d/m/Y H:i:s'),
+            ];
+            $pdf = Pdf::loadView('general_consent.pdf', compact('consent', 'pelepasanInformasi', 'deviceInfo'));
+            $pdf->setPaper('a4', 'portrait');
+            return $pdf->stream(str_replace('/', '_', $consent->no_surat) . '.pdf');
+        }
+
         $safeNoSurat = str_replace('/', '_', $consent->no_surat);
         $namaFile = $safeNoSurat . '.pdf';
 
