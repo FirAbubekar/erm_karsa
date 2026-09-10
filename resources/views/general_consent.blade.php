@@ -415,14 +415,14 @@
                         Penanggung Jawab Pasien
                     </div>
 
-                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-grid" style="grid-template-columns: 3fr 1fr; gap: 16px;">
                         <div class="form-group">
                             <label>Nama Penanggung Jawab <span class="required-star">*</span></label>
                             <input type="text" id="field-pj-nama" class="form-control" placeholder="Masukkan nama lengkap" required>
                         </div>
-                        <div class="form-group" style="display: none;">
-                            <label>Umur (th)</label>
-                            <input type="number" id="field-pj-umur" class="form-control" placeholder="0" value="0">
+                        <div class="form-group">
+                            <label>Umur (Th) <span class="required-star">*</span></label>
+                            <input type="number" id="field-pj-umur" class="form-control" placeholder="Tahun" min="0" max="150" required>
                         </div>
                     </div>
 
@@ -898,13 +898,34 @@
             document.getElementById('search-message').style.display = 'none';
         }
 
+        function generateNewNoSurat() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            return 'PPU' + now.getFullYear() +
+                   pad(now.getMonth() + 1) +
+                   pad(now.getDate()) +
+                   pad(now.getHours()) +
+                   pad(now.getMinutes()) +
+                   pad(now.getSeconds());
+        }
+
+        function selectRegistration(reg) {
+            if (!reg) return;
+            document.getElementById('field-no-rawat').value = reg.no_rawat;
+            const noPernyataanEl = document.getElementById('field-no-pernyataan');
+            if (noPernyataanEl) {
+                if (reg.general_consent && reg.general_consent.no_surat) {
+                    noPernyataanEl.value = reg.general_consent.no_surat;
+                } else {
+                    noPernyataanEl.value = generateNewNoSurat();
+                }
+            }
+        }
+
         async function searchPatient() {
             const noRm = inputNoRm.value;
             if (!noRm) return showSearchMessage('Silakan masukkan No. RM', 'error');
             hideSearchMessage();
-
-            btnSearch.disabled = true;
-            btnSearch.innerHTML = 'Mencari...';
 
             btnSearch.disabled = true;
             btnSearch.innerHTML = 'Mencari...';
@@ -916,6 +937,14 @@
                 if (response.ok) {
                     const { pasien, history, latest_auth_parties, matched_no_rawat } = result;
                     activePatientData = pasien;
+
+                    // Reset signature preview and pad when searching a new patient
+                    if (signaturePreview && signaturePlaceholder && signaturePad) {
+                        signaturePreview.src = '';
+                        signaturePreview.style.display = 'none';
+                        signaturePlaceholder.style.display = 'flex';
+                        signaturePad.clear();
+                    }
 
                     // Update Form Fields
                     document.getElementById('field-no-rm').value = pasien.no_rkm_medis;
@@ -999,7 +1028,6 @@
                     syncAuth1();
 
                     // Clear and Populate Authorized Parties
-
                     if (latest_auth_parties && latest_auth_parties.length > 0) {
                         latest_auth_parties.forEach((party, index) => {
                             if (index < 4) {
@@ -1040,8 +1068,7 @@
                             row.addEventListener('click', (e) => {
                                 if (e.target.tagName === 'BUTTON') return;
                                 
-                                document.getElementById('field-no-rawat').value = reg.no_rawat;
-                                // document.getElementById('field-tgl-periksa').value = reg.tgl_registrasi;
+                                selectRegistration(reg);
                                 // Highlight selected row
                                 Array.from(historyTableBody.children).forEach(r => r.style.background = '');
                                 row.style.background = 'var(--primary-light)';
@@ -1053,12 +1080,15 @@
                         window.historyData = history;
 
                         // Automatically select latest registration, or the searched no_rawat if present
-                        document.getElementById('field-no-rawat').value = matched_no_rawat || history[0].no_rawat;
-                        // document.getElementById('field-tgl-periksa').value = history[0].tgl_registrasi;
+                        const targetRawat = matched_no_rawat || history[0].no_rawat;
+                        const targetReg = history.find(h => h.no_rawat === targetRawat) || history[0];
+                        selectRegistration(targetReg);
                         historyTableBody.children[0].style.background = 'var(--primary-light)';
                     } else {
                         historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Pasien ditemukan, tapi tidak ada riwayat rawat.</td></tr>';
                         document.getElementById('field-no-rawat').value = '';
+                        const noPernyataanEl = document.getElementById('field-no-pernyataan');
+                        if (noPernyataanEl) noPernyataanEl.value = generateNewNoSurat();
                     }
                 } else {
                     showSearchMessage(result.error || 'Terjadi kesalahan', 'error');
@@ -1330,16 +1360,19 @@
             // 1. Fetch Geolocation coordinates first
             const coords = await getCoordinates();
 
+            const noPernyataanField = document.getElementById('field-no-pernyataan');
+            const noSuratVal = (noPernyataanField && noPernyataanField.value) ? noPernyataanField.value : generateNewNoSurat();
+
             const formData = {
-                no_surat: document.getElementById('field-no-rawat').value + '_GC', // Temporary logic if no_pernyataan is not provided or just use field
+                no_surat: noSuratVal,
                 no_rawat: document.getElementById('field-no-rawat').value,
                 no_rm: document.getElementById('field-no-rm').value,
                 tanggal: document.getElementById('field-tgl-periksa').value,
                 pengobatan_kepada: getHubunganValue(),
-                nilai_kepercayaan: '-',
+                nilai_kepercayaan: document.getElementById('field-pj-kepercayaan') ? document.getElementById('field-pj-kepercayaan').value : '-',
                 nama_pj: document.getElementById('field-pj-nama').value,
-                umur_pj: '-',
-                no_ktppj: '-',
+                umur_pj: document.getElementById('field-pj-umur').value || '-',
+                no_ktppj: document.getElementById('field-pj-ktp') ? document.getElementById('field-pj-ktp').value : '-',
                 jkpj: document.getElementById('field-pj-jk').value,
                 bertindak_atas: getHubunganValue(),
                 no_telp_prefix: document.getElementById('field-pj-telp-prefix').value,
@@ -1357,12 +1390,6 @@
                 lng: coords.lng,
             };
 
-            // Override no_surat with actual No. Pernyataan from field if exists
-            const noPernyataanField = document.getElementById('field-no-pernyataan');
-            if (noPernyataanField) {
-                formData.no_surat = noPernyataanField.value;
-            }
-
             // Basic Validation with specific field errors
             var errors = [];
             errors = errors.concat(validateBiodata());
@@ -1373,6 +1400,14 @@
                 errors.push('- Nama Penanggung Jawab belum diisi');
             } else {
                 setFieldError(elNamaPj, '');
+            }
+
+            var elUmurPj = document.getElementById('field-pj-umur');
+            if (!formData.umur_pj || formData.umur_pj === '-') {
+                setFieldError(elUmurPj, 'Field wajib diisi');
+                errors.push('- Umur Penanggung Jawab belum diisi');
+            } else {
+                setFieldError(elUmurPj, '');
             }
 
             var elTelpPj = document.getElementById('field-pj-telp');
@@ -1406,6 +1441,22 @@
                 if (result.success) {
                     // Success Notification Modal
                     showSuccess(result.message);
+
+                    // Update no_pernyataan with the saved no_surat
+                    if (result.data && result.data.no_surat) {
+                        const noPernyataanEl = document.getElementById('field-no-pernyataan');
+                        if (noPernyataanEl) {
+                            noPernyataanEl.value = result.data.no_surat;
+                        }
+                        // Update cache in window.historyData
+                        const currentRawat = document.getElementById('field-no-rawat').value;
+                        if (window.historyData) {
+                            const foundReg = window.historyData.find(h => h.no_rawat === currentRawat);
+                            if (foundReg) {
+                                foundReg.general_consent = result.data;
+                            }
+                        }
+                    }
 
                     // Reset signature preview
                     signaturePreview.src = '';
@@ -1703,6 +1754,12 @@
             if (e.target.value === 'Diri Sendiri') {
                 document.getElementById('field-pj-nama').value = activePatientData.nm_pasien || '';
                 document.getElementById('field-pj-jk').value = activePatientData.jk || 'L';
+                if (activePatientData.tgl_lahir) {
+                    const birthDate = new Date(activePatientData.tgl_lahir);
+                    const ageDifMs = Date.now() - birthDate.getTime();
+                    const ageDate = new Date(ageDifMs);
+                    document.getElementById('field-pj-umur').value = Math.abs(ageDate.getUTCFullYear() - 1970);
+                }
                 
                 // Auto Fill & Sanitize Phone Number
                 let phoneVal = activePatientData.no_tlp || '';
@@ -1784,6 +1841,7 @@
                                     
                                     // Update form fields
                                     document.getElementById('field-pj-nama').value = consent.nama_pj || '';
+                                    document.getElementById('field-pj-umur').value = consent.umur_pj || '';
                                     document.getElementById('field-pj-jk').value = consent.jkpj || 'L';
                                     const hubunganSelect = document.getElementById('field-pj-hubungan');
                                     const hubunganText = document.getElementById('field-pj-hubungan-text');
