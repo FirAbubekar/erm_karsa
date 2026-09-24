@@ -95,7 +95,7 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
 
     Route::post('/logout', [App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
-        // Transfer Pasien Antar Ruangan
+    // Transfer Pasien Antar Ruangan
     Route::get('/transfer-pasien', [TransferPasienController::class, 'index'])->name('transfer-pasien.index');
     Route::get('/transfer-pasien/riwayat', [TransferPasienController::class, 'riwayat'])->name('transfer-pasien.riwayat');
     Route::post('/transfer-pasien/store', [TransferPasienController::class, 'store'])->name('transfer-pasien.store');
@@ -339,23 +339,37 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
             'data'            => $data,
         ]);
     })->name('wa-gateway.history-data');
+
+    // Master Data Template Pernyataan (Persetujuan / Penolakan)
+    Route::group(['prefix' => 'master-template'], function () {
+        Route::get('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'index'])->name('master-template.index');
+        Route::post('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'store'])->name('master-template.store');
+        Route::put('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'update'])->name('master-template.update');
+        Route::delete('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroy'])->name('master-template.destroy');
+
+        Route::get('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'showDetails'])->name('master-template.details');
+        Route::post('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'storeDetail'])->name('master-template.details.store');
+        Route::put('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'updateDetail'])->name('master-template.details.update');
+        Route::delete('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroyDetail'])->name('master-template.details.destroy');
+        Route::post('/{id}/details/reorder', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'reorderDetail'])->name('master-template.details.reorder');
+    });
+
     // Bank Darah
 
 
-Route::get('/bank-darah/rekomendasi', [BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
-Route::post('/bank-darah/store', [BankDarahController::class, 'store'])->name('bank-darah.store');
-Route::get('/bank-darah/validasi', [BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
-Route::get('/bank-darah/validasi/pasien', [BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
-Route::post('/bank-darah/validasi/transfusi', [BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
-Route::post('/bank-darah/validasi/penerimaan', [BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
-Route::get('/bank-darah/reaksi-transfusi', [BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
-Route::post('/bank-darah/reaksi-transfusi/store', [BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
-Route::get('/bank-darah/reaksi-transfusi/history', [BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
-Route::get('/bank-darah/reaksi-transfusi/download/{id}', [BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
-Route::get('/bank-darah/cari-pasien', [BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
-Route::get('/bank-darah/cari-barcode', [BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
-Route::get('/bank-darah/history', [BankDarahController::class, 'history'])->name('bank-darah.history');
-Route::get('/bank-darah/download/{id}', [BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
-Route::get('/bank-darah/validasi/history', [BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
+    Route::get('/bank-darah/rekomendasi', [BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
+    Route::post('/bank-darah/store', [BankDarahController::class, 'store'])->name('bank-darah.store');
+    Route::get('/bank-darah/validasi', [BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
+    Route::get('/bank-darah/validasi/pasien', [BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
+    Route::post('/bank-darah/validasi/transfusi', [BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
+    Route::post('/bank-darah/validasi/penerimaan', [BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
+    Route::get('/bank-darah/reaksi-transfusi', [BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
+    Route::post('/bank-darah/reaksi-transfusi/store', [BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
+    Route::get('/bank-darah/reaksi-transfusi/history', [BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
+    Route::get('/bank-darah/reaksi-transfusi/download/{id}', [BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
+    Route::get('/bank-darah/cari-pasien', [BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
+    Route::get('/bank-darah/cari-barcode', [BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
+    Route::get('/bank-darah/history', [BankDarahController::class, 'history'])->name('bank-darah.history');
+    Route::get('/bank-darah/download/{id}', [BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
+    Route::get('/bank-darah/validasi/history', [BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
 });
-
