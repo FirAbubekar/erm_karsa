@@ -242,6 +242,16 @@ class PatientEducationController extends Controller
             'signature'          => 'nullable|string',
         ]);
 
+        if ($request->filled('tanggal_edukasi')) {
+            $validationError = $this->validateTanggalEdukasi($request->no_rawat, $request->tanggal_edukasi);
+            if ($validationError) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => $validationError,
+                ], 422);
+            }
+        }
+
         return DB::transaction(function () use ($request) {
             try {
                 // Check if updating existing
@@ -346,6 +356,24 @@ class PatientEducationController extends Controller
             'kode_topik'  => 'required|string',
             'nama_topik'  => 'required|string',
         ]);
+
+        $datesToValidate = [];
+        if ($request->filled('tgl_edukasi')) {
+            $datesToValidate[] = $request->tgl_edukasi;
+        }
+        if ($request->filled('tgl_akhir_edukasi')) {
+            $datesToValidate[] = $request->tgl_akhir_edukasi;
+        }
+
+        if (!empty($datesToValidate)) {
+            $validationError = $this->validateTanggalEdukasi($request->no_rawat, ...$datesToValidate);
+            if ($validationError) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => $validationError,
+                ], 422);
+            }
+        }
 
         return DB::transaction(function () use ($request) {
             try {
@@ -684,5 +712,50 @@ class PatientEducationController extends Controller
             abort(404);
         }
         return response()->file($path);
+    }
+
+    /**
+     * Validasi tanggal edukasi agar berada di dalam rentang perawatan
+     */
+    private function validateTanggalEdukasi($noRawat, ...$dates)
+    {
+        if (empty($dates)) return null;
+
+        $tglMasuk = null;
+        $tglKeluar = null;
+
+        // Cek kamar inap
+        $kamarInap = DB::table('kamar_inap')
+            ->where('no_rawat', $noRawat)
+            ->get();
+
+        if ($kamarInap->isNotEmpty()) {
+            $tglMasuk = $kamarInap->min('tgl_masuk');
+            $tglKeluar = $kamarInap->max('tgl_keluar');
+            
+            if ($tglKeluar === '0000-00-00' || is_null($tglKeluar)) {
+                $tglKeluar = now()->format('Y-m-d');
+            }
+        } else {
+            // Cek reg_periksa
+            $reg = DB::table('reg_periksa')->where('no_rawat', $noRawat)->first();
+            if ($reg) {
+                $tglMasuk = $reg->tgl_registrasi;
+                $tglKeluar = $reg->tgl_registrasi; // Rawat Jalan hanya boleh di hari pendaftaran
+            } else {
+                return null;
+            }
+        }
+
+        foreach ($dates as $date) {
+            if (!$date) continue;
+            
+            $d = \Carbon\Carbon::parse($date)->format('Y-m-d');
+            if ($d < $tglMasuk || $d > $tglKeluar) {
+                return "Tanggal edukasi ($d) harus berada dalam rentang perawatan ($tglMasuk s/d $tglKeluar).";
+            }
+        }
+
+        return null;
     }
 }

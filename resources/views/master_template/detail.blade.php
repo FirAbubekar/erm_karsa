@@ -607,7 +607,7 @@
                             @forelse ($master->details as $detail)
                                 <tr>
                                     <td style="text-align: center; font-weight: 600;">{{ $detail->urutan }}</td>
-                                    <td><span class="badge bg-secondary">{{ $detail->jenis_informasi }}</span></td>
+                                    <td style="white-space: pre-wrap;">{{ $detail->jenis_informasi }}</td>
                                     <td style="white-space: pre-wrap;">{{ $detail->isi_informasi }}</td>
                                     <td>
                                         @if($detail->is_editable)
@@ -667,7 +667,7 @@
     
     <div class="form-group">
         <label>Jenis Informasi</label>
-        <input type="text" name="jenis_informasi" id="jenis_informasi" class="form-control" required placeholder="Contoh: Diagnosis, Tindakan, Risiko">
+        <textarea name="jenis_informasi" id="jenis_informasi" class="form-control" rows="2" required placeholder="Contoh: Diagnosis, Tindakan, Risiko"></textarea>
     </div>
 
     <div class="form-group">

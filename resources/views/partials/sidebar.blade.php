@@ -82,6 +82,38 @@
             </div>
         @endif
 
+        @if (hasPermission('rm007.create') || hasPermission('rm007.view'))
+        <div class="nav-dropdown {{ Route::is('persetujuan-penolakan.*') ? 'active' : '' }}">
+            <div class="nav-dropdown-toggle">
+                <div class="nav-dropdown-label">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    RM 007 Form Pernyataan
+                </div>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="nav-dropdown-content">
+                @if (hasPermission('rm007.create'))
+                <a href="{{ route('persetujuan-penolakan.index') }}"
+                    class="nav-dropdown-item {{ Route::is('persetujuan-penolakan.index') ? 'active' : '' }}">
+                    Form Pernyataan
+                </a>
+                @endif
+                @if (hasPermission('rm007.view'))
+                <a href="{{ route('persetujuan-penolakan.history') }}"
+                    class="nav-dropdown-item {{ Route::is('persetujuan-penolakan.history') ? 'active' : '' }}">
+                    Riwayat Form Pernyataan
+                </a>
+                @endif
+            </div>
+        </div>
+        @endif
+
         @if (hasPermission('ranap.create') || hasPermission('ranap.view'))
             <div class="nav-dropdown {{ Route::is('surat-persetujuan-rawat-inap.*') ? 'active' : '' }}">
                 <div class="nav-dropdown-toggle">
