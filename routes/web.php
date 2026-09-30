@@ -66,6 +66,15 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::get('/riwayat-prospective-reviu', [App\Http\Controllers\ProspectiveReviewController::class, 'historyPage'])->name('prospective-reviu.history-page');
     Route::get('/prospective-reviu/export-excel', [App\Http\Controllers\ProspectiveReviewController::class, 'exportExcel'])->name('prospective-reviu.export-excel');
 
+    // Form Pernyataan (Persetujuan / Penolakan Tindakan)
+    Route::get('/persetujuan-penolakan', [App\Http\Controllers\PersetujuanPenolakanController::class, 'index'])->name('persetujuan-penolakan.index');
+    Route::get('/persetujuan-penolakan/history', [App\Http\Controllers\PersetujuanPenolakanController::class, 'history'])->name('persetujuan-penolakan.history');
+    Route::get('/persetujuan-penolakan/download/{no_pernyataan}', [App\Http\Controllers\PersetujuanPenolakanController::class, 'download'])->name('persetujuan-penolakan.download');
+    Route::get('/persetujuan-penolakan/template/{kode_dokumen}', [App\Http\Controllers\PersetujuanPenolakanController::class, 'getTemplateDetails'])->name('persetujuan-penolakan.template');
+    Route::post('/persetujuan-penolakan/save', [App\Http\Controllers\PersetujuanPenolakanController::class, 'store'])->name('persetujuan-penolakan.store');
+    Route::get('/persetujuan-penolakan/search-pegawai', [App\Http\Controllers\PersetujuanPenolakanController::class, 'searchPegawai'])->name('persetujuan-penolakan.search-pegawai');
+    Route::get('/persetujuan-penolakan/search-dokter', [App\Http\Controllers\PersetujuanPenolakanController::class, 'searchDokter'])->name('persetujuan-penolakan.search-dokter');
+
     // Hasil Lab
     Route::get('/hasil-lab', [App\Http\Controllers\HasilLabController::class, 'index'])->name('hasil-lab.index');
     Route::get('/hasil-lab/detail/{ono}', [App\Http\Controllers\HasilLabController::class, 'detail'])->name('hasil-lab.detail');
@@ -95,7 +104,7 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
 
     Route::post('/logout', [App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
-        // Transfer Pasien Antar Ruangan
+    // Transfer Pasien Antar Ruangan
     Route::get('/transfer-pasien', [TransferPasienController::class, 'index'])->name('transfer-pasien.index');
     Route::get('/transfer-pasien/riwayat', [TransferPasienController::class, 'riwayat'])->name('transfer-pasien.riwayat');
     Route::post('/transfer-pasien/store', [TransferPasienController::class, 'store'])->name('transfer-pasien.store');
@@ -339,23 +348,37 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
             'data'            => $data,
         ]);
     })->name('wa-gateway.history-data');
+
+    // Master Data Template Pernyataan (Persetujuan / Penolakan)
+    Route::group(['prefix' => 'master-template'], function () {
+        Route::get('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'index'])->name('master-template.index');
+        Route::post('/', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'store'])->name('master-template.store');
+        Route::put('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'update'])->name('master-template.update');
+        Route::delete('/{id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroy'])->name('master-template.destroy');
+
+        Route::get('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'showDetails'])->name('master-template.details');
+        Route::post('/{id}/details', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'storeDetail'])->name('master-template.details.store');
+        Route::put('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'updateDetail'])->name('master-template.details.update');
+        Route::delete('/{id}/details/{detail_id}', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'destroyDetail'])->name('master-template.details.destroy');
+        Route::post('/{id}/details/reorder', [App\Http\Controllers\MasterTemplatePernyataanController::class, 'reorderDetail'])->name('master-template.details.reorder');
+    });
+
     // Bank Darah
 
 
-Route::get('/bank-darah/rekomendasi', [BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
-Route::post('/bank-darah/store', [BankDarahController::class, 'store'])->name('bank-darah.store');
-Route::get('/bank-darah/validasi', [BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
-Route::get('/bank-darah/validasi/pasien', [BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
-Route::post('/bank-darah/validasi/transfusi', [BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
-Route::post('/bank-darah/validasi/penerimaan', [BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
-Route::get('/bank-darah/reaksi-transfusi', [BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
-Route::post('/bank-darah/reaksi-transfusi/store', [BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
-Route::get('/bank-darah/reaksi-transfusi/history', [BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
-Route::get('/bank-darah/reaksi-transfusi/download/{id}', [BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
-Route::get('/bank-darah/cari-pasien', [BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
-Route::get('/bank-darah/cari-barcode', [BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
-Route::get('/bank-darah/history', [BankDarahController::class, 'history'])->name('bank-darah.history');
-Route::get('/bank-darah/download/{id}', [BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
-Route::get('/bank-darah/validasi/history', [BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
+    Route::get('/bank-darah/rekomendasi', [BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
+    Route::post('/bank-darah/store', [BankDarahController::class, 'store'])->name('bank-darah.store');
+    Route::get('/bank-darah/validasi', [BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
+    Route::get('/bank-darah/validasi/pasien', [BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
+    Route::post('/bank-darah/validasi/transfusi', [BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
+    Route::post('/bank-darah/validasi/penerimaan', [BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
+    Route::get('/bank-darah/reaksi-transfusi', [BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
+    Route::post('/bank-darah/reaksi-transfusi/store', [BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
+    Route::get('/bank-darah/reaksi-transfusi/history', [BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
+    Route::get('/bank-darah/reaksi-transfusi/download/{id}', [BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
+    Route::get('/bank-darah/cari-pasien', [BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
+    Route::get('/bank-darah/cari-barcode', [BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
+    Route::get('/bank-darah/history', [BankDarahController::class, 'history'])->name('bank-darah.history');
+    Route::get('/bank-darah/download/{id}', [BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
+    Route::get('/bank-darah/validasi/history', [BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
 });
-

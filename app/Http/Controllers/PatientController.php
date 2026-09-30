@@ -12,33 +12,33 @@ class PatientController extends Controller
 {
     public function search(Request $request)
     {
-        $input = $request->get('no_rm') ?? $request->get('no_rawat');
-        $input = trim($input);
+        $noRm = $request->get('no_rm');
 
-        if (!$input) {
+        if (!$noRm) {
             return response()->json(['error' => 'No. RM harus diisi'], 400);
         }
 
-        // Determine the no_rkm_medis. Prefer direct patient match, otherwise
-        // fall back to resolving via RegPeriksa by no_rawat.
-        $pasien = Pasien::where('pasien.no_rkm_medis', $input)
-            ->leftJoin('kelurahan', 'pasien.kd_kel', '=', 'kelurahan.kd_kel')
-            ->leftJoin('kecamatan', 'pasien.kd_kec', '=', 'kecamatan.kd_kec')
-            ->leftJoin('kabupaten', 'pasien.kd_kab', '=', 'kabupaten.kd_kab')
-            ->select('pasien.*', 'kelurahan.nm_kel', 'kecamatan.nm_kec', 'kabupaten.nm_kab')
-            ->first();
+        $searchTerms = [$noRm];
+        if (is_numeric($noRm)) {
+            $pad8 = str_pad($noRm, 8, '0', STR_PAD_LEFT);
+            if ($pad8 !== $noRm) $searchTerms[] = $pad8;
+            
+            $pad6 = str_pad($noRm, 6, '0', STR_PAD_LEFT);
+            if ($pad6 !== $noRm && strlen($noRm) < 6) $searchTerms[] = $pad6;
+        }
 
-        if (!$pasien) {
-            // Try resolving through registration number (no_rawat)
-            $reg = RegPeriksa::where('no_rawat', $input)->first();
-
-            if ($reg && $reg->no_rkm_medis) {
-                $pasien = Pasien::where('pasien.no_rkm_medis', $reg->no_rkm_medis)
-                    ->leftJoin('kelurahan', 'pasien.kd_kel', '=', 'kelurahan.kd_kel')
-                    ->leftJoin('kecamatan', 'pasien.kd_kec', '=', 'kecamatan.kd_kec')
-                    ->leftJoin('kabupaten', 'pasien.kd_kab', '=', 'kabupaten.kd_kab')
-                    ->select('pasien.*', 'kelurahan.nm_kel', 'kecamatan.nm_kec', 'kabupaten.nm_kab')
-                    ->first();
+        // Get Patient Details - Prioritaskan exact match, lalu pad 8, lalu pad 6
+        $pasien = null;
+        foreach ($searchTerms as $term) {
+            $pasien = Pasien::where('pasien.no_rkm_medis', $term)
+                ->leftJoin('kelurahan', 'pasien.kd_kel', '=', 'kelurahan.kd_kel')
+                ->leftJoin('kecamatan', 'pasien.kd_kec', '=', 'kecamatan.kd_kec')
+                ->leftJoin('kabupaten', 'pasien.kd_kab', '=', 'kabupaten.kd_kab')
+                ->select('pasien.*', 'kelurahan.nm_kel', 'kecamatan.nm_kec', 'kabupaten.nm_kab')
+                ->first();
+                
+            if ($pasien) {
+                break;
             }
         }
 
@@ -46,19 +46,10 @@ class PatientController extends Controller
             return response()->json(['error' => 'Data pasien tidak ditemukan'], 404);
         }
 
-        $noRm = $pasien->no_rkm_medis;
-
-        $matchedNoRawat = null;
-        if ($request->get('no_rawat')) {
-            $matchedNoRawat = $request->get('no_rawat');
-        } elseif ($reg ?? null) {
-            $matchedNoRawat = $reg->no_rawat;
-        }
-
         // Get Latest Pelepasan Informasi from the latest General Consent
         $latestAuthParties = [];
-        $latestConsent = GeneralConsent::whereHas('regPeriksa', function ($q) use ($noRm) {
-            $q->where('no_rkm_medis', $noRm);
+        $latestConsent = GeneralConsent::whereHas('regPeriksa', function ($q) use ($pasien) {
+            $q->where('no_rkm_medis', $pasien->no_rkm_medis);
         })->orderBy('tanggal', 'desc')->first();
 
         if ($latestConsent) {
@@ -68,17 +59,17 @@ class PatientController extends Controller
 
         // Get History of Registrations for this patient, including their General Consent and SPRI status
         $history = RegPeriksa::with(['generalConsent', 'signaturePasien', 'suratPersetujuanRawatInap'])
-            ->where('no_rkm_medis', $noRm)
+            ->where('no_rkm_medis', $pasien->no_rkm_medis)
             ->whereDate('tgl_registrasi', '<=', now()->toDateString())
             ->orderBy('tgl_registrasi', 'desc')
+            ->where('stts', '!=', 'Batal')
             ->limit(10)
             ->get();
 
         return response()->json([
             'pasien' => $pasien,
             'history' => $history,
-            'latest_auth_parties' => $latestAuthParties,
-            'matched_no_rawat' => $matchedNoRawat
+            'latest_auth_parties' => $latestAuthParties
         ]);
     }
 }
