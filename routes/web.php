@@ -66,6 +66,15 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::get('/riwayat-prospective-reviu', [App\Http\Controllers\ProspectiveReviewController::class, 'historyPage'])->name('prospective-reviu.history-page');
     Route::get('/prospective-reviu/export-excel', [App\Http\Controllers\ProspectiveReviewController::class, 'exportExcel'])->name('prospective-reviu.export-excel');
 
+    // Form Pernyataan (Persetujuan / Penolakan Tindakan)
+    Route::get('/persetujuan-penolakan', [App\Http\Controllers\PersetujuanPenolakanController::class, 'index'])->name('persetujuan-penolakan.index');
+    Route::get('/persetujuan-penolakan/history', [App\Http\Controllers\PersetujuanPenolakanController::class, 'history'])->name('persetujuan-penolakan.history');
+    Route::get('/persetujuan-penolakan/download/{no_pernyataan}', [App\Http\Controllers\PersetujuanPenolakanController::class, 'download'])->name('persetujuan-penolakan.download');
+    Route::get('/persetujuan-penolakan/template/{kode_dokumen}', [App\Http\Controllers\PersetujuanPenolakanController::class, 'getTemplateDetails'])->name('persetujuan-penolakan.template');
+    Route::post('/persetujuan-penolakan/save', [App\Http\Controllers\PersetujuanPenolakanController::class, 'store'])->name('persetujuan-penolakan.store');
+    Route::get('/persetujuan-penolakan/search-pegawai', [App\Http\Controllers\PersetujuanPenolakanController::class, 'searchPegawai'])->name('persetujuan-penolakan.search-pegawai');
+    Route::get('/persetujuan-penolakan/search-dokter', [App\Http\Controllers\PersetujuanPenolakanController::class, 'searchDokter'])->name('persetujuan-penolakan.search-dokter');
+
     // Hasil Lab
     Route::get('/hasil-lab', [App\Http\Controllers\HasilLabController::class, 'index'])->name('hasil-lab.index');
     Route::get('/hasil-lab/detail/{ono}', [App\Http\Controllers\HasilLabController::class, 'detail'])->name('hasil-lab.detail');

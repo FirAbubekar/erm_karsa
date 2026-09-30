@@ -86,6 +86,7 @@ class PatientController extends Controller
             ->where('no_rkm_medis', $pasien->no_rkm_medis)
             ->whereDate('tgl_registrasi', '<=', now()->toDateString())
             ->orderBy('tgl_registrasi', 'desc')
+            ->where('stts', '!=', 'Batal')
             ->limit(10)
             ->get();
 

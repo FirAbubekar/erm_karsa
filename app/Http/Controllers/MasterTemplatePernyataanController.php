@@ -84,7 +84,7 @@ class MasterTemplatePernyataanController extends Controller
     {
         $request->validate([
             'urutan' => 'nullable|integer',
-            'jenis_informasi' => 'required|string|max:50',
+            'jenis_informasi' => 'required|string',
             'isi_informasi' => 'nullable|string',
             'is_editable' => 'boolean',
         ]);
@@ -114,7 +114,7 @@ class MasterTemplatePernyataanController extends Controller
     {
         $request->validate([
             'urutan' => 'required|integer',
-            'jenis_informasi' => 'required|string|max:50',
+            'jenis_informasi' => 'required|string',
             'isi_informasi' => 'nullable|string',
             'is_editable' => 'boolean',
         ]);
