@@ -460,10 +460,17 @@
                                         @endif
                                     </td>
                                     <td class="topik-cell" data-original-topik="{{ $topik['topik'] }}">
-                                        {!! nl2br(e(trim(str_ireplace('(sebutkan)', '', $topik['topik'])))) !!}
-                                        <textarea class="topik-sebutkan-input form-control"
-                                            style="font-size:11px;padding:4px 6px;margin-top:4px;width:100%;border-radius:4px;resize:vertical;min-height:50px;"
-                                            placeholder="Sebutkan detail..." {{ !$canEditRow ? 'disabled' : '' }}></textarea>
+                                        <div style="margin-bottom: 12px; line-height: 1.6;">
+                                            {!! nl2br(e(trim(str_ireplace('(sebutkan)', '', $topik['topik'])))) !!}
+                                        </div>
+                                        <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-left: 3px solid #007bff; border-radius: 4px; padding: 5px;">
+                                            <label style="display: block; font-size: 11px; font-weight: 600; color: #495057; margin-bottom: 2px;">
+                                                <i class="fas fa-edit" style="margin-right: 4px;"></i>Catatan Penjelasan (Mencakup Semua Poin Di Atas)
+                                            </label>
+                                            <textarea class="topik-sebutkan-input form-control"
+                                                style="font-size:12px;padding:6px;width:100%;border-radius:4px;resize:vertical;min-height:60px;"
+                                                placeholder="Tuliskan detail penjelasan di sini..." {{ !$canEditRow ? 'disabled' : '' }}></textarea>
+                                        </div>
                                     </td>
                                     <td>
                                         <div style="margin-bottom:6px">

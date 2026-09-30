@@ -96,7 +96,7 @@ class PatientEducationController extends Controller
             [
                 'kode'      => 'TE_REHABILITASI',
                 'no_urut'   => 9,
-                'poli_unit' => 'Rawat Inap',
+                'poli_unit' => 'Dokter',
                 'topik'     => 'Teknik Rehabilitasi',
                 'is_custom' => false,
             ],

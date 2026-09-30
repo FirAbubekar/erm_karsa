@@ -61,6 +61,7 @@ class PatientController extends Controller
         $history = RegPeriksa::with(['generalConsent', 'signaturePasien', 'suratPersetujuanRawatInap'])
             ->where('no_rkm_medis', $pasien->no_rkm_medis)
             ->orderBy('tgl_registrasi', 'desc')
+            ->where('stts', '!=', 'Batal')
             ->limit(10)
             ->get();
 
