@@ -19,7 +19,7 @@ class RegPeriksa extends Model
 
     public function generalConsent()
     {
-        return $this->hasOne(GeneralConsent::class, 'no_rawat', 'no_rawat');
+        return $this->hasOne(GeneralConsent::class, 'no_rawat', 'no_rawat')->latestOfMany('no_surat');
     }
 
     public function signaturePasien()
@@ -29,6 +29,6 @@ class RegPeriksa extends Model
 
     public function suratPersetujuanRawatInap()
     {
-        return $this->hasOne(SuratPersetujuanRawatInap::class, 'no_rawat', 'no_rawat');
+        return $this->hasOne(SuratPersetujuanRawatInap::class, 'no_rawat', 'no_rawat')->latestOfMany('no_surat');
     }
 }

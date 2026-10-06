@@ -113,6 +113,21 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'simbdrs' => [
+            'driver' => env('DB_CONNECTION_SIMBDRS', 'mysql'),
+            'host' => env('DB_HOST_SIMBDRS', '127.0.0.1'),
+            'port' => env('DB_PORT_SIMBDRS', '3306'),
+            'database' => env('DB_DATABASE_SIMBDRS', 'bdrs'),
+            'username' => env('DB_USERNAME_SIMBDRS', 'root'),
+            'password' => env('DB_PASSWORD_SIMBDRS', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+        ],
+
     ],
 
     /*

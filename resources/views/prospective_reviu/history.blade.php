@@ -510,8 +510,20 @@
 
         .filter-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .filter-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
         }
 
         .filter-group {
@@ -1360,7 +1372,7 @@
                     </div>
                 </div>
                 
-                <form action="{{ route('prospective-reviu.history-page') }}" method="GET">
+                <form id="filterForm" action="{{ route('prospective-reviu.history-page') }}" method="GET">
                     <div class="filter-body">
                         <div class="filter-form">
                             <div class="filter-group">
@@ -1421,6 +1433,12 @@
                                 Reset Pencarian
                             </a>
                         @endif
+
+                        <button type="button" id="btnExportExcel" class="btn-filter-reset" style="color: #10B981; border-color: #10B981; background: #ECFDF5;">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Export Excel
+                        </button>
+
                         <button type="submit" class="btn-filter-submit">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             Terapkan Filter
@@ -1615,6 +1633,8 @@
         </div>
     </div>
 
+    @include('prospective_reviu.modals')
+
     <script>
         // ─── Detail Modal ───
         function openDetailModal(data) {
@@ -1658,6 +1678,32 @@
         // Close on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeDetailModal();
+        });
+
+        // ─── Filter Form Validation ───
+        function showError(msg) {
+            document.getElementById('error-modal-message').innerHTML = msg;
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        function hideError() {
+            document.getElementById('error-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-error-modal').addEventListener('click', hideError);
+        document.getElementById('btn-close-error').addEventListener('click', hideError);
+
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            const search = this.search.value.trim();
+            const noRawat = this.no_rawat.value.trim();
+            const person = this.person.value.trim();
+            const startDate = this.start_date.value.trim();
+            const endDate = this.end_date.value.trim();
+
+            if (!search && !noRawat && !person && !startDate && !endDate) {
+                e.preventDefault();
+                showError('Silakan isi minimal salah satu filter (Identitas, No. Rawat, Petugas, atau Periode) sebelum menekan tombol Terapkan Filter.');
+            }
         });
 
         // ─── Client-side table search ───
@@ -1716,7 +1762,27 @@
             }
         }
 
+        // Export Excel logic
+        document.getElementById('btnExportExcel').addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = document.getElementById('filterForm');
+            const oldAction = form.action;
+            
+            // Ubah action form sementara ke endpoint export excel
+            form.action = "{{ route('prospective-reviu.export-excel') }}";
+            form.submit();
+            
+            // Kembalikan action form ke semula untuk pencarian biasa
+            setTimeout(() => {
+                form.action = oldAction;
+            }, 100);
+        });
 
+        @if(session('export_error'))
+        document.addEventListener('DOMContentLoaded', function() {
+            showError("{{ session('export_error') }}");
+        });
+        @endif
     </script>
 </body>
 </html>

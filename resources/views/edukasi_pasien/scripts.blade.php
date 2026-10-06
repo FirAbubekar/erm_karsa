@@ -23,6 +23,27 @@
         document.getElementById('error-modal').style.display = 'none'
     }
 
+    function showConfirm(msg, onConfirm) {
+        document.getElementById('confirm-modal-message').textContent = msg;
+        document.getElementById('confirm-modal').style.display = 'flex';
+        
+        const okBtn = document.getElementById('btn-ok-confirm');
+        const cancelBtn = document.getElementById('btn-cancel-confirm');
+        const closeBtn = document.getElementById('close-confirm-modal');
+        
+        const newOkBtn = okBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        
+        const closeModals = () => { document.getElementById('confirm-modal').style.display = 'none'; };
+        cancelBtn.onclick = closeModals;
+        closeBtn.onclick = closeModals;
+        
+        newOkBtn.onclick = () => {
+            closeModals();
+            if (onConfirm) onConfirm();
+        };
+    }
+
     function showSuccess(msg) {
         document.getElementById('success-modal-message').textContent = msg;
         document.getElementById('success-modal').style.display = 'flex'
@@ -52,6 +73,8 @@
     async function searchPatient() {
         const noRm = inputNoRm.value;
         if (!noRm) return showError('Silakan masukkan No. RM');
+        if (noRm.length < 5) return showError('No. RM harus minimal 5 karakter');
+        if (!/^\d+$/.test(noRm)) return showError('No. RM harus berupa angka');
         btnSearch.disabled = true;
         btnSearch.innerHTML = 'Mencari...';
         try {
@@ -60,7 +83,8 @@
             if (res.ok) {
                 const {
                     pasien,
-                    history
+                    history,
+                    matched_no_rawat
                 } = result;
                 document.getElementById('field-no-rm').value = pasien.no_rkm_medis;
                 document.getElementById('field-nm-pasien').value = pasien.nm_pasien;
@@ -84,7 +108,7 @@
                         });
                         historyTableBody.appendChild(row);
                     });
-                    document.getElementById('field-no-rawat').value = history[0].no_rawat;
+                    document.getElementById('field-no-rawat').value = matched_no_rawat || history[0].no_rawat;
                     document.getElementById('field-tgl-registrasi').value = history[0].tgl_registrasi;
                     historyTableBody.children[0].style.background = 'var(--primary-light)';
                     // Auto-load assessment for first row
@@ -187,7 +211,7 @@
                     img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
                     sigBox.appendChild(img);
                 }
-                img.src = '/storage/' + data.ttd_pasien_wali;
+                img.src = '/edukasi-pasien/signature/' + data.ttd_pasien_wali;
                 img.style.display = 'block';
                 if (placeholder) placeholder.style.display = 'none';
                 sigBox.style.borderStyle = 'solid';
@@ -263,7 +287,7 @@
                     <button class="btn-icon btn-icon-save" title="Simpan baris" style="margin-right:4px">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     </button>
-                    <button class="btn-icon btn-icon-delete" onclick="this.closest('tr').remove()" title="Hapus baris">
+                    <button class="btn-icon btn-icon-delete" onclick="deleteCustomRow(this)" title="Hapus baris">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </td>
@@ -349,7 +373,7 @@
                         img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain';
                         ttdBox.appendChild(img);
                     }
-                    img.src = '/storage/' + impl.ttd_pasien;
+                    img.src = '/edukasi-pasien/signature/' + impl.ttd_pasien;
                     img.style.display = 'block';
                     if (placeholder) placeholder.style.display = 'none';
                     ttdBox.dataset.signatureData = 'existing';
@@ -621,7 +645,7 @@
             <button class="btn-icon btn-icon-save" title="Simpan baris" style="margin-right:4px">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
             </button>
-            <button class="btn-icon btn-icon-delete" onclick="this.closest('tr').remove()" title="Hapus baris">
+            <button class="btn-icon btn-icon-delete" onclick="deleteCustomRow(this)" title="Hapus baris">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
         </td>
@@ -691,15 +715,74 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
                 body: JSON.stringify(payload),
             });
             const result = await res.json();
+            // Clear existing errors
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
             if (res.ok && result.success) {
                 showSuccess(result.message);
             } else {
-                showError(result.error || 'Terjadi kesalahan saat menyimpan.');
+                if (res.status === 422 && result.errors) {
+                    let firstErrorEl = null;
+                    const fieldMap = {
+                        'no_rawat': 'field-no-rawat',
+                        'nama_penerima_info': 'field-nama-penerima-info',
+                        'hubungan_dgn_pasien': 'field-hubungan-dgn-pasien',
+                        'bahasa': 'bahasa[]',
+                        'perlu_penerjemah': 'perlu_penerjemah',
+                        'baca_dan_tulis': 'baca_dan_tulis',
+                        'pendidikan': 'pendidikan',
+                        'nilai_budaya': 'nilai_budaya',
+                        'gaya_pembelajaran': 'gaya_pembelajaran',
+                        'literasi_kesehatan': 'literasi_kesehatan',
+                        'hambatan_edukasi': 'hambatan_edukasi[]',
+                        'kesediaan_menerima': 'kesediaan_menerima',
+                        'rencana_kebutuhan': 'rencana_kebutuhan[]',
+                        'tanggal_edukasi': 'field-tgl-edukasi',
+                        'nama_pasien_wali_ttd': 'field-nama-wali-ttd',
+                        'signature': 'konfirmasi-signature-box'
+                    };
+
+                    for (const key in result.errors) {
+                        const errorMsg = result.errors[key][0];
+                        const targetName = fieldMap[key] || key;
+                        
+                        let el = document.getElementById(targetName);
+                        if (!el) {
+                            el = document.querySelector(`input[name="${targetName}"]`);
+                            if (el) el = el.closest('.form-group') || el.closest('.radio-group') || el.closest('.checkbox-group');
+                        }
+
+                        if (el) {
+                            el.classList.add('is-invalid');
+                            const feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            feedback.innerText = errorMsg;
+                            
+                            if (el.classList.contains('form-group') || el.classList.contains('radio-group') || el.classList.contains('checkbox-group')) {
+                                el.appendChild(feedback);
+                            } else {
+                                el.parentNode.insertBefore(feedback, el.nextSibling);
+                            }
+
+                            if (!firstErrorEl) firstErrorEl = el;
+                        } else {
+                            showError(errorMsg);
+                        }
+                    }
+
+                    if (firstErrorEl) {
+                        firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    showError(result.error || result.message || 'Terjadi kesalahan saat menyimpan.');
+                }
             }
         } catch (e) {
             console.error(e);
@@ -909,4 +992,59 @@
             }
         }
     });
+
+    // Delete custom row logic
+    async function deleteCustomRow(btn) {
+        try {
+            const row = btn.closest('tr');
+            if (!row) return;
+            
+            const kodeTopik = row.dataset.kode;
+            if (!kodeTopik) return;
+            
+            const noRawatEl = document.getElementById('field-no-rawat');
+            const noRawat = noRawatEl ? noRawatEl.value : null;
+
+            if (!noRawat) {
+                // Remove locally if no patient selected
+                row.remove();
+                return;
+            }
+
+            const msg = 'Apakah Anda yakin ingin menghapus baris pelaksanaan ini?';
+            showConfirm(msg, async () => {
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                    
+                    const res = await fetch("/edukasi-pasien/delete-implementation", {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            no_rawat: noRawat,
+                            kode_topik: kodeTopik
+                        })
+                    });
+                    
+                    const result = await res.json();
+                    if (result.success) {
+                        row.remove();
+                        showSuccess(result.message);
+                    } else {
+                        row.remove(); // Force remove if it wasn't in DB
+                        showError(result.error || 'Gagal menghapus data pelaksanaan.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showError('Terjadi kesalahan pada server saat menghapus.');
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            showError('Terjadi kesalahan pada server saat menghapus.');
+        }
+    }
 </script>

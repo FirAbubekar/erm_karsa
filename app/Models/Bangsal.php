@@ -10,5 +10,7 @@ class Bangsal extends Model
     protected $primaryKey = 'kd_bangsal';
     public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false;
+    public $timestamps = false; // Usually false in legacy DBs
+
+    protected $fillable = [];
 }

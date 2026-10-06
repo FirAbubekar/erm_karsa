@@ -73,7 +73,20 @@ class SuratPersetujuanRawatInapController extends Controller
 
         return DB::transaction(function () use ($request) {
             try {
-                $isEdit = SuratPersetujuanRawatInap::where('no_surat', $request->no_surat)->exists();
+                // Lock and prioritize lookup by no_rawat to ensure 1 SPRI per rawat and prevent cross-patient overwrites
+                $spri = SuratPersetujuanRawatInap::where('no_rawat', $request->no_rawat)->orderBy('no_surat', 'desc')->first();
+
+                if (!$spri) {
+                    // If no SPRI exists for this no_rawat yet, check if requested no_surat exists
+                    $existingBySurat = !empty($request->no_surat) ? SuratPersetujuanRawatInap::where('no_surat', $request->no_surat)->first() : null;
+                    // Only reuse if it truly belongs to this exact no_rawat (never overwrite another patient's SPRI)
+                    if ($existingBySurat && $existingBySurat->no_rawat === $request->no_rawat) {
+                        $spri = $existingBySurat;
+                    } else {
+                        $spri = new SuratPersetujuanRawatInap();
+                    }
+                }
+                $isEdit = $spri->exists;
 
                 // Fetch room/bangsal from database
                 $bangsal = Bangsal::where('kd_bangsal', $request->kd_bangsal)->first();
@@ -154,25 +167,35 @@ class SuratPersetujuanRawatInapController extends Controller
                 $bayarSecara = substr($bayarSecara, 0, 30); // DB limit is varchar(30)
 
                 // 7. Save to surat_persetujuan_rawat_inap table
-                $spri = SuratPersetujuanRawatInap::updateOrCreate(
-                    ['no_surat' => $request->no_surat],
-                    [
-                        'no_rawat' => $request->no_rawat,
-                        'tanggal' => $request->tanggal,
-                        'nama_pj' => substr($request->pj_nama . '(' . $request->pj_umur . ')(' . ($request->pj_jk === 'Laki-Laki' ? 'L' : 'P') . ')', 0, 50),
-                        'no_ktppj' => substr($request->no_ktp, 0, 20),
-                        'pendidikan_pj' => $request->pendidikan_pj,
-                        'alamatpj' => $alamatpj,
-                        'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp, $request->pj_telp_prefix), 0, 30),
-                        'ruang' => substr($bangsal->nm_bangsal, 0, 40),
-                        'kelas' => $kelasDb,
-                        'hubungan' => $hubunganDb,
-                        'hak_kelas' => $hakKelasDb,
-                        'nama_alamat_keluarga_terdekat' => substr($request->nama_alamat_keluarga_terdekat, 0, 130),
-                        'bayar_secara' => $bayarSecara,
-                        'nip' => Session::get('user_id') ?? $request->nip ?? '-',
-                    ]
-                );
+                $targetNoSurat = $request->no_surat;
+                if (!$isEdit) {
+                    // Ensure targetNoSurat is truly unique and doesn't collide with another patient's existing surat
+                    if (empty($targetNoSurat) || SuratPersetujuanRawatInap::where('no_surat', $targetNoSurat)->exists()) {
+                        $targetNoSurat = 'SPRI-' . date('YmdHis');
+                        while (SuratPersetujuanRawatInap::where('no_surat', $targetNoSurat)->exists()) {
+                            $targetNoSurat = 'SPRI-' . date('YmdHis') . rand(10, 99);
+                        }
+                    }
+                    $spri->no_surat = $targetNoSurat;
+                }
+
+                $spri->fill([
+                    'no_rawat' => $request->no_rawat,
+                    'tanggal' => $request->tanggal,
+                    'nama_pj' => substr($request->pj_nama . '(' . $request->pj_umur . ')(' . ($request->pj_jk === 'Laki-Laki' ? 'L' : 'P') . ')', 0, 50),
+                    'no_ktppj' => substr($request->no_ktp, 0, 20),
+                    'pendidikan_pj' => $request->pendidikan_pj,
+                    'alamatpj' => $alamatpj,
+                    'no_telppj' => substr($this->formatPhoneNumber($request->pj_telp, $request->pj_telp_prefix), 0, 30),
+                    'ruang' => substr($bangsal->nm_bangsal, 0, 40),
+                    'kelas' => $kelasDb,
+                    'hubungan' => $hubunganDb,
+                    'hak_kelas' => $hakKelasDb,
+                    'nama_alamat_keluarga_terdekat' => substr($request->nama_alamat_keluarga_terdekat, 0, 130),
+                    'bayar_secara' => $bayarSecara,
+                    'nip' => Session::get('user_id') ?? $request->nip ?? '-',
+                ]);
+                $spri->save();
 
                 // Log activity if it is an edit but the model was not dirty (so updated event did not fire)
                 if ($isEdit && !$spri->wasChanged()) {
@@ -226,11 +249,16 @@ class SuratPersetujuanRawatInapController extends Controller
                     \Illuminate\Support\Facades\Log::error("Gagal memproses/mengirim PDF SPRI: " . $pdfEx->getMessage());
                 }
 
-                // 9. Save to database table: surat_persetujuan_rawat_inap_pembuat_pernyataan
+                // 9. Save to database table: surat_persetujuan_rawat_inap_pembuat_pernyataan & berkas_digital_perawatan
                 $safeNoSurat = str_replace('/', '_', $spri->no_surat);
                 DB::table('surat_persetujuan_rawat_inap_pembuat_pernyataan')->updateOrInsert(
                     ['no_surat' => $spri->no_surat],
                     ['photo' => 'pages/upload/' . $safeNoSurat . '.pdf']
+                );
+
+                DB::table('berkas_digital_perawatan')->updateOrInsert(
+                    ['no_rawat' => $request->no_rawat, 'kode' => '28'],
+                    ['lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf']
                 );
 
                 // 10. Queue to t_antrean_wa (WhatsApp Queue)
@@ -364,6 +392,9 @@ class SuratPersetujuanRawatInapController extends Controller
         $namaFile = $safeNoSurat . '.pdf';
         $remoteUrl = 'http://192.168.30.24/webapps/berkasrawat/pages/upload/' . $namaFile;
 
+        $isDownload = $request->boolean('download') || $request->get('action') === 'download';
+        $disposition = $isDownload ? 'attachment' : 'inline';
+
         try {
             // Fetch PDF from remote server .24
             $response = \Illuminate\Support\Facades\Http::get($remoteUrl);
@@ -372,7 +403,7 @@ class SuratPersetujuanRawatInapController extends Controller
                 $fileContent = $response->body();
                 return response($fileContent, 200, [
                     'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="Surat_Persetujuan_Rawat_Inap_' . $namaFile . '"',
+                    'Content-Disposition' => $disposition . '; filename="Surat_Persetujuan_Rawat_Inap_' . $namaFile . '"',
                 ]);
             }
         } catch (\Exception $e) {
@@ -411,7 +442,11 @@ class SuratPersetujuanRawatInapController extends Controller
         
         $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->download('Surat_Persetujuan_Rawat_Inap_' . $namaFile);
+        if ($isDownload) {
+            return $pdf->download('Surat_Persetujuan_Rawat_Inap_' . $namaFile);
+        }
+
+        return $pdf->stream('Surat_Persetujuan_Rawat_Inap_' . $namaFile);
     }
 
     public function getWaTemplate($no_surat)

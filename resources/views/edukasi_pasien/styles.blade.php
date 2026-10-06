@@ -316,6 +316,24 @@
         letter-spacing: 0.03em;
     }
 
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-control.is-invalid {
+        border-color: #EF4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #EF4444;
+        font-size: 11px;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
     .form-control {
         width: 100%;
         height: 40px;
