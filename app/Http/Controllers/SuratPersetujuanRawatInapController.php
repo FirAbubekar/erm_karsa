@@ -249,11 +249,16 @@ class SuratPersetujuanRawatInapController extends Controller
                     \Illuminate\Support\Facades\Log::error("Gagal memproses/mengirim PDF SPRI: " . $pdfEx->getMessage());
                 }
 
-                // 9. Save to database table: surat_persetujuan_rawat_inap_pembuat_pernyataan
+                // 9. Save to database table: surat_persetujuan_rawat_inap_pembuat_pernyataan & berkas_digital_perawatan
                 $safeNoSurat = str_replace('/', '_', $spri->no_surat);
                 DB::table('surat_persetujuan_rawat_inap_pembuat_pernyataan')->updateOrInsert(
                     ['no_surat' => $spri->no_surat],
                     ['photo' => 'pages/upload/' . $safeNoSurat . '.pdf']
+                );
+
+                DB::table('berkas_digital_perawatan')->updateOrInsert(
+                    ['no_rawat' => $request->no_rawat, 'kode' => '28'],
+                    ['lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf']
                 );
 
                 // 10. Queue to t_antrean_wa (WhatsApp Queue)
