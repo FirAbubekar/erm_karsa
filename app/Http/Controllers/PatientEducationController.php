@@ -242,7 +242,11 @@ class PatientEducationController extends Controller
             'signature'          => 'nullable|string',
         ]);
 
-        if ($request->filled('tanggal_edukasi')) {
+        // Khusus Bagian A dan B (Asesmen), kita skip validasi tanggalnya 
+        // agar Pendaftaran bisa langsung simpan di tanggal registrasi
+        $skipAssessmentValidation = true; 
+        
+        if (!$skipAssessmentValidation && $request->filled('tanggal_edukasi')) {
             $validationError = $this->validateTanggalEdukasi($request->no_rawat, $request->tanggal_edukasi);
             if ($validationError) {
                 return response()->json([
@@ -357,21 +361,29 @@ class PatientEducationController extends Controller
             'nama_topik'  => 'required|string',
         ]);
 
-        $datesToValidate = [];
-        if ($request->filled('tgl_edukasi')) {
-            $datesToValidate[] = $request->tgl_edukasi;
-        }
-        if ($request->filled('tgl_akhir_edukasi')) {
-            $datesToValidate[] = $request->tgl_akhir_edukasi;
+        $skipValidation = false;
+        $poliUnit = strtolower(trim($request->poli_unit ?? ''));
+        if ($poliUnit === 'pendaftaran' || $poliUnit === '' || filter_var($request->is_custom, FILTER_VALIDATE_BOOLEAN) || in_array($request->kode_topik, ['A', 'B'])) {
+            $skipValidation = true;
         }
 
-        if (!empty($datesToValidate)) {
-            $validationError = $this->validateTanggalEdukasi($request->no_rawat, ...$datesToValidate);
-            if ($validationError) {
-                return response()->json([
-                    'success' => false,
-                    'error'   => $validationError,
-                ], 422);
+        $datesToValidate = [];
+        if (!$skipValidation) {
+            if ($request->filled('tgl_edukasi')) {
+                $datesToValidate[] = $request->tgl_edukasi;
+            }
+            if ($request->filled('tgl_akhir_edukasi')) {
+                $datesToValidate[] = $request->tgl_akhir_edukasi;
+            }
+
+            if (!empty($datesToValidate)) {
+                $validationError = $this->validateTanggalEdukasi($request->no_rawat, ...$datesToValidate);
+                if ($validationError) {
+                    return response()->json([
+                        'success' => false,
+                        'error'   => $validationError,
+                    ], 422);
+                }
             }
         }
 
