@@ -158,6 +158,88 @@
             @endif
         @endif
 
+        @if (hasPermission('gizi.skrining') || hasPermission('gizi.asuhan') || hasPermission('gizi.permintaan') || session('is_logged_in'))
+            <div class="nav-label" style="margin-top: 24px;">Instalasi Gizi</div>
+
+            <div class="nav-dropdown {{ Route::is('gizi.skrining*') ? 'active' : '' }}">
+                <div class="nav-dropdown-toggle">
+                    <div class="nav-dropdown-label">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                            </path>
+                        </svg>
+                        Skrining & Asuhan Gizi
+                    </div>
+                    <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="nav-dropdown-content">
+                    <a href="{{ route('gizi.skrining') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.skrining') ? 'active' : '' }}">
+                        Asuhan Gizi
+                    </a>
+                    <a href="{{ route('gizi.skrining.riwayat') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.skrining.riwayat') ? 'active' : '' }}">
+                        Riwayat Asuhan Gizi
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-dropdown {{ Route::is('gizi.asuhan*') ? 'active' : '' }}">
+                <div class="nav-dropdown-toggle">
+                    <div class="nav-dropdown-label">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            </path>
+                        </svg>
+                        Catatan ADIME Gizi
+                    </div>
+                    <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="nav-dropdown-content">
+                    <a href="{{ route('gizi.asuhan') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.asuhan') ? 'active' : '' }}">
+                        Input ADIME Gizi
+                    </a>
+                    <a href="{{ route('gizi.asuhan.riwayat') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.asuhan.riwayat') ? 'active' : '' }}">
+                        Riwayat ADIME Gizi
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-dropdown {{ Route::is('gizi.permintaan*') ? 'active' : '' }}">
+                <div class="nav-dropdown-toggle">
+                    <div class="nav-dropdown-label">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z">
+                            </path>
+                        </svg>
+                        Permintaan Makanan Pasien
+                    </div>
+                    <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="nav-dropdown-content">
+                    <a href="{{ route('gizi.permintaan') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.permintaan') ? 'active' : '' }}">
+                        Input Permintaan Makanan
+                    </a>
+                    <a href="{{ route('gizi.permintaan.riwayat-semua') }}"
+                        class="nav-dropdown-item {{ Route::is('gizi.permintaan.riwayat-semua') ? 'active' : '' }}">
+                        Riwayat Permintaan Makanan
+                    </a>
+                </div>
+            </div>
+        @endif
+
         @if (hasPermission('gc.create') ||
                 hasPermission('gc.view') ||
                 hasPermission('ranap.create') ||

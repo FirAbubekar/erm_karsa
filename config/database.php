@@ -128,6 +128,21 @@ return [
             'engine' => null,
         ],
 
+        'gizi' => [
+            'driver' => env('DB_CONNECTION_GIZI', 'mysql'),
+            'host' => env('DB_HOST_GIZI', '127.0.0.1'),
+            'port' => env('DB_PORT_GIZI', '3306'),
+            'database' => env('DB_DATABASE_GIZI', 'sim_gizi'),
+            'username' => env('DB_USERNAME_GIZI', 'root'),
+            'password' => env('DB_PASSWORD_GIZI', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+        ],
+
     ],
 
     /*

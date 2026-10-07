@@ -39,7 +39,7 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::get('/pelepasan-informasi/{no_surat}', [App\Http\Controllers\GeneralConsentController::class, 'getPelepasanInformasi'])->name('pelepasan-informasi.get');
     Route::post('/general-consent/send-wa/{no_surat}', [App\Http\Controllers\GeneralConsentController::class, 'sendWhatsappManual'])->name('general-consent.send-wa');
     Route::get('/general-consent/wa-template/{no_surat}', [App\Http\Controllers\GeneralConsentController::class, 'getWaTemplate'])->name('general-consent.wa-template');
-    Route::get('/general-consent/check-wa', [GeneralConsentController::class, 'checkWa'])->name('general-consent.check-wa');
+    Route::get('/general-consent/check-wa', [App\Http\Controllers\GeneralConsentController::class, 'checkWa'])->name('general-consent.check-wa');
 
     Route::get('/edukasi-pasien', function () {
         return app(App\Http\Controllers\PatientEducationController::class)->index();
@@ -105,10 +105,10 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     Route::post('/logout', [App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
     // Transfer Pasien Antar Ruangan
-    Route::get('/transfer-pasien', [TransferPasienController::class, 'index'])->name('transfer-pasien.index');
-    Route::get('/transfer-pasien/riwayat', [TransferPasienController::class, 'riwayat'])->name('transfer-pasien.riwayat');
-    Route::post('/transfer-pasien/store', [TransferPasienController::class, 'store'])->name('transfer-pasien.store');
-    Route::post('/transfer-pasien/update', [TransferPasienController::class, 'update'])->name('transfer-pasien.update');
+    Route::get('/transfer-pasien', [App\Http\Controllers\TransferPasienController::class, 'index'])->name('transfer-pasien.index');
+    Route::get('/transfer-pasien/riwayat', [App\Http\Controllers\TransferPasienController::class, 'riwayat'])->name('transfer-pasien.riwayat');
+    Route::post('/transfer-pasien/store', [App\Http\Controllers\TransferPasienController::class, 'store'])->name('transfer-pasien.store');
+    Route::post('/transfer-pasien/update', [App\Http\Controllers\TransferPasienController::class, 'update'])->name('transfer-pasien.update');
 
 
     Route::get('/web-permissions', [App\Http\Controllers\WebPermissionController::class, 'index'])->name('web-permissions.index');
@@ -364,21 +364,39 @@ Route::middleware([\App\Http\Middleware\CheckLoginSession::class])->group(functi
     });
 
     // Bank Darah
+    Route::get('/bank-darah/rekomendasi', [App\Http\Controllers\BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
+    Route::post('/bank-darah/store', [App\Http\Controllers\BankDarahController::class, 'store'])->name('bank-darah.store');
+    Route::get('/bank-darah/validasi', [App\Http\Controllers\BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
+    Route::get('/bank-darah/validasi/pasien', [App\Http\Controllers\BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
+    Route::post('/bank-darah/validasi/transfusi', [App\Http\Controllers\BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
+    Route::post('/bank-darah/validasi/penerimaan', [App\Http\Controllers\BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
+    Route::get('/bank-darah/reaksi-transfusi', [App\Http\Controllers\BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
+    Route::post('/bank-darah/reaksi-transfusi/store', [App\Http\Controllers\BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
+    Route::get('/bank-darah/reaksi-transfusi/history', [App\Http\Controllers\BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
+    Route::get('/bank-darah/reaksi-transfusi/download/{id}', [App\Http\Controllers\BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
+    Route::get('/bank-darah/cari-pasien', [App\Http\Controllers\BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
+    Route::get('/bank-darah/cari-barcode', [App\Http\Controllers\BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
+    Route::get('/bank-darah/history', [App\Http\Controllers\BankDarahController::class, 'history'])->name('bank-darah.history');
+    Route::get('/bank-darah/download/{id}', [App\Http\Controllers\BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
+    Route::get('/bank-darah/validasi/history', [App\Http\Controllers\BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
 
+    // Instalasi Gizi
+    Route::prefix('instalasi-gizi')->group(function () {
+        Route::get('/skrining', [App\Http\Controllers\InstalasiGiziController::class, 'skriningIndex'])->name('gizi.skrining');
+        Route::post('/skrining/store', [App\Http\Controllers\InstalasiGiziController::class, 'skriningStore'])->name('gizi.skrining.store');
+        Route::get('/skrining/riwayat', [App\Http\Controllers\InstalasiGiziController::class, 'skriningRiwayat'])->name('gizi.skrining.riwayat');
 
-    Route::get('/bank-darah/rekomendasi', [BankDarahController::class, 'rekomendasi'])->name('bank-darah.rekomendasi');
-    Route::post('/bank-darah/store', [BankDarahController::class, 'store'])->name('bank-darah.store');
-    Route::get('/bank-darah/validasi', [BankDarahController::class, 'validasi'])->name('bank-darah.validasi');
-    Route::get('/bank-darah/validasi/pasien', [BankDarahController::class, 'getPasienByRuangan'])->name('bank-darah.validasi.pasien');
-    Route::post('/bank-darah/validasi/transfusi', [BankDarahController::class, 'validasiTransfusi'])->name('bank-darah.validasi.transfusi');
-    Route::post('/bank-darah/validasi/penerimaan', [BankDarahController::class, 'validasiPenerimaan'])->name('bank-darah.validasi.penerimaan');
-    Route::get('/bank-darah/reaksi-transfusi', [BankDarahController::class, 'reaksiTransfusi'])->name('bank-darah.reaksi');
-    Route::post('/bank-darah/reaksi-transfusi/store', [BankDarahController::class, 'storeReaksiTransfusi'])->name('bank-darah.reaksi.store');
-    Route::get('/bank-darah/reaksi-transfusi/history', [BankDarahController::class, 'historyReaksiTransfusi'])->name('bank-darah.reaksi.history');
-    Route::get('/bank-darah/reaksi-transfusi/download/{id}', [BankDarahController::class, 'downloadReaksiTransfusiPDF'])->name('bank-darah.reaksi.download');
-    Route::get('/bank-darah/cari-pasien', [BankDarahController::class, 'cariPasien'])->name('bank-darah.cari-pasien');
-    Route::get('/bank-darah/cari-barcode', [BankDarahController::class, 'cariBarcode'])->name('bank-darah.cari-barcode');
-    Route::get('/bank-darah/history', [BankDarahController::class, 'history'])->name('bank-darah.history');
-    Route::get('/bank-darah/download/{id}', [BankDarahController::class, 'downloadPDF'])->name('bank-darah.download');
-    Route::get('/bank-darah/validasi/history', [BankDarahController::class, 'historyValidasi'])->name('bank-darah.validasi.history');
+        Route::get('/asuhan', [App\Http\Controllers\InstalasiGiziController::class, 'asuhanIndex'])->name('gizi.asuhan');
+        Route::post('/asuhan/store', [App\Http\Controllers\InstalasiGiziController::class, 'asuhanStore'])->name('gizi.asuhan.store');
+        Route::post('/asuhan/destroy', [App\Http\Controllers\InstalasiGiziController::class, 'asuhanDestroy'])->name('gizi.asuhan.destroy');
+        Route::get('/asuhan/riwayat', [App\Http\Controllers\InstalasiGiziController::class, 'asuhanRiwayat'])->name('gizi.asuhan.riwayat');
+        Route::get('/asuhan/riwayat-pasien/{noRawat}', [App\Http\Controllers\InstalasiGiziController::class, 'adimeRiwayatPasien'])->name('gizi.asuhan.riwayat-pasien');
+
+        Route::get('/permintaan', [App\Http\Controllers\InstalasiGiziController::class, 'permintaanIndex'])->name('gizi.permintaan');
+        Route::post('/permintaan/store', [App\Http\Controllers\InstalasiGiziController::class, 'permintaanStore'])->name('gizi.permintaan.store');
+        Route::post('/permintaan/update/{kdPermintaan}', [App\Http\Controllers\InstalasiGiziController::class, 'permintaanUpdate'])->name('gizi.permintaan.update');
+        Route::get('/permintaan/riwayat-semua', [App\Http\Controllers\InstalasiGiziController::class, 'permintaanRiwayat'])->name('gizi.permintaan.riwayat-semua');
+        Route::get('/permintaan/riwayat/{noRawat}', [App\Http\Controllers\InstalasiGiziController::class, 'permintaanRiwayatPasien'])->name('gizi.permintaan.riwayat-pasien');
+        Route::get('/kamar/{kd_bangsal}', [App\Http\Controllers\InstalasiGiziController::class, 'getKamarByBangsal'])->name('gizi.kamar-by-bangsal');
+    });
 });
