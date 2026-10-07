@@ -743,10 +743,19 @@ class PatientEducationController extends Controller
 
         if ($kamarInap->isNotEmpty()) {
             $tglMasuk = $kamarInap->min('tgl_masuk');
-            $tglKeluar = $kamarInap->max('tgl_keluar');
             
-            if ($tglKeluar === '0000-00-00' || is_null($tglKeluar)) {
+            // Cek apakah ada baris yang menandakan pasien belum pulang
+            $belumPulang = $kamarInap->contains(function ($row) {
+                return empty($row->tgl_keluar) || $row->tgl_keluar === '0000-00-00' || $row->stts_pulang === '-';
+            });
+
+            if ($belumPulang) {
                 $tglKeluar = now()->format('Y-m-d');
+            } else {
+                $tglKeluar = $kamarInap->max('tgl_keluar');
+                if ($tglKeluar === '0000-00-00' || is_null($tglKeluar)) {
+                    $tglKeluar = now()->format('Y-m-d');
+                }
             }
         } else {
             // Cek reg_periksa
