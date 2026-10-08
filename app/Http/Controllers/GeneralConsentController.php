@@ -289,7 +289,11 @@ class GeneralConsentController extends Controller
                 // 5. Save to berkas_digital_perawatan
                 $safeNoSurat = str_replace('/', '_', $activeNoSurat);
                 DB::table('berkas_digital_perawatan')->updateOrInsert(
-                    ['no_rawat' => $request->no_rawat, 'kode' => '28'],
+                    [
+                        'no_rawat' => $request->no_rawat,
+                        'kode' => '28',
+                        'lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf'
+                    ],
                     ['lokasi_file' => 'pages/upload/' . $safeNoSurat . '.pdf']
                 );
 
